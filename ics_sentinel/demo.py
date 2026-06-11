@@ -1,45 +1,60 @@
-"""One-command demo: ``python -m ics_sentinel.demo``.
+"""One-command end-to-end demo: ``python -m ics_sentinel.demo`` (or ``make demo``).
 
-Phase 2: generate benign traffic with optional injected attack scenarios
-(``--scenario``). Later phases extend this into the full pipeline
-(detect → ATT&CK map → AI triage → report).
+Pipeline: generate traffic (benign + attack scenarios) → detect → map to
+MITRE ATT&CK for ICS → AI triage (Claude, or deterministic [MOCK] fallback)
+→ ranked incident report.
 """
 
 from __future__ import annotations
 
 import argparse
+import sys
 from collections import Counter
 
-from . import config
+from . import attack_map, config, report
+from .detection import DetectionEngine
 from .generator import ATTACK_SCENARIOS, TrafficGenerator
 from .modbus import BENIGN_LABEL, ModbusFrame
+from .triage import Triager
 
 
-def summarize(frames: list[ModbusFrame]) -> str:
+def print_traffic(frames: list[ModbusFrame]) -> None:
+    print("-" * 100)
+    for frame in frames:
+        if frame.label != BENIGN_LABEL:
+            marker = f"  ⚠ ATTACK[{frame.label}]"
+        elif frame.is_write:
+            marker = "  [EWS write]"
+        else:
+            marker = ""
+        print(f"{frame}{marker}")
+    print("-" * 100)
+
+
+def traffic_summary(frames: list[ModbusFrame]) -> str:
     reads = sum(1 for f in frames if f.is_read)
     writes = sum(1 for f in frames if f.is_write)
     other = len(frames) - reads - writes
     sources = Counter(f.src_ip for f in frames)
-    src_part = ", ".join(f"{ip} ({n})" for ip, n in sources.most_common())
-    duration = frames[-1].timestamp - frames[0].timestamp if frames else 0.0
-    lines = [
-        f"{len(frames)} frames over {duration:.1f}s — "
-        f"{reads} reads / {writes} writes"
+    parts = (
+        f"{len(frames)} frames — {reads} reads / {writes} writes"
         + (f" / {other} illegal" if other else "")
-        + f" — sources: {src_part}"
-    ]
+        + " — sources: "
+        + ", ".join(f"{ip} ({n})" for ip, n in sources.most_common())
+    )
     attacks = Counter(f.label for f in frames if f.label != BENIGN_LABEL)
     if attacks:
-        attack_part = ", ".join(f"{name} ({n})" for name, n in attacks.most_common())
-        lines.append(f"injected attack frames (ground truth): {attack_part}")
-    return "\n".join(lines)
+        parts += "\n  injected (ground truth): " + ", ".join(
+            f"{name} ({n})" for name, n in attacks.most_common()
+        )
+    return parts
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="python -m ics_sentinel.demo",
-        description="ICS Sentinel demo — synthetic Modbus TCP traffic, "
-        "optionally with injected attack scenarios.",
+        description="ICS Sentinel — full pipeline demo: synthetic Modbus TCP "
+        "traffic → detection → ATT&CK mapping → AI triage → report.",
     )
     parser.add_argument(
         "--duration",
@@ -59,37 +74,63 @@ def main(argv: list[str] | None = None) -> None:
         default=[],
         choices=[*ATTACK_SCENARIOS, "all"],
         metavar="NAME",
-        help="attack scenario to inject (repeatable); one of: "
-        + ", ".join([*ATTACK_SCENARIOS, "all"]),
+        help="attack scenario to inject (repeatable). Default: all. "
+        "Choices: " + ", ".join([*ATTACK_SCENARIOS, "all"]),
+    )
+    parser.add_argument(
+        "--benign",
+        action="store_true",
+        help="run on a clean benign baseline (no attacks injected)",
+    )
+    parser.add_argument(
+        "--show-traffic",
+        action="store_true",
+        help="also print the raw frame stream before the report",
     )
     args = parser.parse_args(argv)
 
-    scenarios = (
-        list(ATTACK_SCENARIOS) if "all" in args.scenario else list(args.scenario)
+    if args.benign:
+        scenarios: list[str] = []
+    elif not args.scenario or "all" in args.scenario:
+        scenarios = list(ATTACK_SCENARIOS)
+    else:
+        scenarios = list(args.scenario)
+
+    # 1. Traffic
+    generator = TrafficGenerator(seed=args.seed)
+    frames = generator.generate_with_scenarios(args.duration, scenarios)
+    print(
+        f"[1/4] Generated {args.duration:g}s of Modbus TCP traffic"
+        + (f" with scenarios: {', '.join(scenarios)}" if scenarios else " (benign)"),
+        file=sys.stderr,
     )
-    frames = TrafficGenerator(seed=args.seed).generate_with_scenarios(
-        args.duration, scenarios
+    if args.show_traffic:
+        print_traffic(frames)
+    print("      " + traffic_summary(frames).replace("\n", "\n      "), file=sys.stderr)
+
+    # 2. Detection
+    alerts = DetectionEngine().analyze(frames)
+    print(f"[2/4] Detection engine raised {len(alerts)} alert(s)", file=sys.stderr)
+
+    # 3. ATT&CK mapping
+    alerts = attack_map.enrich(alerts)
+    technique_ids = sorted({t.technique_id for a in alerts for t in a.techniques})
+    print(
+        f"[3/4] Mapped to MITRE ATT&CK for ICS: {', '.join(technique_ids) or '—'}",
+        file=sys.stderr,
     )
 
-    print("ICS Sentinel — synthetic Modbus TCP traffic")
+    # 4. Triage + report
+    triager = Triager()
     print(
-        f"HMI master {config.HMI_IP} polling "
-        + ", ".join(f"{p.name} ({p.ip}, unit {p.unit_id})" for p in config.PLCS)
-        + f"; writes only from EWS {config.EWS_IP}"
+        f"[4/4] Triage mode: {triager.mode}"
+        + ("" if triager.mode == "AI" else "  (set ANTHROPIC_API_KEY for AI triage)"),
+        file=sys.stderr,
     )
-    if scenarios:
-        print(f"injected scenarios: {', '.join(scenarios)}")
-    print("-" * 100)
-    for frame in frames:
-        if frame.label != BENIGN_LABEL:
-            marker = f"  ⚠ ATTACK[{frame.label}]"
-        elif frame.is_write:
-            marker = "  [EWS write]"
-        else:
-            marker = ""
-        print(f"{frame}{marker}")
-    print("-" * 100)
-    print(summarize(frames))
+    results = triager.triage_all(alerts)
+    summary = triager.executive_summary(alerts, results)
+    print(file=sys.stderr)
+    report.render(alerts, results, summary, triager.mode)
 
 
 if __name__ == "__main__":

@@ -79,8 +79,80 @@ write does not actually move the simulated tank. Feeding attacks back into
 the physics would make detection-on-consequences possible (interesting
 future work) but isn't needed to demonstrate detection-on-traffic.
 
-## Looking ahead
+## Detection choices (Phase 3)
 
-- **Phase 3** detections will be tested both ways: each rule must fire on its
-  attack scenario *and* stay silent on a pure benign stream — false-positive
-  discipline is the difference between a detector and a noise generator.
+Every rule is tested *both ways*: it must fire on its attack scenario and
+stay silent on benign streams across multiple seeds and a 10-minute run.
+False-positive discipline is the difference between a detector and a noise
+generator — in a real plant, a noisy OT IDS gets unplugged.
+
+- **R1 write-source allowlist.** On a protocol with no authentication, source
+  identity is the only authorization signal that exists. An allowlist of
+  control sources is exactly what real OT network monitoring does (and why
+  OT networks are supposed to be segmented).
+- **R2 safe-range check.** OT security's distinguishing feature is *physical*
+  consequence. Encoding the process engineer's safe operating envelope turns
+  a generic "write event" into "this command can overflow the tank" —
+  detectable even when the source is the legitimate workstation (insider /
+  compromised-EWS case).
+- **R3 scan window.** Counts *distinct* (PLC, unit, register) points per
+  source in a sliding window. Benign polling touches exactly 6 points, so
+  the threshold (12) has enormous margin; an enumeration sweep touches 160
+  in seconds. Distinct-point counting (not frame counting) is what separates
+  a fast poller from a scanner.
+- **R4 structural validation.** Healthy Modbus stacks never emit undefined
+  function codes or wrong-arity PDUs. Anything structurally invalid is
+  fuzzing, exploit tooling, or corruption — all reportable.
+- **R5 statistical write-rate baseline.** Writes are bucketed per source per
+  second; a bucket alerts when it exceeds the mean + 3σ of *all other*
+  buckets (leave-one-out, so a flood can't inflate its own threshold), with
+  a small floor (5) because the benign baseline has near-zero variance and a
+  degenerate σ would otherwise flag a second write. This is the "simple
+  statistics, no ML" sweet spot: defensible math, one tunable constant.
+
+**Alert coalescing.** Repeated identical findings within a window merge into
+one alert with a `count`, and flood buckets merge across boundaries — a
+40-frame replay yields 2 alerts (one R1 with count 40, one R5), not 41.
+Alert volume is the thing that kills real SOCs; the design treats it as a
+first-class concern (and it cuts LLM triage calls ~20×).
+
+## ATT&CK for ICS mapping rationale (Phase 4)
+
+A detection rule observes a *wire pattern*; the mapped technique is the
+adversary behavior that produces that pattern:
+
+| Rule | Technique(s) | Why |
+|---|---|---|
+| R1 | T0855 Unauthorized Command Message | A command not from the EWS is, by definition, an unauthorized command message. |
+| R2 | T0836 Modify Parameter + T0831 Manipulation of Control | The write modifies an operating parameter; the consequence of the controller chasing it is manipulation of the physical process. Both tagged because responders care about cause *and* effect. |
+| R3 | T0846 Remote System Discovery | Register/unit sweeps are how an adversary discovers PLCs and maps the process pre-attack. |
+| R4 | T0814 Denial of Service | Illegal codes/corrupt PDUs crash fragile PLC protocol stacks — a classic ICS DoS vector (and fuzzing precursor). |
+| R5 | T0814 + T0855 | A replay burst both floods the controller (denial of control) and hammers it with commands the operator never issued. |
+
+T0856 (Spoof Reporting Message) is deliberately *not* claimed: we don't
+simulate falsified responses, and mapping techniques you can't actually
+detect is how ATT&CK coverage tables lose credibility.
+
+## AI triage design (Phase 5)
+
+- **Structure is forced, parsing is defensive.** Claude is prompted to return
+  a single JSON object with a fixed schema; the parser strips code fences,
+  locates the outermost braces, validates severity against the enum, retries
+  once with a format reminder, and finally falls back to the mock template.
+  The demo can never be broken by the AI layer (hard requirement).
+- **Context is the differentiator.** Each request carries the plant's process
+  context (topology, register semantics, safe ranges) and the alert's ATT&CK
+  candidates — so the model can reason "register 40002 is a pump setpoint
+  and 200 overflows the tank," not just "a write happened." Severity is
+  explicitly anchored to physical-process impact first.
+- **Mock mode is honest.** Templates state outright that severity is
+  heuristic, and every output is labeled `[MOCK]` vs `[AI]` end to end.
+- Model: `claude-opus-4-8` (current recommended default), overridable via
+  `ICS_SENTINEL_MODEL`; key only ever read from `ANTHROPIC_API_KEY`.
+
+## Reporting (Phase 6)
+
+One renderer choice per the scope guardrails: a terminal report (no web
+dashboard). `rich` draws severity-ranked panels, Critical first; a small
+plain-text fallback keeps the zero-dependency promise when `rich` isn't
+installed. Both label the triage mode prominently.

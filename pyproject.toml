@@ -5,8 +5,9 @@ description = "AI-augmented anomaly detection and incident triage for Modbus TCP
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
-# Phase 1 is stdlib-only. Later phases add: anthropic (AI triage), rich (report).
-dependencies = []
+# The pipeline runs stdlib-only (plain report + [MOCK] triage). These two
+# unlock the full experience: rich terminal report + real AI triage.
+dependencies = ["rich>=13.0", "anthropic>=0.40"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
