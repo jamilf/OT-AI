@@ -35,8 +35,8 @@ Built in phases; each phase is a working checkpoint.
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | 1 | Modbus TCP frame model + synthetic benign traffic generator | ✅ done |
-| 2 | Injectable attack scenarios | ⏳ next |
-| 3 | Detection engine (rules + statistical baselines) | planned |
+| 2 | Injectable attack scenarios | ✅ done |
+| 3 | Detection engine (rules + statistical baselines) | ⏳ next |
 | 4 | MITRE ATT&CK for ICS mapping | planned |
 | 5 | AI triage layer (Claude, with mock fallback) | planned |
 | 6 | Ranked incident report + full one-command demo | planned |
@@ -48,8 +48,9 @@ no pcaps, nothing to install:
 
 ```bash
 git clone <this-repo> && cd OT-AI
-python -m ics_sentinel.demo            # 60s of simulated plant traffic
-python -m ics_sentinel.demo --duration 120 --seed 7
+python -m ics_sentinel.demo                              # benign baseline
+python -m ics_sentinel.demo --scenario unauthorized_write
+python -m ics_sentinel.demo --scenario all --duration 120 --seed 7
 ```
 
 Run the tests:
@@ -78,6 +79,29 @@ rather than random:
 Tank levels evolve under simple pump physics with hysteresis control, so the
 polled values are coherent over time — the baseline the later detection
 phases will defend.
+
+## Attack scenarios
+
+Five injectable scenarios (`--scenario NAME`, repeatable, or `all`), each
+keyed to a detection the engine will need to make:
+
+| Scenario | What happens on the wire | Why it's dangerous |
+|----------|--------------------------|--------------------|
+| `unauthorized_write` | Pump shut off + setpoint changed by `10.0.0.66` — values look normal, the *source* doesn't | Modbus has no auth: any host can command a PLC |
+| `dangerous_setpoint` | Setpoint written to **200%** from the *authorized* EWS (compromised/insider) | Controller chasing an impossible setpoint overflows the tank |
+| `recon_scan` | One source sweep-reads 160 register/unit combinations in ~4s, probing units that don't exist | Classic pre-attack enumeration of the process |
+| `malformed_frame` | Illegal function codes (0x5A, 0x00) and a corrupt write PDU | Fuzzing / exploit tooling; can crash fragile PLC stacks |
+| `replay_flood` | A captured pump-off command replayed 40× in one second, byte-identical | Control flooding / DoS without ever cracking anything |
+
+Frames carry a ground-truth `label` for testing and demo annotation only —
+the detection engine never sees it.
+
+```
+08:00:12.041  10.0.0.10 → 10.0.0.20 [unit 1] txn=38    Read Holding Registers       addr=40002 ← 49
+08:00:12.049  10.0.0.66 → 10.0.0.20 [unit 1] txn=1     Write Single Coil            addr=0 → 0  ⚠ ATTACK[unauthorized_write]
+08:00:13.327  10.0.0.66 → 10.0.0.20 [unit 1] txn=2     Write Single Register        addr=40002 → 30  ⚠ ATTACK[unauthorized_write]
+08:00:14.018  10.0.0.10 → 10.0.0.21 [unit 2] txn=47    Read Holding Registers       addr=40002 ← 62
+```
 
 ## Sample output (Phase 1)
 

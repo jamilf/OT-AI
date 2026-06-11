@@ -25,6 +25,7 @@ from dataclasses import dataclass
 
 HMI_IP = "10.0.0.10"  # SCADA/HMI master — polls the PLCs, never writes
 EWS_IP = "10.0.0.11"  # engineering workstation — the only authorized write source
+ATTACKER_IP = "10.0.0.66"  # compromised host used by the attack scenarios
 
 
 @dataclass(frozen=True)

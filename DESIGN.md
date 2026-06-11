@@ -54,11 +54,33 @@ traffic cadence live in one module. Phase 3's rules (write allowlist, safe
 ranges, scan thresholds) will read the same constants the generator uses —
 preventing the classic demo bug where detector and simulator drift apart.
 
+## Attack scenarios (Phase 2)
+
+Each scenario is a generator method returning a labeled frame list, spliced
+into the benign baseline by timestamp (`merge_streams`). Tests assert that
+the benign portion of a mixed stream is byte-identical to a pure benign run
+with the same seed — attacks compose without perturbing the baseline.
+
+Two deliberate design choices:
+
+- **Each scenario isolates one detection signal.** `unauthorized_write`
+  writes perfectly ordinary *values* from the wrong *source*;
+  `dangerous_setpoint` writes an impossible value from the *authorized*
+  workstation (a compromised-EWS/insider story). This keeps Phase 3's rules
+  honest — one rule fires per scenario, and tests can pin that down. The
+  scenarios still compose (`--scenario all`) for the full-pipeline demo.
+- **Replay frames are byte-identical**, including the transaction ID — only
+  the observation timestamp differs, exactly what a capture-and-replay tool
+  produces on an unauthenticated protocol. The frequency anomaly (40 writes
+  in 1 s vs. minutes apart at baseline) is the detectable signal.
+
+One simplification: attack frames are wire events only — a `dangerous_setpoint`
+write does not actually move the simulated tank. Feeding attacks back into
+the physics would make detection-on-consequences possible (interesting
+future work) but isn't needed to demonstrate detection-on-traffic.
+
 ## Looking ahead
 
-- **Phase 2** splices labeled attack frame lists into the benign baseline via
-  `generator.merge_streams`, so scenarios compose without touching the
-  benign path.
 - **Phase 3** detections will be tested both ways: each rule must fire on its
   attack scenario *and* stay silent on a pure benign stream — false-positive
   discipline is the difference between a detector and a noise generator.
