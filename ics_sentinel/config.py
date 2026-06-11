@@ -75,3 +75,23 @@ DEFAULT_SEED = 42
 # Fixed simulation epoch so seeded runs are byte-for-byte reproducible
 # (2026-01-05 08:00:00 UTC).
 SIMULATION_START_EPOCH = 1767600000.0
+
+# ---------------------------------------------------------------------------
+# Detection thresholds (Phase 3) — tune here, never in detection.py
+# ---------------------------------------------------------------------------
+
+# Scan rule: more than this many distinct (PLC, unit, register) points touched
+# by one source within the window. Benign HMI polling touches 6 points total.
+SCAN_WINDOW_S = 5.0
+SCAN_DISTINCT_POINTS = 12
+
+# Command-frequency rule: writes are bucketed per source into windows; a
+# bucket alerts when its count exceeds max(mean + FREQ_SIGMA * stdev of all
+# other buckets, FREQ_MIN_BURST). The floor keeps near-zero-variance benign
+# baselines (one write per bucket) from making the 3-sigma bound degenerate.
+FREQ_WINDOW_S = 1.0
+FREQ_SIGMA = 3.0
+FREQ_MIN_BURST = 5
+
+# Repeated identical findings within this window collapse into one alert.
+DEDUP_WINDOW_S = 10.0
