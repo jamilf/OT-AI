@@ -1,0 +1,23 @@
+[project]
+name = "ics-sentinel"
+version = "0.1.0"
+description = "AI-augmented anomaly detection and incident triage for Modbus TCP industrial control traffic"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+# Phase 1 is stdlib-only. Later phases add: anthropic (AI triage), rich (report).
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["ics_sentinel"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
