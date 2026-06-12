@@ -87,7 +87,19 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help="also print the raw frame stream before the report",
     )
+    parser.add_argument(
+        "--plain",
+        action="store_true",
+        help="force the plain-text report (no rich panels)",
+    )
+    parser.add_argument(
+        "--output",
+        metavar="PATH",
+        help="also write the report to a file (.md or .json, by extension)",
+    )
     args = parser.parse_args(argv)
+    if args.output and not args.output.endswith((".md", ".json")):
+        parser.error("--output must end in .md or .json")
 
     if args.benign:
         scenarios: list[str] = []
@@ -130,7 +142,13 @@ def main(argv: list[str] | None = None) -> None:
     results = triager.triage_all(alerts)
     summary = triager.executive_summary(alerts, results)
     print(file=sys.stderr)
-    report.render(alerts, results, summary, triager.mode)
+    report.render(alerts, results, summary, triager.mode, force_plain=args.plain)
+
+    if args.output:
+        exporter = report.to_json if args.output.endswith(".json") else report.to_markdown
+        with open(args.output, "w", encoding="utf-8") as fh:
+            fh.write(exporter(alerts, results, summary, triager.mode) + "\n")
+        print(f"Report written to {args.output}", file=sys.stderr)
 
 
 if __name__ == "__main__":

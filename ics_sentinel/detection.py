@@ -21,10 +21,13 @@ from __future__ import annotations
 from collections import defaultdict, deque
 from dataclasses import dataclass, field, replace
 from statistics import fmean, pstdev
-from typing import Any
+from typing import TYPE_CHECKING
 
 from . import config
 from .modbus import KNOWN_CODES, ModbusFrame
+
+if TYPE_CHECKING:
+    from .attack_map import Technique
 
 RULE_UNAUTHORIZED_WRITE = "R1-UNAUTH-WRITE"
 RULE_SAFETY = "R2-SAFETY"
@@ -55,8 +58,8 @@ class Alert:
     description: str
     raw_frame: ModbusFrame
     count: int = 1  # frames coalesced into this alert
-    # MITRE ATT&CK for ICS techniques, attached by attack_map.enrich (Phase 4).
-    techniques: tuple[Any, ...] = field(default=(), compare=False)
+    # MITRE ATT&CK for ICS techniques, attached by attack_map.enrich.
+    techniques: tuple["Technique", ...] = field(default=(), compare=False)
 
 
 @dataclass(slots=True)
