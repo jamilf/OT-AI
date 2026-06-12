@@ -168,6 +168,76 @@
     }, 0.45);
   }
 
+  /* ---------- copy-to-clipboard buttons (docs page) ---------- */
+  $all("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.getAttribute("data-copy");
+      function flash() {
+        btn.classList.add("copied");
+        btn.textContent = "✓ copied";
+        setTimeout(function () {
+          btn.classList.remove("copied");
+          btn.textContent = "copy";
+        }, 1500);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(flash, function () { fallbackCopy(text); flash(); });
+      } else {
+        fallbackCopy(text);
+        flash();
+      }
+    });
+  });
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) { /* clipboard unavailable */ }
+    document.body.removeChild(ta);
+  }
+
+  /* ---------- demo output player (docs page) ---------- */
+  var runBtn = document.getElementById("run-demo");
+  var demoOut = document.getElementById("demo-output");
+  if (runBtn && demoOut) {
+    var demoLines = $all(".t-line", demoOut);
+    var demoCursor = document.createElement("span");
+    demoCursor.className = "triage-cursor";
+    demoCursor.setAttribute("aria-hidden", "true");
+
+    if (!reducedMotion) {
+      demoLines.forEach(function (line) { line.classList.add("t-hidden"); });
+    }
+
+    runBtn.addEventListener("click", function () {
+      runBtn.disabled = true;
+      demoLines.forEach(function (line) {
+        line.classList.remove("t-shown");
+        line.classList.add("t-hidden");
+      });
+      var i = 0;
+      function next() {
+        if (i >= demoLines.length) {
+          demoLines[demoLines.length - 1].appendChild(demoCursor);
+          runBtn.disabled = false;
+          runBtn.innerHTML = '<span class="tri" aria-hidden="true"></span>Replay';
+          return;
+        }
+        var line = demoLines[i];
+        line.classList.remove("t-hidden");
+        line.classList.add("t-shown");
+        line.appendChild(demoCursor);
+        i++;
+        setTimeout(next, reducedMotion ? 0 : (line.classList.contains("t-blank") ? 60 : 160));
+      }
+      next();
+    });
+  }
+
   /* ---------- proof-point stats ---------- */
   var stats = document.getElementById("stats");
   if (stats) {

@@ -30,6 +30,24 @@
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-glow" aria-hidden="true"></div>
 
+<nav class="site-nav" aria-label="Site">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html">
+      <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z" fill="none" stroke="#2C82C9" stroke-width="2.5"/>
+        <path d="M10 16.5l4 4 8-9" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      ICS Sentinel
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="is-active">Home</a>
+      <a href="docs.html">Docs &amp; Replicate</a>
+      <a href="#about" class="nav-hide-sm">About</a>
+      <a class="nav-cta" href="docs.html">Replicate it</a>
+    </div>
+  </div>
+</nav>
+
 <!-- ============================================================
      HERO
      ============================================================ -->
@@ -55,6 +73,7 @@
 
     <div class="hero-ctas hero-enter" style="--d:.66s">
       <a class="btn btn-primary" href="#pipeline">See the pipeline ↓</a>
+      <a class="btn btn-ghost" href="docs.html">Replicate it →</a>
       <span class="cmd-pill"><span class="prompt-char">$</span> python -m ics_sentinel.demo<span class="cursor" aria-hidden="true"></span></span>
     </div>
 
@@ -555,6 +574,31 @@
   </div>
 </section>
 
+<!-- ============================================================
+     ABOUT / PORTFOLIO
+     ============================================================ -->
+<section id="about" aria-labelledby="about-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>05 · About the author</p>
+    <h2 class="section-title" id="about-title" data-animate style="--d:.08s">Built by Jamil Flores.</h2>
+
+    <div class="about-card" data-animate="pop" style="--d:.12s">
+      <div class="avatar" aria-hidden="true">JF</div>
+      <div class="about-body">
+        <p class="about-kicker">Portfolio project</p>
+        <h3>Jamil Flores</h3>
+        <p>ICS Sentinel is a portfolio project by Jamil Flores, exploring AI-assisted defense for
+        industrial control systems — from Modbus packet parsing to Claude-powered SOC triage.
+        Built end to end: simulator, detection engine, ATT&amp;CK mapping, AI analyst, and this site.</p>
+        <div class="about-actions">
+          <a class="btn btn-linkedin" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Connect on LinkedIn</a>
+          <a class="btn btn-ghost btn-sm" href="docs.html">Replicate the project →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <footer>
@@ -562,6 +606,8 @@
     <span class="cmd-pill"><span class="prompt-char">$</span> python -m ics_sentinel.demo<span class="cursor" aria-hidden="true"></span></span>
     <p class="foot-title">ICS Sentinel</p>
     <p>An AI SOC analyst for industrial networks · built for OT defenders</p>
+    <p class="foot-credit">© Jamil Flores · portfolio project ·
+      <a href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a></p>
   </div>
 </footer>
 

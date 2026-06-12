@@ -7,9 +7,10 @@ response actions.
 
 ## Showcase site
 
-This repo hosts the animated one-page showcase site for ICS Sentinel:
-`index.html`, `styles.css`, `app.js` — pure static files, zero dependencies,
-no build step.
+This repo hosts the animated showcase site for ICS Sentinel:
+`index.html` (the showcase), `docs.html` (interactive replication guide +
+documentation), `styles.css`, `app.js` — pure static files, zero
+dependencies, no build step.
 
 View it locally:
 
@@ -20,3 +21,8 @@ python3 -m http.server 8000
 
 …or just open `index.html` directly in a browser. It also works as-is on
 GitHub Pages.
+
+## Author
+
+A portfolio project by **Jamil Flores** —
+[LinkedIn](https://www.linkedin.com/in/jamilflores).
