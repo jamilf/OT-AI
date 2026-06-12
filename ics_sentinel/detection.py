@@ -73,8 +73,66 @@ class _Finding:
     description: str
 
 
+@dataclass(frozen=True, slots=True)
+class Baseline:
+    """Thresholds learned from a clean traffic sample (``--baseline``)."""
+
+    scan_distinct_points: int
+    freq_min_burst: int
+
+
+def learn_baseline(frames: list[ModbusFrame]) -> Baseline:
+    """Derive scan/flood thresholds from clean traffic.
+
+    Scan: the busiest source's distinct-point count per window, doubled
+    (floored at the config default — never learn *looser* than configured).
+    Flood: the busiest per-window write count, tripled (floor 3) — on the
+    quiet benign baseline this learns a *tighter* floor than the static
+    config, without ever flagging the traffic it was learned from.
+    """
+    frames = sorted(frames, key=lambda f: f.timestamp)
+
+    max_distinct = 0
+    windows: dict[str, deque] = defaultdict(deque)
+    for f in frames:
+        window = windows[f.src_ip]
+        window.append((f.timestamp, (f.dst_ip, f.unit_id, f.address)))
+        while window and f.timestamp - window[0][0] > config.SCAN_WINDOW_S:
+            window.popleft()
+        max_distinct = max(max_distinct, len({p for _, p in window}))
+
+    write_buckets: dict[tuple[str, int], int] = defaultdict(int)
+    for f in frames:
+        if f.is_write:
+            idx = int(
+                (f.timestamp - config.SIMULATION_START_EPOCH)
+                // config.FREQ_WINDOW_S
+            )
+            write_buckets[(f.src_ip, idx)] += 1
+    max_burst = max(write_buckets.values(), default=0)
+
+    return Baseline(
+        scan_distinct_points=max(max_distinct * 2, config.SCAN_DISTINCT_POINTS),
+        freq_min_burst=max(max_burst * 3, 3),
+    )
+
+
 class DetectionEngine:
-    """Offline batch analysis of a timestamp-ordered frame stream."""
+    """Offline batch analysis of a timestamp-ordered frame stream.
+
+    Pass a :class:`Baseline` (from :func:`learn_baseline`) to use thresholds
+    learned from clean traffic instead of the static config values.
+    """
+
+    def __init__(self, baseline: Baseline | None = None) -> None:
+        self.scan_distinct_points = (
+            baseline.scan_distinct_points
+            if baseline
+            else config.SCAN_DISTINCT_POINTS
+        )
+        self.freq_min_burst = (
+            baseline.freq_min_burst if baseline else config.FREQ_MIN_BURST
+        )
 
     def analyze(self, frames: list[ModbusFrame]) -> list[Alert]:
         frames = sorted(frames, key=lambda f: f.timestamp)
@@ -155,7 +213,7 @@ class DetectionEngine:
             while window and f.timestamp - window[0][0] > config.SCAN_WINDOW_S:
                 window.popleft()
             distinct = {point for _, point in window}
-            if len(distinct) > config.SCAN_DISTINCT_POINTS:
+            if len(distinct) > self.scan_distinct_points:
                 span = f.timestamp - window[0][0]
                 findings.append(
                     _Finding(
@@ -163,7 +221,7 @@ class DetectionEngine:
                         f,
                         f"{f.src_ip} read {len(distinct)} distinct "
                         f"PLC/unit/register points in {span:.1f}s "
-                        f"(threshold: {config.SCAN_DISTINCT_POINTS} per "
+                        f"(threshold: {self.scan_distinct_points} per "
                         f"{config.SCAN_WINDOW_S:g}s; benign polling touches 6). "
                         "Consistent with Modbus address-space enumeration.",
                     )
@@ -243,10 +301,10 @@ class DetectionEngine:
             if others:
                 threshold = max(
                     fmean(others) + config.FREQ_SIGMA * pstdev(others),
-                    float(config.FREQ_MIN_BURST),
+                    float(self.freq_min_burst),
                 )
             else:
-                threshold = float(config.FREQ_MIN_BURST)
+                threshold = float(self.freq_min_burst)
             if n > threshold:
                 flagged[key] = threshold
 

@@ -12,7 +12,7 @@ import sys
 from collections import Counter
 
 from . import attack_map, config, report
-from .detection import DetectionEngine
+from .detection import DetectionEngine, learn_baseline
 from .generator import ATTACK_SCENARIOS, TrafficGenerator
 from .modbus import BENIGN_LABEL, ModbusFrame
 from .triage import Triager
@@ -88,6 +88,12 @@ def main(argv: list[str] | None = None) -> None:
         help="also print the raw frame stream before the report",
     )
     parser.add_argument(
+        "--baseline",
+        action="store_true",
+        help="learn scan/flood thresholds from a separate clean traffic "
+        "sample instead of using the static config values",
+    )
+    parser.add_argument(
         "--plain",
         action="store_true",
         help="force the plain-text report (no rich panels)",
@@ -120,9 +126,23 @@ def main(argv: list[str] | None = None) -> None:
         print_traffic(frames)
     print("      " + traffic_summary(frames).replace("\n", "\n      "), file=sys.stderr)
 
-    # 2. Detection
-    alerts = DetectionEngine().analyze(frames)
-    print(f"[2/4] Detection engine raised {len(alerts)} alert(s)", file=sys.stderr)
+    # 2. Detection (optionally with thresholds learned from clean traffic)
+    if args.baseline:
+        clean = TrafficGenerator(seed=args.seed + 1).generate_benign(args.duration)
+        baseline = learn_baseline(clean)
+        engine = DetectionEngine(baseline)
+        learned = (
+            f" (learned baseline: scan>{baseline.scan_distinct_points} points, "
+            f"burst>{baseline.freq_min_burst} writes/s)"
+        )
+    else:
+        engine = DetectionEngine()
+        learned = ""
+    alerts = engine.analyze(frames)
+    print(
+        f"[2/4] Detection engine raised {len(alerts)} alert(s){learned}",
+        file=sys.stderr,
+    )
 
     # 3. ATT&CK mapping
     alerts = attack_map.enrich(alerts)

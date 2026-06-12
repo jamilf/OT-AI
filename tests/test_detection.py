@@ -18,7 +18,9 @@ from ics_sentinel.detection import (
     RULE_SPOOF,
     RULE_UNAUTHORIZED_WRITE,
     Alert,
+    Baseline,
     DetectionEngine,
+    learn_baseline,
 )
 from ics_sentinel.generator import TrafficGenerator
 
@@ -159,6 +161,45 @@ def test_alert_carries_raw_frame_and_required_fields():
     assert alert.rule_name
     assert alert.function_code == alert.raw_frame.function_code
     assert alert.dst_ip == alert.raw_frame.dst_ip
+
+
+# ----------------------------------------------------------------------
+# Learned baseline (--baseline)
+# ----------------------------------------------------------------------
+
+
+def test_learned_baseline_values_are_sane():
+    clean = TrafficGenerator(seed=7).generate_benign(120.0)
+    baseline = learn_baseline(clean)
+    # Benign polling touches 6 distinct points; doubled but floored at config.
+    assert baseline.scan_distinct_points == config.SCAN_DISTINCT_POINTS
+    # Benign writes are 1/bucket; learned floor (3) is tighter than config (5).
+    assert baseline.freq_min_burst == 3 < config.FREQ_MIN_BURST
+
+
+def test_learned_baseline_silent_on_the_traffic_it_was_learned_from():
+    clean = TrafficGenerator(seed=7).generate_benign(120.0)
+    engine = DetectionEngine(learn_baseline(clean))
+    assert engine.analyze(clean) == []
+
+
+def test_learned_baseline_still_catches_every_scenario():
+    from ics_sentinel.generator import ATTACK_SCENARIOS
+
+    clean = TrafficGenerator(seed=config.DEFAULT_SEED + 1).generate_benign(60.0)
+    engine = DetectionEngine(learn_baseline(clean))
+    gen = TrafficGenerator(seed=config.DEFAULT_SEED)
+    alerts = engine.analyze(gen.generate_with_scenarios(60.0, sorted(ATTACK_SCENARIOS)))
+    assert rules_fired(alerts) == set(
+        {RULE_UNAUTHORIZED_WRITE, RULE_SAFETY, RULE_SCAN, RULE_MALFORMED, RULE_FLOOD, RULE_SPOOF}
+    )
+
+
+def test_learn_baseline_empty_input_uses_floors():
+    baseline = learn_baseline([])
+    assert baseline == Baseline(
+        scan_distinct_points=config.SCAN_DISTINCT_POINTS, freq_min_burst=3
+    )
 
 
 def test_detection_never_reads_ground_truth_labels():
