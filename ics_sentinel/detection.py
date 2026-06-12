@@ -34,6 +34,7 @@ RULE_SAFETY = "R2-SAFETY"
 RULE_SCAN = "R3-SCAN"
 RULE_MALFORMED = "R4-MALFORMED"
 RULE_FLOOD = "R5-FLOOD"
+RULE_SPOOF = "R6-SPOOF"
 
 RULE_NAMES = {
     RULE_UNAUTHORIZED_WRITE: "Unauthorized write source",
@@ -41,6 +42,7 @@ RULE_NAMES = {
     RULE_SCAN: "Reconnaissance / enumeration scan",
     RULE_MALFORMED: "Illegal or malformed frame",
     RULE_FLOOD: "Anomalous command frequency",
+    RULE_SPOOF: "Conflicting duplicate response",
 }
 
 
@@ -76,7 +78,11 @@ class DetectionEngine:
 
     def analyze(self, frames: list[ModbusFrame]) -> list[Alert]:
         frames = sorted(frames, key=lambda f: f.timestamp)
-        findings = self._per_frame_rules(frames) + self._detect_scans(frames)
+        findings = (
+            self._per_frame_rules(frames)
+            + self._detect_scans(frames)
+            + self._detect_spoofs(frames)
+        )
         alerts = self._coalesce(findings) + self._detect_floods(frames)
         alerts.sort(key=lambda a: a.timestamp)
         return [replace(a, id=f"ALT-{i:03d}") for i, a in enumerate(alerts, 1)]
@@ -163,6 +169,55 @@ class DetectionEngine:
                     )
                 )
                 fired.add(f.src_ip)
+        return findings
+
+    # ------------------------------------------------------------------
+    # R6: conflicting duplicate responses (spoofed reporting / MITM)
+    # ------------------------------------------------------------------
+
+    def _detect_spoofs(self, frames: list[ModbusFrame]) -> list[_Finding]:
+        """Two answers for one transaction with *different* values.
+
+        A replay (R5) repeats a frame byte-identically; a spoof *conflicts*
+        with the original — the tell that someone injected a second response.
+        The time window guards against 16-bit txn-ID wraparound on long
+        captures looking like duplicates.
+        """
+        findings: list[_Finding] = []
+        groups: dict[tuple, list[ModbusFrame]] = defaultdict(list)
+        for f in frames:
+            key = (
+                f.src_ip,
+                f.dst_ip,
+                f.unit_id,
+                f.function_code,
+                f.address,
+                f.transaction_id,
+            )
+            groups[key].append(f)
+        for group in groups.values():
+            if len(group) < 2:
+                continue
+            group.sort(key=lambda f: f.timestamp)
+            first = group[0]
+            for other in group[1:]:
+                if (
+                    other.timestamp - first.timestamp <= config.SPOOF_WINDOW_S
+                    and other.values != first.values
+                ):
+                    findings.append(
+                        _Finding(
+                            RULE_SPOOF,
+                            other,
+                            f"Two different values observed for the same "
+                            f"transaction (txn {other.transaction_id}) on "
+                            f"{other.dst_ip} [unit {other.unit_id}] addr "
+                            f"{other.address}: {list(first.values)} then "
+                            f"{list(other.values)}. A second, conflicting "
+                            "response indicates response injection (MITM) — "
+                            "operators may be seeing falsified process values.",
+                        )
+                    )
         return findings
 
     # ------------------------------------------------------------------

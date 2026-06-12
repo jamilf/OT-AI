@@ -31,6 +31,7 @@ from .detection import (
     RULE_MALFORMED,
     RULE_SAFETY,
     RULE_SCAN,
+    RULE_SPOOF,
     RULE_UNAUTHORIZED_WRITE,
     Alert,
 )
@@ -256,6 +257,26 @@ _MOCK_PROFILES: dict[str, tuple[str, str, str, str, tuple[str, ...]]] = {
             "scanner?",
             "Raise monitoring sensitivity for write commands in the next "
             "24-48h",
+        ),
+    ),
+    RULE_SPOOF: (
+        "High",
+        "Low",
+        "The monitor saw two different answers for the same poll of {dst} — "
+        "the value on the operator's screen may be falsified while the real "
+        "process state is different.",
+        "Injecting fake 'all is well' readings is how attackers blind "
+        "operators while manipulating the process (the Stuxnet pattern). "
+        "Treat current readings from this PLC as untrusted until verified.",
+        (
+            "Verify the actual tank level locally at the PLC / field "
+            "instrument — do not trust the HMI value",
+            "Capture traffic and inspect switch ARP/CAM tables for the "
+            "man-in-the-middle host",
+            "Fail over the affected loop to local/manual control until the "
+            "injection path is found",
+            "Check for concurrent write activity that the spoof may be "
+            "covering",
         ),
     ),
     RULE_MALFORMED: (

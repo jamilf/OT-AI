@@ -15,6 +15,7 @@ from ics_sentinel.detection import (
     RULE_MALFORMED,
     RULE_SAFETY,
     RULE_SCAN,
+    RULE_SPOOF,
     RULE_UNAUTHORIZED_WRITE,
     Alert,
     DetectionEngine,
@@ -100,6 +101,21 @@ def test_replay_flood_fires_frequency_rule():
     assert flood[0].count >= 20
 
 
+def test_response_spoof_fires_r6_only():
+    alerts = analyze(["response_spoof"])
+    assert rules_fired(alerts) == {RULE_SPOOF}
+    assert len(alerts) == 1, "conflicting responses coalesce into one alert"
+    assert alerts[0].count >= 3
+    assert "txn" in alerts[0].description
+
+
+def test_replay_flood_does_not_fire_spoof_rule():
+    """Replayed frames are byte-identical — same txn, same values — so the
+    conflicting-duplicate rule must stay quiet."""
+    alerts = analyze(["replay_flood"])
+    assert RULE_SPOOF not in rules_fired(alerts)
+
+
 def test_replay_flood_deduplicates_unauthorized_writes():
     """40 identical frames must not become 40 R1 alerts."""
     alerts = analyze(["replay_flood"])
@@ -123,9 +139,10 @@ def test_all_scenarios_fire_all_rules_with_clean_alert_list():
         RULE_SCAN,
         RULE_MALFORMED,
         RULE_FLOOD,
+        RULE_SPOOF,
     }
-    # ~250 attack frames collapse into a clean, readable alert list.
-    assert len(alerts) <= 12
+    # ~260 attack frames collapse into a clean, readable alert list.
+    assert len(alerts) <= 13
 
 
 def test_alert_ids_sequential_and_chronological():

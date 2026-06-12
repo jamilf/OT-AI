@@ -33,6 +33,7 @@ def test_technique_fields_and_url():
         ("dangerous_setpoint", {"T0836", "T0831"}),
         ("recon_scan", {"T0846"}),
         ("replay_flood", {"T0814", "T0855"}),
+        ("response_spoof", {"T0856"}),
     ],
 )
 def test_enriched_alerts_carry_expected_techniques(scenario, expected_ids):

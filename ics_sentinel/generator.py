@@ -167,11 +167,14 @@ class TrafficGenerator:
 
     # ------------------------------------------------------------------
     # Attack scenarios — each returns a labeled frame list starting at t0.
-    # Attack frames are wire events only: they do not feed back into the
-    # process simulation (see DESIGN.md).
+    # Every method takes the benign stream too (most ignore it; the spoof
+    # scenario clones frames from it). Attack frames are wire events only:
+    # they do not feed back into the process simulation (see DESIGN.md).
     # ------------------------------------------------------------------
 
-    def attack_unauthorized_write(self, t0: float) -> list[ModbusFrame]:
+    def attack_unauthorized_write(
+        self, t0: float, benign: list[ModbusFrame]
+    ) -> list[ModbusFrame]:
         """Pump shut off, then setpoint changed, by a host that is not the EWS.
 
         The written values are perfectly ordinary — what makes this malicious
@@ -201,7 +204,9 @@ class TrafficGenerator:
             ),
         ]
 
-    def attack_dangerous_setpoint(self, t0: float) -> list[ModbusFrame]:
+    def attack_dangerous_setpoint(
+        self, t0: float, benign: list[ModbusFrame]
+    ) -> list[ModbusFrame]:
         """Setpoint driven far past the physical maximum — from the EWS itself.
 
         Sourced from the *authorized* workstation (compromised or insider) so
@@ -223,7 +228,9 @@ class TrafficGenerator:
             )
         ]
 
-    def attack_recon_scan(self, t0: float) -> list[ModbusFrame]:
+    def attack_recon_scan(
+        self, t0: float, benign: list[ModbusFrame]
+    ) -> list[ModbusFrame]:
         """Modbus enumeration: one source sweep-reading registers across unit IDs.
 
         Sweeps 20 consecutive registers on unit IDs 1–4 of each PLC at ~25 ms
@@ -250,7 +257,9 @@ class TrafficGenerator:
                     t += 0.025
         return frames
 
-    def attack_malformed_frame(self, t0: float) -> list[ModbusFrame]:
+    def attack_malformed_frame(
+        self, t0: float, benign: list[ModbusFrame]
+    ) -> list[ModbusFrame]:
         """Structurally invalid traffic: illegal function codes + bad PDU.
 
         Fuzzing, a broken exploit tool, or protocol abuse — none of these
@@ -285,7 +294,9 @@ class TrafficGenerator:
             ),
         ]
 
-    def attack_replay_flood(self, t0: float) -> list[ModbusFrame]:
+    def attack_replay_flood(
+        self, t0: float, benign: list[ModbusFrame]
+    ) -> list[ModbusFrame]:
         """A captured pump-off command replayed 40× at 25 ms intervals.
 
         Replayed frames are byte-identical — same transaction ID — with only
@@ -308,6 +319,38 @@ class TrafficGenerator:
             for i in range(40)
         ]
 
+    def attack_response_spoof(
+        self, t0: float, benign: list[ModbusFrame]
+    ) -> list[ModbusFrame]:
+        """MITM response injection: conflicting answers for the same poll.
+
+        The attacker freezes the reported tank level at its value at attack
+        start, injecting a second response (same flow, unit, and transaction
+        ID) ~5 ms after each real one while the true level keeps moving —
+        the Stuxnet move: operators see "normal" while the process diverges.
+        In this monitor's merged-transaction model that appears as two
+        transactions sharing a txn ID with different read values.
+        """
+        plc = config.PLCS[0]
+        polls = [
+            f
+            for f in benign
+            if f.timestamp >= t0
+            and f.dst_ip == plc.ip
+            and f.address == config.TANK_LEVEL_REGISTER
+            and f.is_read
+        ][:10]
+        frozen = polls[0].values if polls else (60,)
+        return [
+            replace(
+                f,
+                values=frozen,
+                timestamp=f.timestamp + 0.005,
+                label="response_spoof",
+            )
+            for f in polls
+        ]
+
     # ------------------------------------------------------------------
     # Mixed streams
     # ------------------------------------------------------------------
@@ -327,22 +370,26 @@ class TrafficGenerator:
             raise ValueError(
                 f"unknown scenario(s) {unknown}; valid: {sorted(ATTACK_SCENARIOS)}"
             )
-        streams = [self.generate_benign(duration_s)]
+        benign = self.generate_benign(duration_s)
+        streams = [benign]
         for i, name in enumerate(scenarios):
             t0 = config.SIMULATION_START_EPOCH + duration_s * (
                 0.2 + 0.6 * i / len(scenarios)
             )
-            streams.append(ATTACK_SCENARIOS[name](self, t0))
+            streams.append(ATTACK_SCENARIOS[name](self, t0, benign))
         return merge_streams(*streams)
 
 
 #: Scenario name → generator method, as exposed by ``demo.py --scenario``.
-ATTACK_SCENARIOS: dict[str, Callable[[TrafficGenerator, float], list[ModbusFrame]]] = {
+ATTACK_SCENARIOS: dict[
+    str, Callable[[TrafficGenerator, float, list[ModbusFrame]], list[ModbusFrame]]
+] = {
     "unauthorized_write": TrafficGenerator.attack_unauthorized_write,
     "dangerous_setpoint": TrafficGenerator.attack_dangerous_setpoint,
     "recon_scan": TrafficGenerator.attack_recon_scan,
     "malformed_frame": TrafficGenerator.attack_malformed_frame,
     "replay_flood": TrafficGenerator.attack_replay_flood,
+    "response_spoof": TrafficGenerator.attack_response_spoof,
 }
 
 

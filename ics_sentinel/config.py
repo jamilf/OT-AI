@@ -93,5 +93,10 @@ FREQ_WINDOW_S = 1.0
 FREQ_SIGMA = 3.0
 FREQ_MIN_BURST = 5
 
+# Spoof rule: two frames sharing a transaction ID with *different* values
+# within this window indicate response injection. The window also guards
+# against 16-bit transaction-ID wraparound on very long captures.
+SPOOF_WINDOW_S = 5.0
+
 # Repeated identical findings within this window collapse into one alert.
 DEDUP_WINDOW_S = 10.0

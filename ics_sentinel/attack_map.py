@@ -15,6 +15,7 @@ from .detection import (
     RULE_MALFORMED,
     RULE_SAFETY,
     RULE_SCAN,
+    RULE_SPOOF,
     RULE_UNAUTHORIZED_WRITE,
     Alert,
 )
@@ -45,6 +46,7 @@ TECHNIQUES: dict[str, Technique] = {
         Technique("T0831", "Manipulation of Control", "Impact"),
         Technique("T0846", "Remote System Discovery", "Discovery"),
         Technique("T0814", "Denial of Service", "Inhibit Response Function"),
+        Technique("T0856", "Spoof Reporting Message", "Evasion / Impair Process Control"),
     )
 }
 
@@ -65,6 +67,9 @@ RULE_TECHNIQUE_IDS: dict[str, tuple[str, ...]] = {
     # Command flooding both denies legitimate control and hammers the
     # process with unauthorized commands.
     RULE_FLOOD: ("T0814", "T0855"),
+    # A conflicting second response is a falsified reporting message —
+    # hiding true process state from operators.
+    RULE_SPOOF: ("T0856",),
 }
 
 
