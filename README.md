@@ -22,7 +22,12 @@ python3 -m http.server 8000
 …or just open `index.html` directly in a browser. It also works as-is on
 GitHub Pages.
 
+Live site: https://jamilf.github.io/OT-AI/ (deployed from `main` by the
+GitHub Pages workflow in `.github/workflows/pages.yml`).
+
 ## Author
 
-A portfolio project by **Jamil Flores** —
-[LinkedIn](https://www.linkedin.com/in/jamilflores).
+Built end to end by **Jamil Flores** — Modbus TCP protocol parsing,
+physics-coherent plant simulation, detection engineering (0 false positives),
+MITRE ATT&CK for ICS mapping, and Claude-powered triage with cost-aware
+alert coalescing. [LinkedIn](https://www.linkedin.com/in/jamilflores).

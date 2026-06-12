@@ -1180,6 +1180,18 @@ footer .foot-title { color: var(--text-dim); font-weight: 700; margin-bottom: 6p
 }
 .about-body h3 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
 .about-body p { color: var(--text-dim); font-size: 15px; margin-bottom: 16px; }
+.skills-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+.chip-skill {
+  color: #9cc4e8;
+  background: rgba(44, 130, 201, 0.08);
+  border-color: rgba(44, 130, 201, 0.35);
+  font-size: 11.5px;
+}
 .about-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .btn-linkedin {
   background: #0a66c2;
@@ -1219,6 +1231,7 @@ footer .foot-title { color: var(--text-dim); font-weight: 700; margin-bottom: 6p
   .about-card { grid-template-columns: 1fr; text-align: center; padding: 28px 22px; }
   .avatar { margin: 0 auto; }
   .about-actions { justify-content: center; }
+  .skills-strip { justify-content: center; }
   .stage-cards { grid-template-columns: 1fr; }
   .stat-strip { grid-template-columns: 1fr 1fr; }
   .matchup-row { grid-template-columns: 1fr; gap: 8px; }

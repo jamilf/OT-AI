@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ICS Sentinel — An AI SOC analyst for industrial networks</title>
-<meta name="description" content="ICS Sentinel detects attacks on unauthenticated Modbus TCP control traffic, then uses Claude to triage every alert into plain English, MITRE ATT&CK for ICS context, and concrete response actions.">
+<meta name="description" content="ICS Sentinel detects attacks on unauthenticated Modbus TCP control traffic, then uses Claude to triage every alert into plain English, MITRE ATT&CK for ICS context, and concrete response actions. A portfolio project by Jamil Flores.">
+<meta name="author" content="Jamil Flores">
 <meta name="theme-color" content="#0d1420">
 <meta property="og:title" content="ICS Sentinel — An AI SOC analyst for industrial networks">
-<meta property="og:description" content="387 frames → 10 alerts → 1 Critical incident → 1 executive summary. Detection rules + MITRE ATT&CK for ICS + Claude triage for Modbus TCP.">
+<meta property="og:description" content="387 frames → 10 alerts → 1 Critical incident → 1 executive summary. Detection rules + MITRE ATT&CK for ICS + Claude triage for Modbus TCP. Built by Jamil Flores.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z' fill='%230d1420' stroke='%232C82C9' stroke-width='2'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='%232ECC71' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
@@ -102,6 +103,8 @@
     <p class="section-sub" data-animate style="--d:.16s">
       Every number below is from a real default run
       (<span class="mono">python -m ics_sentinel.demo</span>, seed 42, 60-second window) and verified by tests.
+      Monitoring is fully passive — Sentinel reads a SPAN/TAP-style mirror of the traffic and
+      never injects a packet into the process.
     </p>
 
     <div class="funnel-svg-box" id="funnel" data-animate style="--d:.2s">
@@ -381,7 +384,7 @@
             <div class="mu-cell mu-attack">
               <h4>Unauthorized write</h4>
               <p>Normal-looking commands… from the wrong host.</p>
-              <div class="chips"><span class="chip chip-attack">T0855</span></div>
+              <div class="chips"><span class="chip chip-attack" title="T0855 — Unauthorized Command Message (MITRE ATT&amp;CK for ICS)">T0855</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
             <div class="mu-cell mu-detect">
@@ -394,7 +397,7 @@
             <div class="mu-cell mu-attack">
               <h4>Dangerous setpoint</h4>
               <p>Pump setpoint forced to <strong>200%</strong> — from the <em>authorized</em> workstation (insider / compromised).</p>
-              <div class="chips"><span class="chip chip-attack">T0836</span><span class="chip chip-attack">T0831</span></div>
+              <div class="chips"><span class="chip chip-attack" title="T0836 — Modify Parameter (MITRE ATT&amp;CK for ICS)">T0836</span><span class="chip chip-attack" title="T0831 — Manipulation of Control (MITRE ATT&amp;CK for ICS)">T0831</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
             <div class="mu-cell mu-detect">
@@ -407,7 +410,7 @@
             <div class="mu-cell mu-attack">
               <h4>Recon scan</h4>
               <p><strong>160</strong> register/unit probes in ~4 seconds (benign polling touches 6 points).</p>
-              <div class="chips"><span class="chip chip-attack">T0846</span></div>
+              <div class="chips"><span class="chip chip-attack" title="T0846 — Remote System Discovery (MITRE ATT&amp;CK for ICS)">T0846</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
             <div class="mu-cell mu-detect">
@@ -420,7 +423,7 @@
             <div class="mu-cell mu-attack">
               <h4>Malformed frames</h4>
               <p>Illegal function codes (<span class="mono">0x5A</span>, <span class="mono">0x00</span>), corrupt payloads.</p>
-              <div class="chips"><span class="chip chip-attack">T0814</span></div>
+              <div class="chips"><span class="chip chip-attack" title="T0814 — Denial of Service (MITRE ATT&amp;CK for ICS)">T0814</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
             <div class="mu-cell mu-detect">
@@ -433,7 +436,7 @@
             <div class="mu-cell mu-attack">
               <h4>Replay flood</h4>
               <p>One captured command replayed <strong>40×/second</strong>, byte-identical.</p>
-              <div class="chips"><span class="chip chip-attack">T0814</span><span class="chip chip-attack">T0855</span></div>
+              <div class="chips"><span class="chip chip-attack" title="T0814 — Denial of Service (MITRE ATT&amp;CK for ICS)">T0814</span><span class="chip chip-attack" title="T0855 — Unauthorized Command Message (MITRE ATT&amp;CK for ICS)">T0855</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
             <div class="mu-cell mu-detect">
@@ -521,7 +524,7 @@
       <div class="panel-body" id="triage-body">
         <div class="t-line t-header"><span class="t-sev">[CRITICAL]</span> <span class="t-val">ALT-003 — Process safety violation</span></div>
         <div class="t-line"><span class="t-key">flow </span> 10.0.0.11 → 10.0.0.21 · Write Single Register · addr 40002 · value <span class="t-num">200</span></div>
-        <div class="t-line"><span class="t-key">attck</span> <span class="t-tech">T0836</span> Modify Parameter · <span class="t-tech">T0831</span> Manipulation of Control</div>
+        <div class="t-line"><span class="t-key">attck</span> <span class="t-tech" title="T0836 — Modify Parameter (MITRE ATT&amp;CK for ICS)">T0836</span> Modify Parameter · <span class="t-tech" title="T0831 — Manipulation of Control (MITRE ATT&amp;CK for ICS)">T0831</span> Manipulation of Control</div>
         <div class="t-line t-blank"> </div>
         <div class="t-line"><span class="t-key">operator view</span></div>
         <div class="t-line t-quote">“A command set the pump setpoint to 200, far outside the safe range.</div>
@@ -587,9 +590,19 @@
       <div class="about-body">
         <p class="about-kicker">Portfolio project</p>
         <h3>Jamil Flores</h3>
-        <p>ICS Sentinel is a portfolio project by Jamil Flores, exploring AI-assisted defense for
-        industrial control systems — from Modbus packet parsing to Claude-powered SOC triage.
-        Built end to end: simulator, detection engine, ATT&amp;CK mapping, AI analyst, and this site.</p>
+        <p>ICS Sentinel was built end to end by Jamil Flores: a Modbus TCP protocol parser, a
+        physics-coherent plant simulator, five detection rules holding <strong>0 false
+        positives</strong> on benign traffic, MITRE ATT&amp;CK for ICS mapping, and a Claude-powered
+        triage layer with cost-aware alert coalescing — all pinned by 75 tests.</p>
+        <div class="skills-strip" aria-label="Skills demonstrated">
+          <span class="chip chip-skill">Modbus/TCP parsing</span>
+          <span class="chip chip-skill">Detection engineering</span>
+          <span class="chip chip-skill">MITRE ATT&amp;CK for ICS</span>
+          <span class="chip chip-skill">Statistical baselining</span>
+          <span class="chip chip-skill">LLM integration (Claude)</span>
+          <span class="chip chip-skill">Test-driven (75 tests)</span>
+          <span class="chip chip-skill">Zero-dep Python</span>
+        </div>
         <div class="about-actions">
           <a class="btn btn-linkedin" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Connect on LinkedIn</a>
           <a class="btn btn-ghost btn-sm" href="docs.html">Replicate the project →</a>

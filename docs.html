@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Docs &amp; Replication — ICS Sentinel</title>
 <meta name="description" content="Replicate ICS Sentinel in one command and read the documentation: detection rules, architecture, the simulated plant, AI triage, and the severity model. A portfolio project by Jamil Flores.">
+<meta name="author" content="Jamil Flores">
 <meta name="theme-color" content="#0d1420">
 <meta property="og:title" content="Docs &amp; Replication — ICS Sentinel">
 <meta property="og:description" content="Clone it, run python -m ics_sentinel.demo, and watch an AI SOC analyst triage attacks on Modbus TCP. By Jamil Flores.">
@@ -167,7 +168,7 @@
         <div class="t-line"><span class="t-key">[plant ]</span> water-treatment skid · HMI + EWS + 2 PLCs · seed 42 · 60s window</div>
         <div class="t-line"><span class="t-key">[traffic]</span> <span class="t-num">387</span> Modbus TCP frames captured · 5 attack scenarios injected</div>
         <div class="t-line"><span class="t-key">[detect ]</span> <span class="t-num">10</span> alerts from 5 rules — allowlist · safe-range · scan-window · structure · mean+3σ</div>
-        <div class="t-line"><span class="t-key">[attck  ]</span> <span class="t-tech">T0855</span> · <span class="t-tech">T0836</span> · <span class="t-tech">T0831</span> · <span class="t-tech">T0846</span> · <span class="t-tech">T0814</span></div>
+        <div class="t-line"><span class="t-key">[attck  ]</span> <span class="t-tech" title="T0855 — Unauthorized Command Message (MITRE ATT&amp;CK for ICS)">T0855</span> · <span class="t-tech" title="T0836 — Modify Parameter (MITRE ATT&amp;CK for ICS)">T0836</span> · <span class="t-tech" title="T0831 — Manipulation of Control (MITRE ATT&amp;CK for ICS)">T0831</span> · <span class="t-tech" title="T0846 — Remote System Discovery (MITRE ATT&amp;CK for ICS)">T0846</span> · <span class="t-tech" title="T0814 — Denial of Service (MITRE ATT&amp;CK for ICS)">T0814</span></div>
         <div class="t-line"><span class="t-key">[triage ]</span> 10/10 triaged → <span class="t-sev">1 CRITICAL</span> · 5 HIGH · 4 MEDIUM · 0 LOW</div>
         <div class="t-line t-blank"> </div>
         <div class="t-line"><span class="t-key">──── ranked incident report ────────────────────────</span></div>
@@ -217,6 +218,10 @@
               <span class="mono">mean + 3σ</span> baseline learned from benign traffic catches the 40×/second
               replay flood (<span class="mono">T0814</span>, <span class="mono">T0855</span>).</li>
           </ul>
+          <p><strong>Why is any of this possible?</strong> Standard Modbus/TCP (port
+          <span class="mono">502</span>) predates security: no authentication, no encryption.
+          Modbus/TCP Security (TLS on port <span class="mono">802</span>) exists, but it is rarely
+          deployed in brownfield plants — which is exactly why passive network detection matters.</p>
         </div>
       </details>
 
@@ -229,6 +234,9 @@
           emits Modbus TCP frames, the detection engine raises alerts, every alert is tagged with
           MITRE ATT&amp;CK for ICS techniques, Claude (or the mock) triages each one, and the
           reporter ranks them Critical-first with a single executive summary across the incident.</p>
+          <p><strong>Monitoring is fully passive.</strong> Sentinel reads a SPAN/TAP-style mirror of
+          the traffic — it never injects a packet, never polls a device, never touches the process.
+          That matters in OT, where an active scanner can crash a fragile PLC.</p>
           <p>See the <a href="index.html#pipeline">animated pipeline</a> on the showcase page.</p>
         </div>
       </details>
@@ -267,7 +275,8 @@
         <summary>Severity model &amp; proof points <span class="chip chip-red">quality</span><span class="chev" aria-hidden="true"></span></summary>
         <div class="acc-body">
           <p>Default-run outcome: <strong>1 Critical · 5 High · 4 Medium · 0 Low</strong>. The Critical is
-          the process-safety violation (setpoint 200 vs safe max 90) — ranked first in the report.</p>
+          the process-safety violation — the pump setpoint (expressed in %, safe range
+          <span class="mono">20–90</span>) forced to <span class="mono">200</span> — ranked first in the report.</p>
           <p><strong>0 false positives</strong> on benign traffic, tested across seeds and a 10-minute
           stream. <strong>75 pytest tests</strong> pin every number, and the whole demo needs
           <strong>0 dependencies</strong> beyond Python 3.11+.</p>
@@ -290,9 +299,19 @@
       <div class="about-body">
         <p class="about-kicker">Portfolio project</p>
         <h3>Jamil Flores</h3>
-        <p>ICS Sentinel is a portfolio project by Jamil Flores, exploring AI-assisted defense for
-        industrial control systems — from Modbus packet parsing to Claude-powered SOC triage.
-        Built end to end: simulator, detection engine, ATT&amp;CK mapping, AI analyst, and this site.</p>
+        <p>ICS Sentinel was built end to end by Jamil Flores: a Modbus TCP protocol parser, a
+        physics-coherent plant simulator, five detection rules holding <strong>0 false
+        positives</strong> on benign traffic, MITRE ATT&amp;CK for ICS mapping, and a Claude-powered
+        triage layer with cost-aware alert coalescing — all pinned by 75 tests.</p>
+        <div class="skills-strip" aria-label="Skills demonstrated">
+          <span class="chip chip-skill">Modbus/TCP parsing</span>
+          <span class="chip chip-skill">Detection engineering</span>
+          <span class="chip chip-skill">MITRE ATT&amp;CK for ICS</span>
+          <span class="chip chip-skill">Statistical baselining</span>
+          <span class="chip chip-skill">LLM integration (Claude)</span>
+          <span class="chip chip-skill">Test-driven (75 tests)</span>
+          <span class="chip chip-skill">Zero-dep Python</span>
+        </div>
         <div class="about-actions">
           <a class="btn btn-linkedin" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Connect on LinkedIn</a>
           <a class="btn btn-ghost btn-sm" href="index.html">See the showcase →</a>
