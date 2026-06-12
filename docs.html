@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docs &amp; Replication — ICS Sentinel</title>
+<meta name="description" content="Replicate ICS Sentinel in one command and read the documentation: detection rules, architecture, the simulated plant, AI triage, and the severity model. A portfolio project by Jamil Flores.">
+<meta name="author" content="Jamil Flores">
+<meta name="theme-color" content="#0d1420">
+<meta property="og:title" content="Docs &amp; Replication — ICS Sentinel">
+<meta property="og:description" content="Clone it, run python -m ics_sentinel.demo, and watch an AI SOC analyst triage attacks on Modbus TCP. By Jamil Flores.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z' fill='%230d1420' stroke='%232C82C9' stroke-width='2'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='%232ECC71' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+<noscript>
+<style>
+  [data-animate] { opacity: 1 !important; transform: none !important; }
+</style>
+</noscript>
+</head>
+<body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<nav class="site-nav" aria-label="Site">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html">
+      <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z" fill="none" stroke="#2C82C9" stroke-width="2.5"/>
+        <path d="M10 16.5l4 4 8-9" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      ICS Sentinel
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html" class="is-active">Docs &amp; Replicate</a>
+      <a href="#about" class="nav-hide-sm">About</a>
+      <a class="nav-cta" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="docs-hero">
+  <div class="wrap">
+    <p class="section-kicker hero-enter" style="--d:.05s">Docs &amp; replication</p>
+    <h1 class="hero-enter" style="--d:.15s">Replicate it in <span class="accent">one command</span>.</h1>
+    <p class="hero-enter" style="--d:.27s">
+      ICS Sentinel runs on the Python standard library alone — no installs, no API key, no
+      hardware. Clone it, run the demo, and watch an AI SOC analyst work a simulated
+      water-treatment plant under attack. Five minutes, start to finish.
+    </p>
+    <p class="hero-enter" style="--d:.39s">
+      <span class="cmd-pill"><span class="prompt-char">$</span> python -m ics_sentinel.demo<span class="cursor" aria-hidden="true"></span></span>
+    </p>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================
+     QUICKSTART
+     ============================================================ -->
+<section id="quickstart" aria-labelledby="quickstart-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>01 · Quickstart</p>
+    <h2 class="section-title" id="quickstart-title" data-animate style="--d:.08s">Five steps. Two are optional.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      Click <span class="mono">copy</span> on any command. The demo never breaks without an
+      API key — it falls back to deterministic <span class="chip chip-dim">[MOCK]</span> triage.
+    </p>
+
+    <div class="steps">
+      <div class="step-card" data-animate style="--d:.05s">
+        <div class="step-num" aria-hidden="true">1</div>
+        <div class="step-body">
+          <h3>Check your Python</h3>
+          <p>You need Python <strong>3.11+</strong>. That's the only requirement — the demo has
+          <strong>0 dependencies</strong>.</p>
+          <div class="code-row">
+            <code>python3 --version</code>
+            <button class="copy-btn" data-copy="python3 --version">copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" data-animate style="--d:.13s">
+        <div class="step-num" aria-hidden="true">2</div>
+        <div class="step-body">
+          <h3>Clone the repo</h3>
+          <p>Everything lives in <a href="https://github.com/jamilf/OT-AI" target="_blank" rel="noopener">github.com/jamilf/OT-AI</a>.</p>
+          <div class="code-row">
+            <code>git clone https://github.com/jamilf/OT-AI.git &amp;&amp; cd OT-AI</code>
+            <button class="copy-btn" data-copy="git clone https://github.com/jamilf/OT-AI.git && cd OT-AI">copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" data-animate style="--d:.21s">
+        <div class="step-num" aria-hidden="true">3</div>
+        <div class="step-body">
+          <h3>Run the demo</h3>
+          <p>Simulates the plant, injects 5 attacks, detects, maps to ATT&amp;CK, triages, and
+          prints a ranked incident report — in <span class="chip chip-dim">[MOCK]</span> mode if no API key is set.</p>
+          <div class="code-row">
+            <code>python -m ics_sentinel.demo</code>
+            <button class="copy-btn" data-copy="python -m ics_sentinel.demo">copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card step-optional" data-animate style="--d:.29s">
+        <div class="step-num" aria-hidden="true">4</div>
+        <div class="step-body">
+          <h3>Turn on Claude <span class="chip chip-attack">optional</span></h3>
+          <p>With an Anthropic API key the triage switches to <span class="chip chip-blue">[AI]</span> —
+          live analysis by Claude. <span class="mono">rich</span> adds pretty terminal output.</p>
+          <div class="code-row">
+            <code>pip install anthropic rich</code>
+            <button class="copy-btn" data-copy="pip install anthropic rich">copy</button>
+          </div>
+          <div class="code-row">
+            <code>export ANTHROPIC_API_KEY=<span class="c-dim">sk-ant-…</span></code>
+            <button class="copy-btn" data-copy="export ANTHROPIC_API_KEY=">copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card step-done" data-animate style="--d:.37s">
+        <div class="step-num" aria-hidden="true">✓</div>
+        <div class="step-body">
+          <h3>Verify with the test suite <span class="chip chip-green">75 tests</span></h3>
+          <p>Every number on this site — 387 frames, 10 alerts, 0 false positives — is asserted
+          by pytest.</p>
+          <div class="code-row">
+            <code>python -m pytest</code>
+            <button class="copy-btn" data-copy="python -m pytest">copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     DEMO PLAYER
+     ============================================================ -->
+<section id="demo" aria-labelledby="demo-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>02 · What you'll see</p>
+    <h2 class="section-title" id="demo-title" data-animate style="--d:.08s">Press play. This is the real output shape.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      A faithful replay of what the default run prints to your terminal
+      (seed 42, 60-second window).
+    </p>
+
+    <div class="panel demo-player" data-animate="pop" style="--d:.1s">
+      <div class="panel-bar">
+        <span class="panel-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>your-terminal — OT-AI</span>
+        <span class="mode-badges">
+          <button class="run-btn" id="run-demo" type="button"><span class="tri" aria-hidden="true"></span>Run the demo</button>
+        </span>
+      </div>
+      <div class="panel-body" id="demo-output">
+        <div class="t-line"><span class="t-key">$</span> python -m ics_sentinel.demo</div>
+        <div class="t-line"><span class="t-key">[mode  ]</span> MOCK — no ANTHROPIC_API_KEY found, using deterministic fallback</div>
+        <div class="t-line"><span class="t-key">[plant ]</span> water-treatment skid · HMI + EWS + 2 PLCs · seed 42 · 60s window</div>
+        <div class="t-line"><span class="t-key">[traffic]</span> <span class="t-num">387</span> Modbus TCP frames captured · 5 attack scenarios injected</div>
+        <div class="t-line"><span class="t-key">[detect ]</span> <span class="t-num">10</span> alerts from 5 rules — allowlist · safe-range · scan-window · structure · mean+3σ</div>
+        <div class="t-line"><span class="t-key">[attck  ]</span> <span class="t-tech" title="T0855 — Unauthorized Command Message (MITRE ATT&amp;CK for ICS)">T0855</span> · <span class="t-tech" title="T0836 — Modify Parameter (MITRE ATT&amp;CK for ICS)">T0836</span> · <span class="t-tech" title="T0831 — Manipulation of Control (MITRE ATT&amp;CK for ICS)">T0831</span> · <span class="t-tech" title="T0846 — Remote System Discovery (MITRE ATT&amp;CK for ICS)">T0846</span> · <span class="t-tech" title="T0814 — Denial of Service (MITRE ATT&amp;CK for ICS)">T0814</span></div>
+        <div class="t-line"><span class="t-key">[triage ]</span> 10/10 triaged → <span class="t-sev">1 CRITICAL</span> · 5 HIGH · 4 MEDIUM · 0 LOW</div>
+        <div class="t-line t-blank"> </div>
+        <div class="t-line"><span class="t-key">──── ranked incident report ────────────────────────</span></div>
+        <div class="t-line"><span class="t-sev">[CRITICAL]</span> ALT-003 — Process safety violation</div>
+        <div class="t-line">           10.0.0.11 → 10.0.0.21 · Write Single Register · 40002 = <span class="t-num">200</span> (safe 20–90)</div>
+        <div class="t-line t-quote">           “Verify the setpoint on the PLC and restore a safe value via local HMI.”</div>
+        <div class="t-line t-blank"> </div>
+        <div class="t-line"><span class="t-key">[summary]</span> An attacker on 10.0.0.66 scanned the plant, replayed captured commands,</div>
+        <div class="t-line">          and a dangerous setpoint was pushed from the engineering workstation.</div>
+        <div class="t-line">          Quarantine both hosts and verify PLC-2 before resuming operation.</div>
+        <div class="t-line"><span class="t-good">✔ report complete</span> — 9 more alerts ranked below the fold</div>
+      </div>
+    </div>
+    <p class="triage-note" data-animate style="--d:.2s">
+      Output shape is illustrative — your run prints the same numbers, verified by the test suite.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     DOCUMENTATION
+     ============================================================ -->
+<section id="documentation" aria-labelledby="docs-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>03 · Documentation</p>
+    <h2 class="section-title" id="docs-title" data-animate style="--d:.08s">How it works, piece by piece.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">Click any topic to expand it.</p>
+
+    <div class="docs-acc">
+      <details data-animate style="--d:.05s">
+        <summary>The 5 detection rules <span class="chip chip-blue">detection</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <ul>
+            <li><strong>Write-source allowlist</strong> — only <span class="mono">10.0.0.11</span> (the engineering
+              workstation) may write. Any other writer is an unauthorized command message
+              (<span class="mono">T0855</span>).</li>
+            <li><strong>Safe-range check</strong> — the pump setpoint (<span class="mono">40002</span>) must stay in
+              <span class="mono">20–90</span>. A write of <span class="mono">200</span> is flagged even from the authorized
+              host — catching insiders and compromised workstations (<span class="mono">T0836</span>, <span class="mono">T0831</span>).</li>
+            <li><strong>Scan-window rule</strong> — benign polling touches 6 register/unit points; more than
+              <span class="mono">12 distinct points</span> in one window means someone is mapping the plant
+              (<span class="mono">T0846</span>). The demo's scan hits 160 points in ~4 seconds.</li>
+            <li><strong>Structural validation</strong> — every frame is parsed against the Modbus spec; illegal
+              function codes like <span class="mono">0x5A</span> and <span class="mono">0x00</span> never reach the rules behind it
+              (<span class="mono">T0814</span>).</li>
+            <li><strong>Statistical rate baseline</strong> — per-source frame rate vs a
+              <span class="mono">mean + 3σ</span> baseline learned from benign traffic catches the 40×/second
+              replay flood (<span class="mono">T0814</span>, <span class="mono">T0855</span>).</li>
+          </ul>
+          <p><strong>Why is any of this possible?</strong> Standard Modbus/TCP (port
+          <span class="mono">502</span>) predates security: no authentication, no encryption.
+          Modbus/TCP Security (TLS on port <span class="mono">802</span>) exists, but it is rarely
+          deployed in brownfield plants — which is exactly why passive network detection matters.</p>
+        </div>
+      </details>
+
+      <details data-animate style="--d:.1s">
+        <summary>Architecture: the 5-stage pipeline <span class="chip chip-blue">design</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p><strong>Traffic → Detection → ATT&amp;CK mapping → AI triage → Report.</strong></p>
+          <p>The default run narrows like a funnel: <span class="mono">387 frames → 10 alerts → 1 Critical
+          incident → 1 executive summary</span>. Each stage is a small, testable module: the simulator
+          emits Modbus TCP frames, the detection engine raises alerts, every alert is tagged with
+          MITRE ATT&amp;CK for ICS techniques, Claude (or the mock) triages each one, and the
+          reporter ranks them Critical-first with a single executive summary across the incident.</p>
+          <p><strong>Monitoring is fully passive.</strong> Sentinel reads a SPAN/TAP-style mirror of
+          the traffic — it never injects a packet, never polls a device, never touches the process.
+          That matters in OT, where an active scanner can crash a fragile PLC.</p>
+          <p>See the <a href="index.html#pipeline">animated pipeline</a> on the showcase page.</p>
+        </div>
+      </details>
+
+      <details data-animate style="--d:.15s">
+        <summary>The simulated plant <span class="chip chip-green">simulation</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>A water-treatment skid with five hosts:</p>
+          <ul>
+            <li><span class="mono">10.0.0.10</span> — <strong>HMI master</strong>: polls every 2s, never writes</li>
+            <li><span class="mono">10.0.0.11</span> — <strong>Engineering workstation</strong>: the only authorized write source</li>
+            <li><span class="mono">10.0.0.20</span> — <strong>PLC-1</strong> (unit 1, intake)</li>
+            <li><span class="mono">10.0.0.21</span> — <strong>PLC-2</strong> (unit 2, storage)</li>
+            <li><span class="mono">10.0.0.66</span> — <strong>Attacker</strong>: a compromised host on the OT segment</li>
+          </ul>
+          <p>Registers: <span class="mono">40001</span> tank level (0–100%), <span class="mono">40002</span> pump setpoint
+          (safe range 20–90), <span class="mono">coil 0</span> pump on/off. Tank levels follow real pump physics
+          (hysteresis control), so the baseline is physically coherent — not random noise.</p>
+        </div>
+      </details>
+
+      <details data-animate style="--d:.2s">
+        <summary>AI triage &amp; the mock fallback <span class="chip chip-blue">[AI] / [MOCK]</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>For every alert, the analyst produces: a severity with justification, a plain-English
+          explanation an operator can act on, an attack narrative, ordered response actions, and a
+          false-positive likelihood. With <span class="mono">ANTHROPIC_API_KEY</span> set, that's
+          <strong>Claude</strong>; without it, a deterministic mock produces the same structure, so the
+          demo never breaks offline.</p>
+          <p><strong>Alert coalescing</strong> keeps the LLM bill sane: the 40×/second replay flood becomes
+          <strong>2 alerts, not 41</strong> — roughly 20× fewer LLM calls.</p>
+        </div>
+      </details>
+
+      <details data-animate style="--d:.25s">
+        <summary>Severity model &amp; proof points <span class="chip chip-red">quality</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>Default-run outcome: <strong>1 Critical · 5 High · 4 Medium · 0 Low</strong>. The Critical is
+          the process-safety violation — the pump setpoint (expressed in %, safe range
+          <span class="mono">20–90</span>) forced to <span class="mono">200</span> — ranked first in the report.</p>
+          <p><strong>0 false positives</strong> on benign traffic, tested across seeds and a 10-minute
+          stream. <strong>75 pytest tests</strong> pin every number, and the whole demo needs
+          <strong>0 dependencies</strong> beyond Python 3.11+.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ABOUT / PORTFOLIO
+     ============================================================ -->
+<section id="about" aria-labelledby="about-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>04 · About the author</p>
+    <h2 class="section-title" id="about-title" data-animate style="--d:.08s">Built by Jamil Flores.</h2>
+
+    <div class="about-card" data-animate="pop" style="--d:.12s">
+      <div class="avatar" aria-hidden="true">JF</div>
+      <div class="about-body">
+        <p class="about-kicker">Portfolio project</p>
+        <h3>Jamil Flores</h3>
+        <p>ICS Sentinel was built end to end by Jamil Flores: a Modbus TCP protocol parser, a
+        physics-coherent plant simulator, five detection rules holding <strong>0 false
+        positives</strong> on benign traffic, MITRE ATT&amp;CK for ICS mapping, and a Claude-powered
+        triage layer with cost-aware alert coalescing — all pinned by 75 tests.</p>
+        <div class="skills-strip" aria-label="Skills demonstrated">
+          <span class="chip chip-skill">Modbus/TCP parsing</span>
+          <span class="chip chip-skill">Detection engineering</span>
+          <span class="chip chip-skill">MITRE ATT&amp;CK for ICS</span>
+          <span class="chip chip-skill">Statistical baselining</span>
+          <span class="chip chip-skill">LLM integration (Claude)</span>
+          <span class="chip chip-skill">Test-driven (75 tests)</span>
+          <span class="chip chip-skill">Zero-dep Python</span>
+        </div>
+        <div class="about-actions">
+          <a class="btn btn-linkedin" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Connect on LinkedIn</a>
+          <a class="btn btn-ghost btn-sm" href="index.html">See the showcase →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="cmd-pill"><span class="prompt-char">$</span> python -m ics_sentinel.demo<span class="cursor" aria-hidden="true"></span></span>
+    <p class="foot-title">ICS Sentinel</p>
+    <p>An AI SOC analyst for industrial networks · built for OT defenders</p>
+    <p class="foot-credit">© Jamil Flores · portfolio project ·
+      <a href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a></p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
