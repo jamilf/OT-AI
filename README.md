@@ -8,9 +8,10 @@ response actions.
 ## Showcase site
 
 This repo hosts the animated showcase site for ICS Sentinel:
-`index.html` (the showcase), `docs.html` (interactive replication guide +
-documentation), `styles.css`, `app.js` — pure static files, zero
-dependencies, no build step.
+`index.html` (the showcase), `docs.html` (interactive replication guide),
+`learn.html` (documentation + ELI5 glossary),
+`apprenticeship.html` (Jamil's electrical-apprenticeship candidate page),
+`styles.css`, `app.js` — pure static files, zero dependencies, no build step.
 
 View it locally:
 
