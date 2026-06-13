@@ -3,26 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ICS Sentinel — An AI SOC analyst for industrial networks</title>
-<meta name="description" content="ICS Sentinel detects attacks on unauthenticated Modbus TCP control traffic, then uses Claude to triage every alert into plain English, MITRE ATT&CK for ICS context, and concrete response actions. A portfolio project by Jamil Flores.">
+<title>Jamil Flores — Electrical Apprentice · OT / Cyber-Physical Security · Sydney</title>
+<meta name="description" content="Jamil Flores — an IT risk & cybersecurity professional retraining as an electrical apprentice in Sydney to work at the OT / cyber-physical intersection. Cert II Electrotechnology, White Card, First Aid, licence + car, Australian citizen, available now.">
+<meta name="keywords" content="electrical apprenticeship Sydney, electrotechnology apprentice, OT security, cyber-physical, SCADA, smart grid, Transgrid, Ausgrid, Endeavour Energy, Jamil Flores">
 <meta name="author" content="Jamil Flores">
 <meta name="theme-color" content="#0a1410">
-<meta property="og:title" content="ICS Sentinel — An AI SOC analyst for industrial networks">
-<meta property="og:description" content="387 frames → 10 alerts → 1 Critical incident → 1 executive summary. Detection rules + MITRE ATT&CK for ICS + Claude triage for Modbus TCP. Built by Jamil Flores.">
+<meta property="og:title" content="Jamil Flores — Electrical Apprentice · OT / Cyber-Physical Security · Sydney">
+<meta property="og:description" content="IT risk & cybersecurity professional retraining as an electrical apprentice — building the rare combination of trade skills and OT security for a grid that's going digital.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z' fill='%230a1410' stroke='%2315e0a0' stroke-width='2'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='%232ECC71' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
 <noscript>
 <style>
-  [data-animate] { opacity: 1 !important; transform: none !important; }
-  .funnel-band { clip-path: none !important; }
-  .funnel-node, .map-node,
-  .matchup-row .mu-attack, .matchup-row .mu-detect,
-  .mu-cell .chips .chip { opacity: 1 !important; transform: none !important; }
-  .map-edge { stroke-dashoffset: 0 !important; }
-  .donut-seg { stroke-dashoffset: 0 !important; }
-  .sev-row .bar { transform: scaleX(1) !important; }
-  .mu-vs::before { transform: scaleX(1) !important; }
+  [data-animate] { opacity: 1 !important; transform: none !important; filter: none !important; }
 </style>
 </noscript>
 </head>
@@ -38,594 +31,298 @@
         <path d="M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z" fill="none" stroke="#15e0a0" stroke-width="2.5"/>
         <path d="M10 16.5l4 4 8-9" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      ICS Sentinel
+      Jamil Flores
     </a>
     <div class="nav-links">
       <a href="index.html" class="is-active">Home</a>
-      <a href="docs.html">Docs &amp; Replicate</a>
+      <a href="project.html">The Project</a>
       <a href="learn.html">Learn</a>
-      <a href="apprenticeship.html">Apprenticeship</a>
-      <a href="#about" class="nav-hide-sm">About</a>
-      <a class="nav-cta" href="docs.html">Replicate it</a>
+      <a class="nav-cta" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </div>
 </nav>
 <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
-<!-- ============================================================
-     HERO
-     ============================================================ -->
-<header class="hero">
+<header class="docs-hero app-hero">
   <div class="wrap">
     <div class="hero-badge hero-enter" style="--d:.05s">
       <span class="pulse-dot" aria-hidden="true"></span>
-      <span>monitoring &nbsp;<span class="mono">modbus/tcp :502</span>&nbsp; on the OT segment</span>
+      <span>electrical apprenticeship &nbsp;·&nbsp; Sydney, NSW &nbsp;·&nbsp; available now &nbsp;·&nbsp; full work rights</span>
     </div>
-
-    <h1 class="hero-enter" style="--d:.15s">ICS Sentinel</h1>
-    <p class="hero-tagline hero-enter" style="--d:.27s">An AI SOC analyst for industrial networks</p>
-    <p class="hero-oneliner hero-enter" style="--d:.39s">
-      Detects attacks on unauthenticated <strong>Modbus TCP</strong> control traffic, then uses
-      <strong>Claude</strong> to triage every alert into plain English, <strong>MITRE ATT&amp;CK for ICS</strong>
-      context, and concrete response actions.
+    <h1 class="hero-enter" style="--d:.15s">Securing the grid — <span class="accent">starting on the tools.</span></h1>
+    <p class="hero-enter" style="--d:.27s">
+      I'm <strong>Jamil Flores</strong> — an IT risk &amp; cybersecurity professional retraining as an
+      <strong>electrical apprentice</strong>. My goal is the place the industry is heading: the
+      intersection of high-voltage trade work and <strong>OT (operational technology) security</strong>
+      on the systems that run our power, transport and water.
     </p>
-
-    <div class="hook-stat hero-enter" style="--d:.52s" role="note">
-      <p><strong>Modbus has no authentication and no encryption</strong> — any device on the
-      network can command a PLC. The protocol will obey whoever speaks it first.</p>
+    <div class="hero-ctas hero-enter" style="--d:.39s">
+      <a class="btn btn-amber" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Get in touch on LinkedIn</a>
+      <a class="btn btn-ghost" href="project.html">See what I've built →</a>
     </div>
-
-    <div class="hero-ctas hero-enter" style="--d:.66s">
-      <a class="btn btn-primary" href="#pipeline">See the pipeline ↓</a>
-      <a class="btn btn-ghost" href="docs.html">Replicate it →</a>
-      <span class="cmd-pill"><span class="prompt-char">$</span> python -m ics_sentinel.demo<span class="cursor" aria-hidden="true"></span></span>
-    </div>
-
-    <div class="hero-line" aria-hidden="true">
-      <div class="track"></div>
-      <div class="packet"></div>
-    </div>
-  </div>
-
-  <div class="scroll-cue" aria-hidden="true">
-    <svg width="22" height="12" viewBox="0 0 22 12" fill="none">
-      <path d="M2 2l9 8 9-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
   </div>
 </header>
 
 <main>
 
 <!-- ============================================================
-     PIPELINE FUNNEL
+     THE PITCH — cyber-physical thesis
      ============================================================ -->
-<section id="pipeline" aria-labelledby="pipeline-title">
+<section id="pitch" aria-labelledby="pitch-title">
   <div class="wrap">
-    <p class="section-kicker" data-animate>01 · The pipeline</p>
-    <h2 class="section-title" id="pipeline-title" data-animate style="--d:.08s">Five stages. One narrowing funnel.</h2>
+    <p class="section-kicker" data-animate>01 · The pitch</p>
+    <h2 class="section-title" id="pitch-title" data-animate style="--d:.08s">A rare combination, built on purpose.</h2>
+    <div class="thesis glow-card" data-animate style="--d:.16s">
+      <p>Power grids, rail and water are digitising fast — protection &amp; control, SCADA, digital
+      substations, remote monitoring. That means the field increasingly needs people who understand
+      <strong>both</strong> the high-voltage trade <em>and</em> the digital systems and security
+      wrapped around it.</p>
+      <p>I'm building that combination deliberately: I bring real <strong>IT risk &amp; cybersecurity</strong>
+      experience, I've completed my <strong>Cert II in Electrotechnology</strong>, and I've already built
+      a working <strong>OT-security project</strong> from scratch. Now I want to learn the trade properly —
+      <strong>on the tools</strong> — and grow into the cyber-physical work the grid will depend on.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     WHY ELECTRICAL
+     ============================================================ -->
+<section id="why-electrical" aria-labelledby="whyel-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>02 · Why electrical</p>
+    <h2 class="section-title" id="whyel-title" data-animate style="--d:.08s">Why I'm switching to the trade.</h2>
     <p class="section-sub" data-animate style="--d:.16s">
-      Every number below is from a real default run
-      (<span class="mono">python -m ics_sentinel.demo</span>, seed 42, 60-second window) and verified by tests.
-      Monitoring is fully passive — Sentinel reads a SPAN/TAP-style mirror of the traffic and
-      never injects a packet into the process.
+      Three things pull me to it, and they line up perfectly with where electrotechnology is going.
     </p>
-
-    <div class="funnel-svg-box" id="funnel" data-animate style="--d:.2s">
-      <svg viewBox="0 0 1200 360" role="img" aria-label="Five-stage pipeline funnel: Traffic, 387 frames; Detection, 10 alerts; ATT&CK mapping, 5 techniques; AI triage, 1 critical incident; Report, 1 executive summary.">
-        <defs>
-          <linearGradient id="bandFade" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#15e0a0" stop-opacity="0.34"/>
-            <stop offset="1" stop-color="#15e0a0" stop-opacity="0.16"/>
-          </linearGradient>
-        </defs>
-
-        <!-- tapering bands -->
-        <g>
-          <path class="funnel-band" style="--d:0s"
-                d="M 60 60 C 195 60, 195 124, 330 124 L 330 236 C 195 236, 195 300, 60 300 Z"
-                fill="url(#bandFade)" stroke="rgba(95,230,195,0.30)" stroke-width="1"/>
-          <path class="funnel-band" style="--d:.25s"
-                d="M 330 124 C 465 124, 465 148, 600 148 L 600 212 C 465 212, 465 236, 330 236 Z"
-                fill="rgba(21,224,160,0.22)" stroke="rgba(95,230,195,0.28)" stroke-width="1"/>
-          <path class="funnel-band" style="--d:.5s"
-                d="M 600 148 C 735 148, 735 160, 870 160 L 870 200 C 735 200, 735 212, 600 212 Z"
-                fill="rgba(21,224,160,0.18)" stroke="rgba(95,230,195,0.26)" stroke-width="1"/>
-          <path class="funnel-band" style="--d:.75s"
-                d="M 870 160 C 1005 160, 1005 166, 1140 166 L 1140 194 C 1005 194, 1005 200, 870 200 Z"
-                fill="rgba(21,224,160,0.15)" stroke="rgba(95,230,195,0.24)" stroke-width="1"/>
-        </g>
-
-        <!-- flowing packets along the spine (decorative) -->
-        <g aria-hidden="true">
-          <circle r="4.5" cx="40" cy="180" fill="#2ECC71" class="mp"
-                  style="offset-path: path('M 40 180 L 330 180'); --dur: 2.6s; --ad: 0s"/>
-          <circle r="4" cx="40" cy="180" fill="#2ECC71" opacity="0.8" class="mp"
-                  style="offset-path: path('M 40 180 L 600 180'); --dur: 4.4s; --ad: 1.2s"/>
-          <circle r="4" cx="40" cy="180" fill="#2ECC71" opacity="0.7" class="mp"
-                  style="offset-path: path('M 40 180 L 1160 180'); --dur: 7.5s; --ad: 0.4s"/>
-          <circle r="4.5" cx="40" cy="180" fill="#D64541" class="mp"
-                  style="offset-path: path('M 40 180 L 870 180'); --dur: 5.2s; --ad: 2s"/>
-          <circle class="crit-ring" cx="870" cy="180" r="30" fill="none" stroke="#D64541" stroke-width="2.5"/>
-        </g>
-
-        <!-- stage nodes -->
-        <g class="funnel-node" style="--d:.15s">
-          <circle cx="60" cy="180" r="26" fill="#101c16" stroke="#15e0a0" stroke-width="2"/>
-          <g stroke="#86eccf" stroke-width="2" stroke-linecap="round">
-            <path d="M 51 174 h 18 M 51 180 h 18 M 51 186 h 18"/>
-          </g>
-          <text class="svg-stage" x="60" y="38">Traffic</text>
-          <text class="svg-stage-sub" x="60" y="340">387 frames</text>
-        </g>
-        <g class="funnel-node" style="--d:.4s">
-          <circle cx="330" cy="180" r="26" fill="#101c16" stroke="#15e0a0" stroke-width="2"/>
-          <g stroke="#86eccf" stroke-width="2" stroke-linecap="round" fill="none">
-            <circle cx="327" cy="177" r="6"/>
-            <path d="M 332 182 L 339 189"/>
-          </g>
-          <text class="svg-stage" x="330" y="38">Detection</text>
-          <text class="svg-stage-sub" x="330" y="340">10 alerts</text>
-        </g>
-        <g class="funnel-node" style="--d:.65s">
-          <circle cx="600" cy="180" r="26" fill="#101c16" stroke="#15e0a0" stroke-width="2"/>
-          <g stroke="#86eccf" stroke-width="2" stroke-linecap="round" fill="none">
-            <circle cx="600" cy="180" r="7"/>
-            <path d="M 589 180 h 5 M 606 180 h 5 M 600 169 v 5 M 600 186 v 5"/>
-          </g>
-          <text class="svg-stage" x="600" y="38">ATT&amp;CK Mapping</text>
-          <text class="svg-stage-sub" x="600" y="340">5 techniques</text>
-        </g>
-        <g class="funnel-node" style="--d:.9s">
-          <circle cx="870" cy="180" r="26" fill="#101c16" stroke="#D64541" stroke-width="2"/>
-          <path d="M 870 169 L 873 177 L 881 180 L 873 183 L 870 191 L 867 183 L 859 180 L 867 177 Z" fill="#5fe6c0"/>
-          <text class="svg-stage" x="870" y="38">AI Triage</text>
-          <text class="svg-stage-sub svg-crit" x="870" y="340">1 critical</text>
-        </g>
-        <g class="funnel-node" style="--d:1.15s">
-          <circle cx="1140" cy="180" r="26" fill="#101c16" stroke="#2ECC71" stroke-width="2"/>
-          <g stroke="#2ECC71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
-            <path d="M 1132 173 h 16 M 1132 180 h 16 M 1132 187 h 7"/>
-            <path d="M 1143 187 l 3 3 5 -6"/>
-          </g>
-          <text class="svg-stage" x="1140" y="38">Report</text>
-          <text class="svg-stage-sub" x="1140" y="340">1 summary</text>
-        </g>
-      </svg>
-    </div>
-
-    <div class="stage-cards">
-      <div class="stage-card glow-cardNone" data-stage="1" data-animate style="--d:.05s">
-        <p class="stage-num">STAGE 01</p>
-        <h3>Traffic</h3>
-        <p class="stage-stat"><span data-count="387">387</span><small> frames</small></p>
-        <p>Synthetic Modbus TCP: an HMI polling 2 PLCs on a water-treatment skid, plus 5 injectable attack scenarios. 387 frames in 60s.</p>
+    <div class="pillar-grid cols-3">
+      <div class="pillar-card glow-card" data-animate style="--d:.05s">
+        <span class="pillar-icon" aria-hidden="true">🔧</span>
+        <h3>Hands-on problem-solving</h3>
+        <p>I want to diagnose, build and fix real things — and see the result at the end of the day, not
+        just on a screen.</p>
       </div>
-      <div class="stage-card glow-cardNone" data-stage="2" data-animate style="--d:.15s">
-        <p class="stage-num">STAGE 02</p>
-        <h3>Detection</h3>
-        <p class="stage-stat"><span data-count="10">10</span><small> alerts</small></p>
-        <p>Allowlist, safe-range, scan-window, structural validation, mean+3σ rate baseline. 5 rules + statistics.</p>
+      <div class="pillar-card glow-card" data-animate style="--d:.15s">
+        <span class="pillar-icon" aria-hidden="true">📈</span>
+        <h3>A future-proof trade</h3>
+        <p>A licensed electrical trade is skilled, in-demand and built for lifelong learning and clear
+        progression — exactly the long game I want.</p>
       </div>
-      <div class="stage-card glow-cardNone" data-stage="3" data-animate style="--d:.25s">
-        <p class="stage-num">STAGE 03</p>
-        <h3>ATT&amp;CK Mapping</h3>
-        <p class="stage-stat"><span data-count="5">5</span><small> techniques</small></p>
-        <p>Each alert tagged with real adversary techniques: <span class="mono">T0855 · T0836 · T0831 · T0846 · T0814</span>.</p>
-      </div>
-      <div class="stage-card glow-card is-critical" data-stage="4" data-animate style="--d:.35s">
-        <p class="stage-num">STAGE 04</p>
-        <h3>AI Triage</h3>
-        <p class="stage-stat"><span data-count="1">1</span><small> critical</small></p>
-        <p>Claude as the analyst: severity + justification, plain-English explanation, attack narrative, ordered response actions, FP likelihood. Mock fallback if no API key.</p>
-      </div>
-      <div class="stage-card glow-cardNone" data-stage="5" data-animate style="--d:.45s">
-        <p class="stage-num">STAGE 05</p>
-        <h3>Report</h3>
-        <p class="stage-stat"><span data-count="1">1</span><small> summary</small></p>
-        <p>Ranked incident report — Critical first. One executive summary tells the incident story across all alerts.</p>
+      <div class="pillar-card glow-card" data-animate style="--d:.25s">
+        <span class="pillar-icon" aria-hidden="true">🔌</span>
+        <h3>Electrotechnology is going digital</h3>
+        <p>Automation, smart grids and connected control systems are reshaping the trade — and that's
+        the part my background makes me genuinely excited to work in.</p>
       </div>
     </div>
-
-    <p class="funnel-readout" data-animate style="--d:.2s">
-      <span><b data-count="387">387</b> frames</span>
-      <span class="arrow">→</span>
-      <span><b data-count="10">10</b> alerts</span>
-      <span class="arrow">→</span>
-      <span class="ro-crit"><b data-count="1">1</b> Critical incident</span>
-      <span class="arrow">→</span>
-      <span><b data-count="1">1</b> executive summary</span>
-    </p>
   </div>
 </section>
 
 <!-- ============================================================
-     PLANT MAP + ATTACK/DETECTION MATCHUP
+     WHY ME — pillars (safety first)
      ============================================================ -->
-<section id="plant" aria-labelledby="plant-title">
+<section id="why-me" aria-labelledby="whyme-title">
   <div class="wrap">
-    <p class="section-kicker" data-animate>02 · The plant &amp; the threats</p>
-    <h2 class="section-title" id="plant-title" data-animate style="--d:.08s">A water-treatment skid, watched end to end.</h2>
+    <p class="section-kicker" data-animate>03 · Why me</p>
+    <h2 class="section-title" id="whyme-title" data-animate style="--d:.08s">What I'd bring to your crew.</h2>
     <p class="section-sub" data-animate style="--d:.16s">
-      Tank levels follow real pump physics (hysteresis control), so the baseline is physically
-      coherent — not random noise. Five attack scenarios, five rules that catch them.
+      An apprentice you don't have to chase: safety-first, methodical, reliable, and ready for the field.
     </p>
 
-    <div class="map-toolbar" data-animate style="--d:.05s">
-      <button class="sim-btn" id="sim-attack" type="button">⚡ Simulate attack</button>
-      <span class="map-hint">Watch <span class="mono">10.0.0.66</span> try to reach PLC-2 — and get caught. Hover any node for details.</span>
-    </div>
-
-    <div class="plant-grid">
-      <!-- network map -->
-      <div class="plant-map" data-animate style="--d:.1s">
-        <div class="map-toast" id="map-toast" role="status" aria-live="polite"></div>
-        <div id="map-svg">
-        <svg viewBox="0 0 1000 620" role="img" aria-label="Network diagram: inside a dashed trust boundary, an HMI master at 10.0.0.10 and an engineering workstation at 10.0.0.11 communicate with PLC-1 at 10.0.0.20 and PLC-2 at 10.0.0.21. An attacker at 10.0.0.66 sits outside the boundary and sends traffic to PLC-2.">
-          <defs>
-            <marker id="arrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2ECC71" opacity="0.7"/>
-            </marker>
-            <marker id="arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#D64541"/>
-            </marker>
-          </defs>
-
-          <!-- trust boundary -->
-          <rect class="boundary" x="40" y="46" width="920" height="420" rx="18"
-                fill="rgba(21,224,160,0.03)" stroke="#5d7088" stroke-width="1.6"/>
-          <text class="svg-title" x="64" y="36">TRUST BOUNDARY — OT SEGMENT 10.0.0.0/24</text>
-
-          <!-- edges -->
-          <g fill="none">
-            <path class="map-edge" style="--d:.5s" d="M 280 143 L 632 143" stroke="#2ECC71" stroke-width="2" opacity="0.55" marker-end="url(#arrG)"/>
-            <path class="map-edge" style="--d:.65s" d="M 280 165 C 440 180, 500 295, 632 300" stroke="#2ECC71" stroke-width="2" opacity="0.5" marker-end="url(#arrG)"/>
-            <path class="map-edge" style="--d:.8s" d="M 280 305 C 440 290, 500 175, 632 168" stroke="#2ECC71" stroke-width="2" opacity="0.5" marker-end="url(#arrG)"/>
-            <path class="map-edge" style="--d:.95s" d="M 280 330 L 632 330" stroke="#2ECC71" stroke-width="2" opacity="0.55" marker-end="url(#arrG)"/>
-            <path class="map-edge" style="--d:1.2s" d="M 280 545 C 420 540, 520 430, 630 354" stroke="#D64541" stroke-width="2.5" opacity="0.75" marker-end="url(#arrR)"/>
-          </g>
-
-          <!-- traffic packets (decorative) -->
-          <g aria-hidden="true" class="map-packet-g">
-            <circle r="4.5" cx="280" cy="143" fill="#2ECC71" class="mp" style="offset-path: path('M 280 143 L 632 143'); --dur: 3.2s; --ad: 0s"/>
-            <circle r="4.5" cx="280" cy="143" fill="#2ECC71" class="mp" style="offset-path: path('M 280 143 L 632 143'); --dur: 3.2s; --ad: 1.6s"/>
-            <circle r="4.5" cx="280" cy="165" fill="#2ECC71" class="mp" style="offset-path: path('M 280 165 C 440 180, 500 295, 632 300'); --dur: 4.1s; --ad: 0.8s"/>
-            <circle r="4" cx="280" cy="305" fill="#2ECC71" class="mp" style="offset-path: path('M 280 305 C 440 290, 500 175, 632 168'); --dur: 5.4s; --ad: 2.4s"/>
-            <circle r="4" cx="280" cy="330" fill="#2ECC71" class="mp" style="offset-path: path('M 280 330 L 632 330'); --dur: 4.6s; --ad: 3.1s"/>
-            <circle r="5" cx="280" cy="545" fill="#D64541" class="mp-attack"
-                    style="offset-path: path('M 280 545 C 420 540, 520 430, 630 354')"/>
-            <circle class="impact-ring" cx="636" cy="350" r="13" fill="none" stroke="#D64541" stroke-width="2.5"/>
-          </g>
-
-          <!-- HMI master -->
-          <g class="map-node" style="--d:.1s" data-node
-             data-name="HMI master" data-ip="10.0.0.10"
-             data-fact="The operator's screen. It only reads — polling both PLCs every 2 seconds — so any write claiming to come from here is automatically suspicious.">
-            <rect x="80" y="100" width="200" height="86" rx="10" fill="#16261e" stroke="#213a2f" stroke-width="1.5"/>
-            <g stroke="#5fe6c0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="100" y="118" width="30" height="20" rx="2"/>
-              <path d="M 110 144 h 10 M 115 138 v 6"/>
-            </g>
-            <text class="svg-name" x="144" y="126">HMI master</text>
-            <text class="svg-ip" x="144" y="145">10.0.0.10</text>
-            <text class="svg-note" x="100" y="172">polls every 2s · never writes</text>
-          </g>
-
-          <!-- Engineering workstation -->
-          <g class="map-node" style="--d:.22s" data-node
-             data-name="Engineering workstation" data-ip="10.0.0.11"
-             data-fact="The only machine allowed to write to the PLCs — which is exactly why rule #2 still checks the values it sends. A trusted host can still be compromised.">
-            <rect x="80" y="280" width="200" height="100" rx="10" fill="#16261e" stroke="#213a2f" stroke-width="1.5"/>
-            <g stroke="#5fe6c0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="100" y="298" width="28" height="18" rx="2"/>
-              <path d="M 96 322 h 36 l -4 6 h -28 Z"/>
-            </g>
-            <text class="svg-name" x="144" y="306">Engineering WS</text>
-            <text class="svg-ip" x="144" y="325">10.0.0.11</text>
-            <text class="svg-note" x="100" y="352">the ONLY authorized</text>
-            <text class="svg-note" x="100" y="368">write source</text>
-          </g>
-
-          <!-- PLC-1 -->
-          <g class="map-node" style="--d:.34s" data-node
-             data-name="PLC-1 · intake" data-ip="10.0.0.20"
-             data-fact="The controller running the intake pump. A small ruggedized computer that reads sensors and drives physical equipment — no keyboard, no antivirus, just logic.">
-            <rect x="640" y="100" width="200" height="86" rx="10" fill="#16261e" stroke="#213a2f" stroke-width="1.5"/>
-            <g stroke="#5fe6c0" stroke-width="2" fill="none" stroke-linecap="round">
-              <rect x="658" y="116" width="26" height="34" rx="2"/>
-              <path d="M 663 124 h 16 M 663 132 h 16 M 663 140 h 10"/>
-            </g>
-            <text class="svg-name" x="698" y="126">PLC-1 · intake</text>
-            <text class="svg-ip" x="698" y="145">10.0.0.20</text>
-            <text class="svg-note" x="658" y="172">unit 1 · intake pump</text>
-            <!-- mini tank -->
-            <g>
-              <rect x="800" y="116" width="26" height="36" rx="3" fill="none" stroke="#5d7088" stroke-width="1.6"/>
-              <rect x="802" y="134" width="22" height="16" rx="2" fill="rgba(21,224,160,0.45)"/>
-            </g>
-          </g>
-
-          <!-- PLC-2 -->
-          <g class="map-node" style="--d:.46s" data-node
-             data-name="PLC-2 · storage" data-ip="10.0.0.21"
-             data-fact="Controls the storage tank and its pump (register 40002, safe 20–90). This is the target of the Critical incident — a setpoint of 200 could overflow the tank.">
-            <rect x="640" y="270" width="200" height="110" rx="10" fill="#16261e" stroke="#213a2f" stroke-width="1.5"/>
-            <g stroke="#5fe6c0" stroke-width="2" fill="none" stroke-linecap="round">
-              <rect x="658" y="288" width="26" height="34" rx="2"/>
-              <path d="M 663 296 h 16 M 663 304 h 16 M 663 312 h 10"/>
-            </g>
-            <text class="svg-name" x="698" y="298">PLC-2 · storage</text>
-            <text class="svg-ip" x="698" y="317">10.0.0.21</text>
-            <text class="svg-note" x="658" y="348">unit 2 · controls the storage tank</text>
-            <!-- mini tank -->
-            <g>
-              <rect x="800" y="288" width="26" height="36" rx="3" fill="none" stroke="#5d7088" stroke-width="1.6"/>
-              <rect x="802" y="300" width="22" height="22" rx="2" fill="rgba(21,224,160,0.45)"/>
-            </g>
-          </g>
-
-          <!-- register annotation -->
-          <g class="map-node" style="--d:.58s">
-            <rect x="618" y="394" width="262" height="62" rx="8" fill="rgba(16,28,22,0.85)" stroke="#213a2f" stroke-width="1" stroke-dasharray="4 4"/>
-            <text class="svg-mono-sm" x="632" y="412">40001  tank level (0–100%)</text>
-            <text class="svg-mono-sm" x="632" y="428">40002  pump setpoint (safe 20–90)</text>
-            <text class="svg-mono-sm" x="632" y="444">coil 0  pump on/off</text>
-          </g>
-
-          <!-- attacker (outside the boundary) -->
-          <g class="map-node" style="--d:.75s" data-node
-             data-name="Attacker" data-ip="10.0.0.66"
-             data-fact="A compromised host sitting inside the OT network but outside the trust boundary. It has no business writing to a PLC — every packet it sends is hostile.">
-            <circle class="attacker-glow" cx="180" cy="551" r="64" fill="rgba(214,69,65,0.18)"/>
-            <rect x="80" y="512" width="200" height="78" rx="10" fill="#1f1620" stroke="#D64541" stroke-width="1.8"/>
-            <g>
-              <circle cx="113" cy="546" r="15" fill="none" stroke="#ff7a75" stroke-width="2"/>
-              <text class="svg-q" x="113" y="552">?</text>
-            </g>
-            <text class="svg-name svg-name-red" x="140" y="540">Attacker</text>
-            <text class="svg-ip svg-ip-red" x="140" y="559">10.0.0.66</text>
-            <text class="svg-note" x="96" y="582">compromised host on the OT segment</text>
-          </g>
-        </svg>
-        </div>
-
-        <div class="map-legend">
-          <span class="key"><span class="swatch swatch-green"></span> authorized traffic (HMI polls, EWS writes)</span>
-          <span class="key"><span class="swatch swatch-red"></span> attacker traffic</span>
-          <span class="key"><span class="swatch swatch-dash"></span> trust boundary</span>
-        </div>
+    <div class="pillar-grid">
+      <div class="pillar-card glow-card" data-animate style="--d:.05s">
+        <span class="pillar-icon" aria-hidden="true">🛡️</span>
+        <h3>Safety-first, always</h3>
+        <p>I come from a risk discipline where the rule is stop, assess, control. I take isolation,
+        tag-out and procedure seriously — because on the grid, that's what everyone goes home on.</p>
       </div>
-
-      <!-- attacks vs detections -->
-      <div class="matchup">
-        <div class="matchup-list">
-
-          <div class="matchup-row" style="--d:.05s">
-            <div class="mu-cell mu-attack glow-card">
-              <h4>Unauthorized write</h4>
-              <p>Normal-looking commands… from the wrong host.</p>
-              <div class="chips"><span class="chip chip-attack" title="T0855 — Unauthorized Command Message (MITRE ATT&amp;CK for ICS)">T0855</span></div>
-            </div>
-            <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect glow-card">
-              <h4>Write-source allowlist</h4>
-              <p>Only <span class="mono">10.0.0.11</span> may write. Anyone else trips the wire.</p>
-            </div>
-          </div>
-
-          <div class="matchup-row" style="--d:.15s">
-            <div class="mu-cell mu-attack glow-card">
-              <h4>Dangerous setpoint</h4>
-              <p>Pump setpoint forced to <strong>200%</strong> — from the <em>authorized</em> workstation (insider / compromised).</p>
-              <div class="chips"><span class="chip chip-attack" title="T0836 — Modify Parameter (MITRE ATT&amp;CK for ICS)">T0836</span><span class="chip chip-attack" title="T0831 — Manipulation of Control (MITRE ATT&amp;CK for ICS)">T0831</span></div>
-            </div>
-            <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect glow-card">
-              <h4>Safe-range check</h4>
-              <p>Setpoint <span class="mono">40002</span> must stay within <span class="mono">20–90</span>. Value, not just source.</p>
-            </div>
-          </div>
-
-          <div class="matchup-row" style="--d:.25s">
-            <div class="mu-cell mu-attack glow-card">
-              <h4>Recon scan</h4>
-              <p><strong>160</strong> register/unit probes in ~4 seconds (benign polling touches 6 points).</p>
-              <div class="chips"><span class="chip chip-attack" title="T0846 — Remote System Discovery (MITRE ATT&amp;CK for ICS)">T0846</span></div>
-            </div>
-            <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect glow-card">
-              <h4>Distinct-points window</h4>
-              <p>More than <span class="mono">12</span> distinct points in one window means someone is mapping the plant.</p>
-            </div>
-          </div>
-
-          <div class="matchup-row" style="--d:.35s">
-            <div class="mu-cell mu-attack glow-card">
-              <h4>Malformed frames</h4>
-              <p>Illegal function codes (<span class="mono">0x5A</span>, <span class="mono">0x00</span>), corrupt payloads.</p>
-              <div class="chips"><span class="chip chip-attack" title="T0814 — Denial of Service (MITRE ATT&amp;CK for ICS)">T0814</span></div>
-            </div>
-            <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect glow-card">
-              <h4>Structural validation</h4>
-              <p>Every frame parsed against the Modbus spec. Garbage never reaches the rules behind it.</p>
-            </div>
-          </div>
-
-          <div class="matchup-row" style="--d:.45s">
-            <div class="mu-cell mu-attack glow-card">
-              <h4>Replay flood</h4>
-              <p>One captured command replayed <strong>40×/second</strong>, byte-identical.</p>
-              <div class="chips"><span class="chip chip-attack" title="T0814 — Denial of Service (MITRE ATT&amp;CK for ICS)">T0814</span><span class="chip chip-attack" title="T0855 — Unauthorized Command Message (MITRE ATT&amp;CK for ICS)">T0855</span></div>
-            </div>
-            <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect glow-card">
-              <h4>Statistical rate baseline</h4>
-              <p>Per-source frame rate vs <span class="mono">mean + 3σ</span> learned from benign traffic.</p>
-            </div>
-          </div>
-
-        </div>
+      <div class="pillar-card glow-card" data-animate style="--d:.13s">
+        <span class="pillar-icon" aria-hidden="true">🔎</span>
+        <h3>Methodical problem-solver</h3>
+        <p>I built a fault-detection system that shipped with <strong>0 false positives</strong> and
+        <strong>75 tests</strong> — the same patience fault-finding on the tools rewards.</p>
       </div>
-    </div>
-
-    <!-- severity outcome -->
-    <div class="severity-box" id="severity" data-animate style="--d:.1s">
-      <div class="donut-wrap">
-        <svg viewBox="0 0 200 200" role="img" aria-label="Severity outcome donut chart: 1 critical, 5 high, 4 medium, 0 low — 10 alerts total.">
-          <circle cx="100" cy="100" r="80" fill="none" stroke="#16271f" stroke-width="26"/>
-          <circle class="donut-seg sev-glow" data-sev="0" data-label="Critical" data-count="1" cx="100" cy="100" r="80" stroke="#D64541" stroke-width="26"
-                  stroke-dasharray="46.3 502.65" stroke-dashoffset="46.3"
-                  transform="rotate(-90 100 100)" style="--d:.1s"/>
-          <circle class="donut-seg" data-sev="1" data-label="High" data-count="5" cx="100" cy="100" r="80" stroke="#F5A623" stroke-width="26"
-                  stroke-dasharray="247.3 502.65" stroke-dashoffset="247.3"
-                  transform="rotate(-54 100 100)" style="--d:.45s"/>
-          <circle class="donut-seg" data-sev="2" data-label="Medium" data-count="4" cx="100" cy="100" r="80" stroke="#15e0a0" stroke-width="26"
-                  stroke-dasharray="197.1 502.65" stroke-dashoffset="197.1"
-                  transform="rotate(126 100 100)" style="--d:.8s"/>
-        </svg>
-        <div class="donut-center">
-          <b data-count="10">10</b>
-          <span>alerts</span>
-        </div>
+      <div class="pillar-card glow-card" data-animate style="--d:.21s">
+        <span class="pillar-icon" aria-hidden="true">🤝</span>
+        <h3>Reliable &amp; team-oriented</h3>
+        <p>Punctual and switched-on, with team-sport and customer-facing experience. I turn up ready,
+        communicate clearly, and pull my weight.</p>
       </div>
-      <div class="sev-legend">
-        <div class="sev-row" data-sev="0">
-          <span class="dot" style="background:#D64541"></span>
-          <span>Critical</span>
-          <span class="bar-track"><span class="bar" style="width:20%; background:#D64541; --d:.15s"></span></span>
-          <span class="count" data-count="1">1</span>
-        </div>
-        <div class="sev-row" data-sev="1">
-          <span class="dot" style="background:#F5A623"></span>
-          <span>High</span>
-          <span class="bar-track"><span class="bar" style="width:100%; background:#F5A623; --d:.3s"></span></span>
-          <span class="count" data-count="5">5</span>
-        </div>
-        <div class="sev-row" data-sev="2">
-          <span class="dot" style="background:#15e0a0"></span>
-          <span>Medium</span>
-          <span class="bar-track"><span class="bar" style="width:80%; background:#15e0a0; --d:.45s"></span></span>
-          <span class="count" data-count="4">4</span>
-        </div>
-        <div class="sev-row" data-sev="3">
-          <span class="dot" style="background:#2ECC71"></span>
-          <span>Low</span>
-          <span class="bar-track"><span class="bar" style="width:4px; background:#2ECC71; --d:.6s"></span></span>
-          <span class="count" data-count="0">0</span>
-        </div>
-        <p class="sev-note">Severity outcome of the default run.</p>
+      <div class="pillar-card glow-card" data-animate style="--d:.29s">
+        <span class="pillar-icon" aria-hidden="true">⛰️</span>
+        <h3>Field-ready</h3>
+        <p>Happy to travel and work regionally, outdoors and in all weather — wherever the network and
+        the job take the crew.</p>
+      </div>
+      <div class="pillar-card glow-card" data-animate style="--d:.37s">
+        <span class="pillar-icon" aria-hidden="true">🧮</span>
+        <h3>Aptitude-test ready</h3>
+        <p>Confident with the numeracy and mechanical-reasoning aptitude testing utilities and group
+        training organisations use to screen apprentices.</p>
+      </div>
+      <div class="pillar-card glow-card" data-animate style="--d:.45s">
+        <span class="pillar-icon" aria-hidden="true">🔐</span>
+        <h3>Brings IT-risk &amp; cyber maturity</h3>
+        <p>A professional background in IT risk and cybersecurity — rare in an apprentice, and exactly
+        what a modernising, networked grid increasingly values.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ============================================================
-     AI TRIAGE TERMINAL
+     TICKETS & LOGISTICS
      ============================================================ -->
-<section id="triage" aria-labelledby="triage-title">
+<section id="credentials" aria-labelledby="cred-title">
   <div class="wrap">
-    <p class="section-kicker" data-animate>03 · The analyst</p>
-    <h2 class="section-title" id="triage-title" data-animate style="--d:.08s">Claude reads the alert so your operator doesn't have to.</h2>
+    <p class="section-kicker" data-animate>04 · Tickets &amp; logistics</p>
+    <h2 class="section-title" id="cred-title" data-animate style="--d:.08s">Qualified, ticketed, and ready.</h2>
     <p class="section-sub" data-animate style="--d:.16s">
-      The Critical incident from the default run, exactly as triaged — severity, ATT&amp;CK context,
-      a plain-English operator view, and ordered response actions.
+      Everything an employer screens for on day one — already sorted.
     </p>
 
-    <div class="panel triage-panel" id="triage-card" data-animate="pop" style="--d:.1s">
-      <div class="panel-bar">
-        <span class="panel-dots" aria-hidden="true"><span></span><span></span><span></span></span>
-        <span>ics-sentinel · triage</span>
-        <span class="mode-badges">
-          <span class="chip chip-blue badge-ai">[AI] Claude</span>
-          <span class="chip chip-dim">[MOCK] fallback</span>
-          <button class="replay-btn" id="triage-replay" type="button">↻ replay</button>
-        </span>
+    <div class="cred-grid">
+      <div class="cred-card glow-card" data-animate style="--d:.04s">
+        <span class="cred-check" aria-hidden="true">✓</span>
+        <div class="cred-body"><strong>Cert II Electrotechnology</strong><span>Pre-apprenticeship qualification completed</span></div>
       </div>
-      <div class="panel-body" id="triage-body">
-        <div class="t-line t-header"><span class="t-sev">[CRITICAL]</span> <span class="t-val">ALT-003 — Process safety violation</span></div>
-        <div class="t-line"><span class="t-key">flow </span> 10.0.0.11 → 10.0.0.21 · Write Single Register · addr 40002 · value <span class="t-num">200</span></div>
-        <div class="t-line"><span class="t-key">attck</span> <span class="t-tech" title="T0836 — Modify Parameter (MITRE ATT&amp;CK for ICS)">T0836</span> Modify Parameter · <span class="t-tech" title="T0831 — Manipulation of Control (MITRE ATT&amp;CK for ICS)">T0831</span> Manipulation of Control</div>
-        <div class="t-line t-blank"> </div>
-        <div class="t-line"><span class="t-key">operator view</span></div>
-        <div class="t-line t-quote">“A command set the pump setpoint to 200, far outside the safe range.</div>
-        <div class="t-line t-quote">If the controller obeys it, the tank can overflow or the pump can be damaged.”</div>
-        <div class="t-line t-blank"> </div>
-        <div class="t-line"><span class="t-action">action 1</span>  Verify the setpoint on the PLC and restore a safe value via local HMI</div>
-        <div class="t-line"><span class="t-action">action 2</span>  Quarantine the source workstation pending forensic review</div>
-        <div class="t-line t-blank"> </div>
-        <div class="t-line"><span class="t-key">false-positive likelihood</span>  <span class="t-good">Low</span></div>
+      <div class="cred-card glow-card" data-animate style="--d:.1s">
+        <span class="cred-check" aria-hidden="true">✓</span>
+        <div class="cred-body"><strong>White Card</strong><span>Construction site induction (NSW)</span></div>
+      </div>
+      <div class="cred-card glow-card" data-animate style="--d:.16s">
+        <span class="cred-check" aria-hidden="true">✓</span>
+        <div class="cred-body"><strong>First Aid</strong><span>Current first aid certification</span></div>
+      </div>
+      <div class="cred-card glow-card" data-animate style="--d:.22s">
+        <span class="cred-check" aria-hidden="true">✓</span>
+        <div class="cred-body"><strong>Driver licence + own car</strong><span>Reliable transport to any site</span></div>
+      </div>
+      <div class="cred-card glow-card" data-animate style="--d:.28s">
+        <span class="cred-check" aria-hidden="true">✓</span>
+        <div class="cred-body"><strong>Australian citizen</strong><span>Full, unrestricted work rights</span></div>
+      </div>
+      <div class="cred-card glow-card" data-animate style="--d:.34s">
+        <span class="cred-check" aria-hidden="true">✓</span>
+        <div class="cred-body"><strong>Sydney-based · available now</strong><span>Ready to start immediately</span></div>
       </div>
     </div>
-
-    <p class="triage-note" data-animate style="--d:.2s">
-      <span class="chip chip-blue">[AI]</span> triage by Claude &nbsp;·&nbsp;
-      <span class="chip chip-dim">[MOCK]</span> deterministic fallback — the demo never breaks without an API key.
+    <p class="cred-extra" data-animate style="--d:.4s">
+      <span class="chip chip-green">Regional &amp; field work — happy to travel</span>
+      <span class="chip chip-green">Aptitude-test ready</span>
+      <span class="chip chip-green">Comfortable with physical, outdoor work</span>
     </p>
   </div>
 </section>
 
 <!-- ============================================================
-     PROOF POINTS
+     THE DIGITAL EDGE → THE PROJECT
      ============================================================ -->
-<section id="proof" aria-labelledby="proof-title">
+<section id="edge" aria-labelledby="edge-title">
   <div class="wrap">
-    <p class="section-kicker" data-animate>04 · Proof points</p>
-    <h2 class="section-title" id="proof-title" data-animate style="--d:.08s">Quiet on benign. Loud on attacks.</h2>
+    <p class="section-kicker" data-animate>05 · The digital edge</p>
+    <h2 class="section-title" id="edge-title" data-animate style="--d:.08s">Most apprentices haven't built one of these.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      The clearest proof of how I learn complex technical systems — and of the cyber-physical angle I'd
+      bring to the grid.
+    </p>
 
-    <div class="stat-strip" id="stats">
-      <div class="stat-card glow-card" data-animate style="--d:.05s">
-        <p class="big"><span data-count="0">0</span></p>
-        <p class="label">false positives on benign traffic — tested across seeds and a 10-minute stream</p>
+    <a class="learn-link-card glow-card" href="project.html" data-animate style="--d:.2s">
+      <div>
+        <h3>⚙️ ICS Sentinel — I built a tool that watches industrial control networks</h3>
+        <p>It monitors the same class of kit the grid runs on — <strong>PLCs</strong>, control wiring and
+        <strong>SCADA-style</strong> industrial networks — detects attacks on the control traffic, and
+        triages them into plain English with response actions. Self-built, end to end, and fully tested.
+        It's why I already speak the language of control systems, take electrical safety seriously, and
+        understand how an attacker thinks about critical infrastructure.</p>
       </div>
-      <div class="stat-card glow-card" data-animate style="--d:.13s">
-        <p class="big"><span class="unit">40× → </span><span data-count="2">2</span></p>
-        <p class="label">replay flood coalesced into 2 alerts, not 41 — ~20× fewer LLM calls</p>
-      </div>
-      <div class="stat-card glow-card" data-animate style="--d:.21s">
-        <p class="big"><span data-count="75">75</span></p>
-        <p class="label">pytest tests verifying every number on this page</p>
-      </div>
-      <div class="stat-card glow-card" data-animate style="--d:.29s">
-        <p class="big"><span data-count="0">0</span></p>
-        <p class="label">dependencies to run the demo — Python 3.11+ stdlib; <span class="mono">rich</span> + <span class="mono">anthropic</span> optional</p>
-      </div>
-      <div class="stat-card glow-card" data-animate style="--d:.37s">
-        <p class="big"><span data-count="1">1</span></p>
-        <p class="label">command<br><span class="mono">python -m ics_sentinel.demo</span></p>
-      </div>
-    </div>
+      <span class="btn btn-primary btn-sm">Explore the project →</span>
+    </a>
   </div>
 </section>
 
 <!-- ============================================================
-     ABOUT / PORTFOLIO
+     WHERE I'M HEADED — target sectors
+     ============================================================ -->
+<section id="sectors" aria-labelledby="sectors-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>06 · Where I'm headed</p>
+    <h2 class="section-title" id="sectors-title" data-animate style="--d:.08s">The teams I'm building toward.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      The environments where a licensed tradesperson who <em>also</em> understands OT security and risk
+      becomes a genuine asset. These are the kinds of organisations I want to apply my skills to.
+    </p>
+
+    <div class="pillar-grid cols-3">
+      <div class="pillar-card glow-card" data-animate style="--d:.05s">
+        <span class="pillar-icon" aria-hidden="true">⚡</span>
+        <h3>Smart-grid utilities</h3>
+        <p>High-voltage transmission &amp; distribution, digital substations and the renewable
+        transition — prime cyber-physical territory.</p>
+        <div class="chips">
+          <span class="chip chip-skill">Transgrid</span>
+          <span class="chip chip-skill">Ausgrid</span>
+          <span class="chip chip-skill">Endeavour Energy</span>
+        </div>
+      </div>
+      <div class="pillar-card glow-card" data-animate style="--d:.15s">
+        <span class="pillar-icon" aria-hidden="true">🚆</span>
+        <h3>Transport &amp; critical infrastructure</h3>
+        <p>Traction power, rail signalling and water SCADA &amp; telemetry — some of the largest, most
+        safety-critical OT networks in the state.</p>
+        <div class="chips">
+          <span class="chip chip-skill">Sydney Trains / TfNSW</span>
+          <span class="chip chip-skill">Sydney Water</span>
+        </div>
+      </div>
+      <div class="pillar-card glow-card" data-animate style="--d:.25s">
+        <span class="pillar-icon" aria-hidden="true">🤖</span>
+        <h3>Automation &amp; switchgear</h3>
+        <p>The companies that build and secure the PLCs, switchgear and control systems the grid runs
+        on — the heart of Industry 4.0.</p>
+        <div class="chips">
+          <span class="chip chip-skill">ABB</span>
+          <span class="chip chip-skill">Siemens</span>
+          <span class="chip chip-skill">Schneider Electric</span>
+          <span class="chip chip-skill">UGL</span>
+        </div>
+      </div>
+    </div>
+    <p class="sectors-note" data-animate style="--d:.32s">
+      Named as the sectors and employers I'm targeting — not current affiliations.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     ABOUT / CONTACT
      ============================================================ -->
 <section id="about" aria-labelledby="about-title">
   <div class="wrap">
-    <p class="section-kicker" data-animate>05 · About the author</p>
-    <h2 class="section-title" id="about-title" data-animate style="--d:.08s">Built by Jamil Flores.</h2>
+    <p class="section-kicker" data-animate>07 · Let's talk</p>
+    <h2 class="section-title" id="about-title" data-animate style="--d:.08s">Ready for the right apprenticeship.</h2>
 
     <div class="about-card" data-animate="pop" style="--d:.12s">
       <div class="avatar" aria-hidden="true">JF</div>
       <div class="about-body">
-        <p class="about-kicker">Portfolio project</p>
+        <p class="about-kicker">Electrical apprentice · Sydney</p>
         <h3>Jamil Flores</h3>
-        <p>ICS Sentinel was built end to end by Jamil Flores: a Modbus TCP protocol parser, a
-        physics-coherent plant simulator, five detection rules holding <strong>0 false
-        positives</strong> on benign traffic, MITRE ATT&amp;CK for ICS mapping, and a Claude-powered
-        triage layer with cost-aware alert coalescing — all pinned by 75 tests.</p>
-        <div class="skills-strip" aria-label="Skills demonstrated">
-          <span class="chip chip-skill">Modbus/TCP parsing</span>
-          <span class="chip chip-skill">Detection engineering</span>
-          <span class="chip chip-skill">MITRE ATT&amp;CK for ICS</span>
-          <span class="chip chip-skill">Statistical baselining</span>
-          <span class="chip chip-skill">LLM integration (Claude)</span>
-          <span class="chip chip-skill">Test-driven (75 tests)</span>
-          <span class="chip chip-skill">Zero-dep Python</span>
+        <p>I'm after an electrotechnology apprenticeship with a Sydney utility, group training
+        organisation or contractor where I can learn the trade from great tradespeople and grow toward
+        the cyber-physical / OT-security work the grid increasingly needs. I've done the prep, I've got
+        the tickets, and I'm ready to put in the years. If you've got an intake, I'd love to chat.</p>
+        <div class="skills-strip" aria-label="At a glance">
+          <span class="chip chip-skill">Cert II Electrotechnology</span>
+          <span class="chip chip-skill">IT risk &amp; cybersecurity</span>
+          <span class="chip chip-skill">OT / SCADA aware</span>
+          <span class="chip chip-skill">Safety-first</span>
+          <span class="chip chip-skill">White Card · First Aid</span>
+          <span class="chip chip-skill">Licence + car</span>
+          <span class="chip chip-skill">Sydney · available now</span>
         </div>
         <div class="about-actions">
           <a class="btn btn-linkedin" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Connect on LinkedIn</a>
-          <a class="btn btn-ghost btn-sm" href="docs.html">Replicate the project →</a>
+          <a class="btn btn-ghost btn-sm" href="project.html">See the project →</a>
         </div>
       </div>
     </div>
@@ -636,11 +333,11 @@
 
 <footer>
   <div class="wrap">
-    <span class="cmd-pill"><span class="prompt-char">$</span> python -m ics_sentinel.demo<span class="cursor" aria-hidden="true"></span></span>
-    <p class="foot-title">ICS Sentinel</p>
-    <p>An AI SOC analyst for industrial networks · built for OT defenders</p>
-    <p class="foot-credit">© Jamil Flores · portfolio project ·
-      <a href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a></p>
+    <p class="foot-title">Jamil Flores</p>
+    <p>Electrical apprentice · Sydney, NSW · OT / cyber-physical security · qualified &amp; ready to start</p>
+    <p class="foot-credit">© Jamil Flores ·
+      <a href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a> ·
+      <a href="project.html">The Project</a></p>
   </div>
 </footer>
 

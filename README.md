@@ -1,17 +1,20 @@
-# ICS Sentinel
+# Jamil Flores — apprenticeship-first portfolio
 
-An AI SOC analyst for industrial networks — detects attacks on
-unauthenticated Modbus TCP control traffic, then uses Claude to triage every
-alert into plain English, MITRE ATT&CK for ICS context, and concrete
-response actions.
+An apprenticeship-first portfolio for **Jamil Flores**, an IT risk &
+cybersecurity professional retraining as an electrical apprentice in Sydney to
+work at the OT / cyber-physical security intersection. The **ICS Sentinel**
+project (detects attacks on Modbus TCP control traffic and triages them) is
+the technical proof behind the pitch.
 
-## Showcase site
+## Site structure
 
-This repo hosts the animated showcase site for ICS Sentinel:
-`index.html` (the showcase), `docs.html` (interactive replication guide),
-`learn.html` (documentation + ELI5 glossary),
-`apprenticeship.html` (Jamil's electrical-apprenticeship candidate page),
-`styles.css`, `app.js` — pure static files, zero dependencies, no build step.
+Pure static files, zero dependencies, no build step:
+- `index.html` — apprenticeship-first homepage (the pitch recruiters land on)
+- `project.html` — the ICS Sentinel showcase (the technical proof)
+- `docs.html` — interactive replication guide
+- `learn.html` — documentation + ELI5 glossary
+- `apprenticeship.html` — redirect to `index.html` (legacy URL)
+- `styles.css`, `app.js`
 
 View it locally:
 
