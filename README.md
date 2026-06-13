@@ -1,10 +1,12 @@
 # Jamil Flores — apprenticeship-first portfolio
 
-An apprenticeship-first portfolio for **Jamil Flores**, an IT risk &
-cybersecurity professional retraining as an electrical apprentice in Sydney to
-work at the OT / cyber-physical security intersection. The **ICS Sentinel**
-project (detects attacks on Modbus TCP control traffic and triages them) is
-the technical proof behind the pitch.
+An apprenticeship-first portfolio for **Jamil Flores**, a mature-age
+career-changer moving from about eight years in IT operations into the
+electrical trade, applying to the NSW networks (Ausgrid, Endeavour Energy,
+Essential Energy, Transgrid, Transport for NSW). The **ICS Sentinel** project
+— a self-built program that watches an industrial control network and flags
+trouble — is included as evidence of how he learns and finishes what he
+starts, not as the day job.
 
 ## Site structure
 
