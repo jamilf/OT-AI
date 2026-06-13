@@ -62,11 +62,12 @@ svg { display: block; }
   inset: 0;
   z-index: -2;
   background-image:
-    linear-gradient(rgba(120, 220, 180, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 220, 180, 0.06) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 30%, transparent 95%);
-  -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 30%, transparent 95%);
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27260%27%20height%3D%27140%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2315e0a0%27%20stroke-opacity%3D%270.11%27%20stroke-width%3D%271.5%27%3E%3Cpath%20d%3D%27M0%200V140%27%2F%3E%3Cpath%20d%3D%27M0%2070H58%27%2F%3E%3Cpath%20d%3D%27M62%2059V81M72%2059V81%27%2F%3E%3Cpath%20d%3D%27M76%2070H156%27%2F%3E%3Cpath%20d%3D%27M160%2058A14%2014%200%200%200%20160%2082%27%2F%3E%3Cpath%20d%3D%27M184%2058A14%2014%200%200%201%20184%2082%27%2F%3E%3Cpath%20d%3D%27M188%2070H260%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%2315e0a0%27%20fill-opacity%3D%270.16%27%3E%3Ccircle%20cx%3D%270%27%20cy%3D%2770%27%20r%3D%272.4%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+    linear-gradient(rgba(120, 220, 180, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 220, 180, 0.035) 1px, transparent 1px);
+  background-size: 260px 140px, 52px 52px, 52px 52px;
+  mask-image: radial-gradient(ellipse 150% 130% at 50% 35%, #000 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 150% 130% at 50% 35%, #000 60%, transparent 100%);
 }
 .bg-glow {
   position: fixed;
@@ -90,6 +91,30 @@ svg { display: block; }
   from { transform: translateX(-65%) translateY(0) scale(1); }
   to   { transform: translateX(-35%) translateY(8vh) scale(1.15); }
 }
+
+/* PLC scan-cycle sweep — a soft energised band travels top->bottom like a PLC scan */
+body::before {
+  content: "";
+  position: fixed;
+  left: 0; right: 0; top: 0;
+  height: 150px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    transparent,
+    rgba(21, 224, 160, 0.05) 55%,
+    rgba(21, 224, 160, 0.10) 88%,
+    rgba(120, 255, 200, 0.16));
+  opacity: 0;
+  animation: plcScan 7.5s linear infinite;
+}
+@keyframes plcScan {
+  0%   { transform: translateY(-170px); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
 
 /* ---------- layout ---------- */
 .wrap {
@@ -1641,4 +1666,8 @@ footer .foot-title { color: var(--text-dim); font-weight: 700; margin-bottom: 6p
   [data-animate] { filter: none !important; }
   .scroll-progress, .glow-card::after { display: none !important; }
   .hero h1 { animation: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { display: none !important; }
 }
