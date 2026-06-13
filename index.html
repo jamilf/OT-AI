@@ -7,11 +7,14 @@
 <meta name="description" content="Jamil Flores — mature-age electrical apprenticeship candidate in Sydney. About eight years in IT operations, now committed to the electrical trade and the NSW networks. Cert II in Electrotechnology, White Card, First Aid, licence, available now.">
 <meta name="keywords" content="electrical apprenticeship Sydney, electrotechnology apprentice NSW, Ausgrid, Endeavour Energy, Essential Energy, Transgrid, Transport for NSW, Jamil Flores">
 <meta name="author" content="Jamil Flores">
-<meta name="theme-color" content="#0a1410">
+<meta name="theme-color" content="#14161b">
 <meta property="og:title" content="Jamil Flores — Electrical Apprentice · Sydney, NSW">
 <meta property="og:description" content="Mature-age career-changer moving into the electrical trade for good. Cert II in Electrotechnology, tickets sorted, ready to start with the NSW networks and put in the four years.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z' fill='%230a1410' stroke='%2315e0a0' stroke-width='2'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='%232ECC71' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z' fill='%2314161b' stroke='%2333a35a' stroke-width='2'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='%232ECC71' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
 <link rel="stylesheet" href="styles.css">
 <noscript>
 <style>
@@ -28,7 +31,7 @@
   <div class="wrap">
     <a class="nav-brand" href="index.html">
       <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
-        <path d="M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z" fill="none" stroke="#15e0a0" stroke-width="2.5"/>
+        <path d="M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z" fill="none" stroke="#33a35a" stroke-width="2.5"/>
         <path d="M10 16.5l4 4 8-9" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       Jamil Flores
@@ -60,6 +63,41 @@
       <a class="btn btn-amber" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Get in touch on LinkedIn</a>
       <a class="btn btn-ghost" href="#credentials">See my tickets ↓</a>
     </div>
+
+    <figure class="hero-sld hero-enter" style="--d:.55s" aria-label="A single-line diagram: grid supply into a busbar feeding circuit breakers, a transformer, and an earthed feeder.">
+      <svg viewBox="0 0 960 210" role="img">
+        <title>Single-line diagram</title>
+        <g class="sld-label" text-anchor="middle">
+          <text x="110" y="20">GRID 132 kV</text>
+          <text x="820" y="74">BUSBAR A</text>
+          <text x="230" y="198">FEEDER 01</text>
+          <text x="440" y="198">11 kV</text>
+          <text x="650" y="198">FEEDER 02</text>
+          <text x="840" y="196">EARTH</text>
+          <text x="468" y="132" text-anchor="start">TX 132/11 kV</text>
+        </g>
+        <g class="sld-line" fill="none">
+          <circle cx="110" cy="40" r="14"/>
+          <path d="M110 54 V88"/>
+          <path d="M230 88 V170"/><path d="M650 88 V170"/>
+          <path d="M440 88 V113"/><path d="M440 153 V170"/>
+          <path d="M840 88 V150"/>
+          <rect x="223" y="108" width="14" height="14" rx="1"/>
+          <rect x="643" y="108" width="14" height="14" rx="1"/>
+          <circle cx="440" cy="127" r="11"/><circle cx="440" cy="143" r="11"/>
+        </g>
+        <path class="sld-bus" d="M60 88 H900"/>
+        <g class="sld-node">
+          <circle cx="110" cy="88" r="3.2"/><circle cx="230" cy="88" r="3.2"/>
+          <circle cx="440" cy="88" r="3.2"/><circle cx="650" cy="88" r="3.2"/>
+          <circle cx="840" cy="88" r="3.2"/>
+        </g>
+        <g class="sld-earth" fill="none">
+          <path d="M824 152 H856"/><path d="M829 158 H851"/><path d="M834 164 H846"/>
+        </g>
+        <circle class="sld-pulse" r="4" cx="0" cy="0"/>
+      </svg>
+    </figure>
   </div>
 </header>
 
@@ -92,19 +130,19 @@
     <h2 class="section-title" id="whyel-title" data-animate style="--d:.08s">The honest reasons.</h2>
     <div class="pillar-grid cols-3">
       <div class="pillar-card glow-card" data-animate style="--d:.05s">
-        <span class="pillar-icon" aria-hidden="true">🔧</span>
+        <span class="pillar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" aria-hidden="true"><path d="M15.5 4.5a4 4 0 0 0-5 5L4 16v4h4l6.5-6.5a4 4 0 0 0 5-5l-2.8 2.8-2-2 2.8-2.8z"/></svg></span>
         <h3>The work is real</h3>
         <p>I'd rather find a fault and fix it than write another report about one. I like work you can
         test, see, and stand behind.</p>
       </div>
       <div class="pillar-card glow-card" data-animate style="--d:.15s">
-        <span class="pillar-icon" aria-hidden="true">🛠️</span>
+        <span class="pillar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" aria-hidden="true"><path d="M3 17h18"/><path d="M5 17a7 7 0 0 1 14 0"/><path d="M10 8a2 2 0 0 1 4 0v2h-4z"/></svg></span>
         <h3>A trade for life</h3>
         <p>A licence, a skill that's always needed, and years of learning ahead of me. I'm not in a
         hurry to be anywhere else.</p>
       </div>
       <div class="pillar-card glow-card" data-animate style="--d:.25s">
-        <span class="pillar-icon" aria-hidden="true">⚡</span>
+        <span class="pillar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" aria-hidden="true"><path d="M12 3v18M7 21l5-18 5 18M8.5 9h7M7 15h10"/></svg></span>
         <h3>The network matters</h3>
         <p>Power sits under everything else. Keeping it running and safe is work worth doing, and worth
         doing carefully.</p>
@@ -125,38 +163,38 @@
     </p>
 
     <div class="pillar-grid">
-      <div class="pillar-card glow-card" data-animate style="--d:.05s">
-        <span class="pillar-icon" aria-hidden="true">🛡️</span>
+      <div class="pillar-card pillar-card--wide glow-card" data-animate style="--d:.05s">
+        <span class="pillar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
         <h3>Safety first</h3>
         <p>In IT ops you don't touch production without a plan and a way back. Same habit here: isolate,
         test, tag out, check again. On the network that isn't paperwork. It's how everyone gets home.</p>
       </div>
       <div class="pillar-card glow-card" data-animate style="--d:.13s">
-        <span class="pillar-icon" aria-hidden="true">🔎</span>
+        <span class="pillar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" aria-hidden="true"><circle cx="11" cy="11" r="6"/><line x1="20" y1="20" x2="15.5" y2="15.5"/></svg></span>
         <h3>Patient with a fault</h3>
         <p>I built a fault-detection program in my own time and didn't leave it until it ran clean: no
         false alarms, every part tested. Fault-finding pays back that kind of patience.</p>
       </div>
       <div class="pillar-card glow-card" data-animate style="--d:.21s">
-        <span class="pillar-icon" aria-hidden="true">🤝</span>
+        <span class="pillar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span>
         <h3>Reliable</h3>
         <p>I play team sport and I've carried an on-call pager. Both teach you to show up when you said
         you would, and not leave your mates a person short.</p>
       </div>
       <div class="pillar-card glow-card" data-animate style="--d:.29s">
-        <span class="pillar-icon" aria-hidden="true">⛰️</span>
+        <span class="pillar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" aria-hidden="true"><path d="M3 18l5-8 4 5 3-4 6 7z"/></svg></span>
         <h3>Field-ready</h3>
         <p>Happy to travel, work regional, and be outdoors in whatever the weather's doing. I don't need
         to be comfortable to do good work.</p>
       </div>
       <div class="pillar-card glow-card" data-animate style="--d:.37s">
-        <span class="pillar-icon" aria-hidden="true">🧮</span>
+        <span class="pillar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="12" y1="9" x2="12" y2="21"/></svg></span>
         <h3>Aptitude-test ready</h3>
         <p>I'm fine with the numeracy and mechanical-reasoning tests the networks use to screen
         apprentices. The maths doesn't worry me.</p>
       </div>
       <div class="pillar-card glow-card" data-animate style="--d:.45s">
-        <span class="pillar-icon" aria-hidden="true">🎯</span>
+        <span class="pillar-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" aria-hidden="true"><path d="M6 21V4M6 4h11l-2 4 2 4H6"/></svg></span>
         <h3>I've gone the distance before</h3>
         <p>Eight years in one field taught me to commit and keep learning. I'm choosing this trade with
         my eyes open, and I'll give the apprenticeship the same.</p>
@@ -223,7 +261,7 @@
 
     <a class="learn-link-card glow-card" href="project.html" data-animate style="--d:.2s">
       <div>
-        <h3>⚙️ ICS Sentinel — a project I built in my own time</h3>
+        <h3>ICS Sentinel — a project I built in my own time</h3>
         <p>It's a small program that watches an industrial control network (the PLC and SCADA-style gear
         the grid is starting to lean on) and flags when something looks wrong. I taught myself what I
         needed, wrote the tests, and got it working start to finish. I'm not bringing it to the job. I'm
