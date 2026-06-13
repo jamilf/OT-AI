@@ -43,7 +43,11 @@ def traffic_summary(frames: list[ModbusFrame]) -> str:
         + " — sources: "
         + ", ".join(f"{ip} ({n})" for ip, n in sources.most_common())
     )
-    attacks = Counter(f.label for f in frames if f.label != BENIGN_LABEL)
+    # Ground-truth attack labels exist only for synthetic traffic; real
+    # captures carry the neutral "pcap" label, which we don't report here.
+    attacks = Counter(
+        f.label for f in frames if f.label in ATTACK_SCENARIOS
+    )
     if attacks:
         parts += "\n  injected (ground truth): " + ", ".join(
             f"{name} ({n})" for name, n in attacks.most_common()
@@ -84,6 +88,12 @@ def main(argv: list[str] | None = None) -> None:
         help="run on a clean benign baseline (no attacks injected)",
     )
     parser.add_argument(
+        "--pcap",
+        metavar="FILE",
+        help="analyze a real Modbus TCP capture instead of synthetic traffic "
+        "(needs scapy: pip install 'ics-sentinel[pcap]')",
+    )
+    parser.add_argument(
         "--show-traffic",
         action="store_true",
         help="also print the raw frame stream before the report",
@@ -107,22 +117,37 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     if args.output and not args.output.endswith((".md", ".json")):
         parser.error("--output must end in .md or .json")
+    if args.pcap and args.baseline:
+        parser.error("--pcap and --baseline cannot be combined")
 
-    if args.benign:
-        scenarios: list[str] = []
-    elif not args.scenario or "all" in args.scenario:
-        scenarios = list(ATTACK_SCENARIOS)
+    # 1. Traffic — real capture or synthetic
+    if args.pcap:
+        from .pcap import load_pcap
+
+        frames = load_pcap(args.pcap)
+        print(
+            f"[1/5] Loaded {len(frames)} Modbus TCP frame(s) from {args.pcap}",
+            file=sys.stderr,
+        )
     else:
-        scenarios = list(args.scenario)
-
-    # 1. Traffic
-    generator = TrafficGenerator(seed=args.seed)
-    frames = generator.generate_with_scenarios(args.duration, scenarios)
-    print(
-        f"[1/5] Generated {args.duration:g}s of Modbus TCP traffic"
-        + (f" with scenarios: {', '.join(scenarios)}" if scenarios else " (benign)"),
-        file=sys.stderr,
-    )
+        if args.benign:
+            scenarios: list[str] = []
+        elif not args.scenario or "all" in args.scenario:
+            scenarios = list(ATTACK_SCENARIOS)
+        else:
+            scenarios = list(args.scenario)
+        frames = TrafficGenerator(seed=args.seed).generate_with_scenarios(
+            args.duration, scenarios
+        )
+        print(
+            f"[1/5] Generated {args.duration:g}s of Modbus TCP traffic"
+            + (
+                f" with scenarios: {', '.join(scenarios)}"
+                if scenarios
+                else " (benign)"
+            ),
+            file=sys.stderr,
+        )
     if args.show_traffic:
         print_traffic(frames)
     print("      " + traffic_summary(frames).replace("\n", "\n      "), file=sys.stderr)
