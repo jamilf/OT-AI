@@ -35,11 +35,13 @@
     <div class="nav-links">
       <a href="index.html">Home</a>
       <a href="docs.html" class="is-active">Docs &amp; Replicate</a>
+      <a href="learn.html">Learn</a>
       <a href="#about" class="nav-hide-sm">About</a>
       <a class="nav-cta" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </div>
 </nav>
+<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
 <header class="docs-hero">
   <div class="wrap">
@@ -189,100 +191,25 @@
 </section>
 
 <!-- ============================================================
-     DOCUMENTATION
+     DOCUMENTATION → LEARN
      ============================================================ -->
 <section id="documentation" aria-labelledby="docs-title">
   <div class="wrap">
     <p class="section-kicker" data-animate>03 · Documentation</p>
-    <h2 class="section-title" id="docs-title" data-animate style="--d:.08s">How it works, piece by piece.</h2>
-    <p class="section-sub" data-animate style="--d:.16s">Click any topic to expand it.</p>
+    <h2 class="section-title" id="docs-title" data-animate style="--d:.08s">Want the deep dive?</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      The full documentation — and a plain-English glossary that explains every term to someone
+      brand new to OT/AI security — lives on the Learn page.
+    </p>
 
-    <div class="docs-acc">
-      <details data-animate style="--d:.05s">
-        <summary>The 5 detection rules <span class="chip chip-blue">detection</span><span class="chev" aria-hidden="true"></span></summary>
-        <div class="acc-body">
-          <ul>
-            <li><strong>Write-source allowlist</strong> — only <span class="mono">10.0.0.11</span> (the engineering
-              workstation) may write. Any other writer is an unauthorized command message
-              (<span class="mono">T0855</span>).</li>
-            <li><strong>Safe-range check</strong> — the pump setpoint (<span class="mono">40002</span>) must stay in
-              <span class="mono">20–90</span>. A write of <span class="mono">200</span> is flagged even from the authorized
-              host — catching insiders and compromised workstations (<span class="mono">T0836</span>, <span class="mono">T0831</span>).</li>
-            <li><strong>Scan-window rule</strong> — benign polling touches 6 register/unit points; more than
-              <span class="mono">12 distinct points</span> in one window means someone is mapping the plant
-              (<span class="mono">T0846</span>). The demo's scan hits 160 points in ~4 seconds.</li>
-            <li><strong>Structural validation</strong> — every frame is parsed against the Modbus spec; illegal
-              function codes like <span class="mono">0x5A</span> and <span class="mono">0x00</span> never reach the rules behind it
-              (<span class="mono">T0814</span>).</li>
-            <li><strong>Statistical rate baseline</strong> — per-source frame rate vs a
-              <span class="mono">mean + 3σ</span> baseline learned from benign traffic catches the 40×/second
-              replay flood (<span class="mono">T0814</span>, <span class="mono">T0855</span>).</li>
-          </ul>
-          <p><strong>Why is any of this possible?</strong> Standard Modbus/TCP (port
-          <span class="mono">502</span>) predates security: no authentication, no encryption.
-          Modbus/TCP Security (TLS on port <span class="mono">802</span>) exists, but it is rarely
-          deployed in brownfield plants — which is exactly why passive network detection matters.</p>
-        </div>
-      </details>
-
-      <details data-animate style="--d:.1s">
-        <summary>Architecture: the 5-stage pipeline <span class="chip chip-blue">design</span><span class="chev" aria-hidden="true"></span></summary>
-        <div class="acc-body">
-          <p><strong>Traffic → Detection → ATT&amp;CK mapping → AI triage → Report.</strong></p>
-          <p>The default run narrows like a funnel: <span class="mono">387 frames → 10 alerts → 1 Critical
-          incident → 1 executive summary</span>. Each stage is a small, testable module: the simulator
-          emits Modbus TCP frames, the detection engine raises alerts, every alert is tagged with
-          MITRE ATT&amp;CK for ICS techniques, Claude (or the mock) triages each one, and the
-          reporter ranks them Critical-first with a single executive summary across the incident.</p>
-          <p><strong>Monitoring is fully passive.</strong> Sentinel reads a SPAN/TAP-style mirror of
-          the traffic — it never injects a packet, never polls a device, never touches the process.
-          That matters in OT, where an active scanner can crash a fragile PLC.</p>
-          <p>See the <a href="index.html#pipeline">animated pipeline</a> on the showcase page.</p>
-        </div>
-      </details>
-
-      <details data-animate style="--d:.15s">
-        <summary>The simulated plant <span class="chip chip-green">simulation</span><span class="chev" aria-hidden="true"></span></summary>
-        <div class="acc-body">
-          <p>A water-treatment skid with five hosts:</p>
-          <ul>
-            <li><span class="mono">10.0.0.10</span> — <strong>HMI master</strong>: polls every 2s, never writes</li>
-            <li><span class="mono">10.0.0.11</span> — <strong>Engineering workstation</strong>: the only authorized write source</li>
-            <li><span class="mono">10.0.0.20</span> — <strong>PLC-1</strong> (unit 1, intake)</li>
-            <li><span class="mono">10.0.0.21</span> — <strong>PLC-2</strong> (unit 2, storage)</li>
-            <li><span class="mono">10.0.0.66</span> — <strong>Attacker</strong>: a compromised host on the OT segment</li>
-          </ul>
-          <p>Registers: <span class="mono">40001</span> tank level (0–100%), <span class="mono">40002</span> pump setpoint
-          (safe range 20–90), <span class="mono">coil 0</span> pump on/off. Tank levels follow real pump physics
-          (hysteresis control), so the baseline is physically coherent — not random noise.</p>
-        </div>
-      </details>
-
-      <details data-animate style="--d:.2s">
-        <summary>AI triage &amp; the mock fallback <span class="chip chip-blue">[AI] / [MOCK]</span><span class="chev" aria-hidden="true"></span></summary>
-        <div class="acc-body">
-          <p>For every alert, the analyst produces: a severity with justification, a plain-English
-          explanation an operator can act on, an attack narrative, ordered response actions, and a
-          false-positive likelihood. With <span class="mono">ANTHROPIC_API_KEY</span> set, that's
-          <strong>Claude</strong>; without it, a deterministic mock produces the same structure, so the
-          demo never breaks offline.</p>
-          <p><strong>Alert coalescing</strong> keeps the LLM bill sane: the 40×/second replay flood becomes
-          <strong>2 alerts, not 41</strong> — roughly 20× fewer LLM calls.</p>
-        </div>
-      </details>
-
-      <details data-animate style="--d:.25s">
-        <summary>Severity model &amp; proof points <span class="chip chip-red">quality</span><span class="chev" aria-hidden="true"></span></summary>
-        <div class="acc-body">
-          <p>Default-run outcome: <strong>1 Critical · 5 High · 4 Medium · 0 Low</strong>. The Critical is
-          the process-safety violation — the pump setpoint (expressed in %, safe range
-          <span class="mono">20–90</span>) forced to <span class="mono">200</span> — ranked first in the report.</p>
-          <p><strong>0 false positives</strong> on benign traffic, tested across seeds and a 10-minute
-          stream. <strong>75 pytest tests</strong> pin every number, and the whole demo needs
-          <strong>0 dependencies</strong> beyond Python 3.11+.</p>
-        </div>
-      </details>
-    </div>
+    <a class="learn-link-card glow-card" href="learn.html" data-animate style="--d:.2s">
+      <div>
+        <h3>📚 Learn: Documentation &amp; ELI5</h3>
+        <p>The 5 detection rules, the architecture, the simulated plant, AI triage, and the
+        severity model — plus 20+ terms explained like you're five.</p>
+      </div>
+      <span class="btn btn-primary btn-sm">Open the Learn page →</span>
+    </a>
   </div>
 </section>
 

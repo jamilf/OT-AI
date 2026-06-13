@@ -116,12 +116,14 @@
     cursor.className = "triage-cursor";
     cursor.setAttribute("aria-hidden", "true");
 
+    var headerCache = null; // snapshot so replay retypes from the original text
     function typeHeader(line, done) {
       // collect text nodes, empty them, then refill char by char
       var walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
       var nodes = [], node;
       while ((node = walker.nextNode())) nodes.push(node);
-      var fulls = nodes.map(function (n) { return n.nodeValue; });
+      if (!headerCache) headerCache = nodes.map(function (n) { return n.nodeValue; });
+      var fulls = headerCache;
       nodes.forEach(function (n) { n.nodeValue = ""; });
       line.classList.remove("t-hidden");
       line.classList.add("t-shown");
@@ -161,11 +163,33 @@
       next();
     }
 
-    observe([triageCard], function () {
+    function playTriage() {
+      triageCard.classList.remove("crit-flash");
+      lines.forEach(function (line) {
+        line.classList.remove("t-shown", "typed");
+        line.classList.add("t-hidden");
+      });
+      // force reflow so crit-flash can re-trigger
+      void triageCard.offsetWidth;
       typeHeader(lines[0], function () {
         setTimeout(function () { revealLines(1); }, 250);
       });
-    }, 0.45);
+    }
+
+    observe([triageCard], function () { playTriage(); }, 0.45);
+
+    var triageReplay = document.getElementById("triage-replay");
+    if (triageReplay) {
+      triageReplay.addEventListener("click", function () {
+        triageReplay.disabled = true;
+        playTriage();
+        setTimeout(function () { triageReplay.disabled = false; }, 2600);
+      });
+    }
+  } else {
+    // reduced motion: replay button just re-flashes nothing; leave full text visible
+    var triageReplayRM = document.getElementById("triage-replay");
+    if (triageReplayRM) triageReplayRM.style.display = "none";
   }
 
   /* ---------- copy-to-clipboard buttons (docs page) ---------- */
@@ -254,5 +278,177 @@
         });
       }
     }, 0.3);
+  }
+
+  /* ========================================================
+     INTERACTION LAYER
+     ======================================================== */
+
+  /* ---------- scroll progress bar ---------- */
+  var progress = document.getElementById("scroll-progress");
+  if (progress) {
+    var ticking = false;
+    function updateProgress() {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var p = max > 0 ? h.scrollTop / max : 0;
+      progress.style.transform = "scaleX(" + p + ")";
+      ticking = false;
+    }
+    window.addEventListener("scroll", function () {
+      if (!ticking) { requestAnimationFrame(updateProgress); ticking = true; }
+    }, { passive: true });
+    updateProgress();
+  }
+
+  /* ---------- pointer-tracked card glow ---------- */
+  if (!reducedMotion && window.matchMedia("(hover: hover)").matches) {
+    document.addEventListener("pointermove", function (e) {
+      var card = e.target.closest && e.target.closest(".glow-card");
+      if (!card) return;
+      var r = card.getBoundingClientRect();
+      card.style.setProperty("--mx", (e.clientX - r.left) + "px");
+      card.style.setProperty("--my", (e.clientY - r.top) + "px");
+    }, { passive: true });
+  }
+
+  /* ---------- hero parallax glow ---------- */
+  var glow = document.querySelector(".bg-glow");
+  if (glow && !reducedMotion && window.matchMedia("(hover: hover)").matches) {
+    var gx = 0, gy = 0, gTick = false;
+    window.addEventListener("pointermove", function (e) {
+      gx = (e.clientX / window.innerWidth - 0.5) * 40;
+      gy = (e.clientY / window.innerHeight - 0.5) * 40;
+      if (!gTick) {
+        requestAnimationFrame(function () {
+          glow.style.marginLeft = gx + "px";
+          glow.style.marginTop = gy + "px";
+          gTick = false;
+        });
+        gTick = true;
+      }
+    }, { passive: true });
+  }
+
+  /* ---------- interactive plant map ---------- */
+  var simBtn = document.getElementById("sim-attack");
+  var mapWrap = document.querySelector(".plant-map");
+  var toast = document.getElementById("map-toast");
+  if (simBtn && mapWrap) {
+    simBtn.addEventListener("click", function () {
+      mapWrap.classList.remove("attack-now");
+      void mapWrap.offsetWidth; // reflow to restart CSS animations
+      mapWrap.classList.add("attack-now");
+      if (toast) {
+        toast.innerHTML = '<span class="toast-sev">[ALERT]</span> unauthorized write ' +
+          '10.0.0.66 → PLC-2<br>blocked · rule <span class="toast-rule">write-source allowlist</span> · T0855';
+        toast.classList.add("show");
+        clearTimeout(simBtn._t);
+        simBtn._t = setTimeout(function () { toast.classList.remove("show"); }, 4200);
+      }
+    });
+  }
+
+  /* ---------- map node tooltips ---------- */
+  if (mapWrap) {
+    var mapTip = document.createElement("div");
+    mapTip.className = "map-tip";
+    mapTip.setAttribute("role", "tooltip");
+    mapWrap.appendChild(mapTip);
+    function showTip(node) {
+      mapTip.innerHTML = '<span class="tip-name">' + node.getAttribute("data-name") +
+        ' <span class="tip-ip">' + node.getAttribute("data-ip") + '</span></span>' +
+        node.getAttribute("data-fact");
+      var nr = node.getBoundingClientRect();
+      var wr = mapWrap.getBoundingClientRect();
+      mapTip.style.left = Math.max(6, Math.min(nr.left - wr.left, wr.width - 270)) + "px";
+      mapTip.style.top = (nr.bottom - wr.top + 8) + "px";
+      mapTip.classList.add("show");
+    }
+    function hideTip() { mapTip.classList.remove("show"); }
+    $all(".map-node[data-node]", mapWrap).forEach(function (node) {
+      node.addEventListener("mouseenter", function () { showTip(node); });
+      node.addEventListener("mouseleave", hideTip);
+      node.addEventListener("click", function (e) { e.stopPropagation(); showTip(node); });
+      node.setAttribute("tabindex", "0");
+      node.addEventListener("focus", function () { showTip(node); });
+      node.addEventListener("blur", hideTip);
+    });
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest || !e.target.closest(".map-node[data-node]")) hideTip();
+    });
+  }
+
+  /* ---------- funnel card ↔ node linking ---------- */
+  var funnelSvg = document.querySelector("#funnel svg");
+  if (funnelSvg) {
+    var funnelNodes = $all(".funnel-node", funnelSvg);
+    $all(".stage-card[data-stage]").forEach(function (card) {
+      var idx = parseInt(card.getAttribute("data-stage"), 10) - 1;
+      var target = funnelNodes[idx];
+      if (!target) return;
+      card.addEventListener("mouseenter", function () { target.classList.add("hl"); });
+      card.addEventListener("mouseleave", function () { target.classList.remove("hl"); });
+    });
+  }
+
+  /* ---------- donut hover ---------- */
+  var donutCenter = document.querySelector(".donut-center");
+  if (donutCenter) {
+    var centerNum = donutCenter.querySelector("b");
+    var centerLabel = donutCenter.querySelector("span");
+    var defNum = centerNum ? centerNum.textContent : "10";
+    var sevRows = $all(".sev-row[data-sev]");
+    function setCenter(num, label) {
+      if (centerNum) centerNum.textContent = num;
+      if (centerLabel) centerLabel.textContent = label;
+    }
+    $all(".donut-seg[data-sev]").forEach(function (seg) {
+      var sev = seg.getAttribute("data-sev");
+      var row = sevRows.filter(function (r) { return r.getAttribute("data-sev") === sev; })[0];
+      function on() {
+        setCenter(seg.getAttribute("data-count"), seg.getAttribute("data-label"));
+        if (row) row.classList.add("hl");
+      }
+      function off() { setCenter(defNum, "alerts"); if (row) row.classList.remove("hl"); }
+      seg.addEventListener("mouseenter", on);
+      seg.addEventListener("mouseleave", off);
+    });
+  }
+
+  /* ---------- ELI5 glossary filter (learn page) ---------- */
+  var eli5Grid = document.getElementById("eli5-grid");
+  if (eli5Grid) {
+    var searchEl = document.getElementById("eli5-search");
+    var chipsWrap = document.getElementById("eli5-chips");
+    var emptyEl = document.getElementById("eli5-empty");
+    var cards = $all(".eli5-card", eli5Grid);
+    var activeCat = "all";
+
+    function applyFilter() {
+      var q = (searchEl && searchEl.value || "").trim().toLowerCase();
+      var shown = 0;
+      cards.forEach(function (card) {
+        var catOk = activeCat === "all" || card.getAttribute("data-cat") === activeCat;
+        var hay = (card.getAttribute("data-term") + " " + card.textContent).toLowerCase();
+        var textOk = !q || hay.indexOf(q) !== -1;
+        var show = catOk && textOk;
+        card.classList.toggle("hide", !show);
+        if (show) shown++;
+      });
+      if (emptyEl) emptyEl.classList.toggle("show", shown === 0);
+    }
+
+    if (searchEl) searchEl.addEventListener("input", applyFilter);
+    if (chipsWrap) {
+      chipsWrap.addEventListener("click", function (e) {
+        var chip = e.target.closest(".eli5-chip");
+        if (!chip) return;
+        $all(".eli5-chip", chipsWrap).forEach(function (c) { c.classList.remove("active"); });
+        chip.classList.add("active");
+        activeCat = chip.getAttribute("data-cat");
+        applyFilter();
+      });
+    }
   }
 })();

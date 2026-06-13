@@ -43,11 +43,13 @@
     <div class="nav-links">
       <a href="index.html" class="is-active">Home</a>
       <a href="docs.html">Docs &amp; Replicate</a>
+      <a href="learn.html">Learn</a>
       <a href="#about" class="nav-hide-sm">About</a>
       <a class="nav-cta" href="docs.html">Replicate it</a>
     </div>
   </div>
 </nav>
+<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
 <!-- ============================================================
      HERO
@@ -191,31 +193,31 @@
     </div>
 
     <div class="stage-cards">
-      <div class="stage-card" data-animate style="--d:.05s">
+      <div class="stage-card glow-cardNone" data-stage="1" data-animate style="--d:.05s">
         <p class="stage-num">STAGE 01</p>
         <h3>Traffic</h3>
         <p class="stage-stat"><span data-count="387">387</span><small> frames</small></p>
         <p>Synthetic Modbus TCP: an HMI polling 2 PLCs on a water-treatment skid, plus 5 injectable attack scenarios. 387 frames in 60s.</p>
       </div>
-      <div class="stage-card" data-animate style="--d:.15s">
+      <div class="stage-card glow-cardNone" data-stage="2" data-animate style="--d:.15s">
         <p class="stage-num">STAGE 02</p>
         <h3>Detection</h3>
         <p class="stage-stat"><span data-count="10">10</span><small> alerts</small></p>
         <p>Allowlist, safe-range, scan-window, structural validation, mean+3σ rate baseline. 5 rules + statistics.</p>
       </div>
-      <div class="stage-card" data-animate style="--d:.25s">
+      <div class="stage-card glow-cardNone" data-stage="3" data-animate style="--d:.25s">
         <p class="stage-num">STAGE 03</p>
         <h3>ATT&amp;CK Mapping</h3>
         <p class="stage-stat"><span data-count="5">5</span><small> techniques</small></p>
         <p>Each alert tagged with real adversary techniques: <span class="mono">T0855 · T0836 · T0831 · T0846 · T0814</span>.</p>
       </div>
-      <div class="stage-card is-critical" data-animate style="--d:.35s">
+      <div class="stage-card glow-card is-critical" data-stage="4" data-animate style="--d:.35s">
         <p class="stage-num">STAGE 04</p>
         <h3>AI Triage</h3>
         <p class="stage-stat"><span data-count="1">1</span><small> critical</small></p>
         <p>Claude as the analyst: severity + justification, plain-English explanation, attack narrative, ordered response actions, FP likelihood. Mock fallback if no API key.</p>
       </div>
-      <div class="stage-card" data-animate style="--d:.45s">
+      <div class="stage-card glow-cardNone" data-stage="5" data-animate style="--d:.45s">
         <p class="stage-num">STAGE 05</p>
         <h3>Report</h3>
         <p class="stage-stat"><span data-count="1">1</span><small> summary</small></p>
@@ -247,9 +249,15 @@
       coherent — not random noise. Five attack scenarios, five rules that catch them.
     </p>
 
+    <div class="map-toolbar" data-animate style="--d:.05s">
+      <button class="sim-btn" id="sim-attack" type="button">⚡ Simulate attack</button>
+      <span class="map-hint">Watch <span class="mono">10.0.0.66</span> try to reach PLC-2 — and get caught. Hover any node for details.</span>
+    </div>
+
     <div class="plant-grid">
       <!-- network map -->
       <div class="plant-map" data-animate style="--d:.1s">
+        <div class="map-toast" id="map-toast" role="status" aria-live="polite"></div>
         <div id="map-svg">
         <svg viewBox="0 0 1000 620" role="img" aria-label="Network diagram: inside a dashed trust boundary, an HMI master at 10.0.0.10 and an engineering workstation at 10.0.0.11 communicate with PLC-1 at 10.0.0.20 and PLC-2 at 10.0.0.21. An attacker at 10.0.0.66 sits outside the boundary and sends traffic to PLC-2.">
           <defs>
@@ -288,7 +296,9 @@
           </g>
 
           <!-- HMI master -->
-          <g class="map-node" style="--d:.1s">
+          <g class="map-node" style="--d:.1s" data-node
+             data-name="HMI master" data-ip="10.0.0.10"
+             data-fact="The operator's screen. It only reads — polling both PLCs every 2 seconds — so any write claiming to come from here is automatically suspicious.">
             <rect x="80" y="100" width="200" height="86" rx="10" fill="#1a2536" stroke="#24344d" stroke-width="1.5"/>
             <g stroke="#6db3e8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <rect x="100" y="118" width="30" height="20" rx="2"/>
@@ -300,7 +310,9 @@
           </g>
 
           <!-- Engineering workstation -->
-          <g class="map-node" style="--d:.22s">
+          <g class="map-node" style="--d:.22s" data-node
+             data-name="Engineering workstation" data-ip="10.0.0.11"
+             data-fact="The only machine allowed to write to the PLCs — which is exactly why rule #2 still checks the values it sends. A trusted host can still be compromised.">
             <rect x="80" y="280" width="200" height="100" rx="10" fill="#1a2536" stroke="#24344d" stroke-width="1.5"/>
             <g stroke="#6db3e8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <rect x="100" y="298" width="28" height="18" rx="2"/>
@@ -313,7 +325,9 @@
           </g>
 
           <!-- PLC-1 -->
-          <g class="map-node" style="--d:.34s">
+          <g class="map-node" style="--d:.34s" data-node
+             data-name="PLC-1 · intake" data-ip="10.0.0.20"
+             data-fact="The controller running the intake pump. A small ruggedized computer that reads sensors and drives physical equipment — no keyboard, no antivirus, just logic.">
             <rect x="640" y="100" width="200" height="86" rx="10" fill="#1a2536" stroke="#24344d" stroke-width="1.5"/>
             <g stroke="#6db3e8" stroke-width="2" fill="none" stroke-linecap="round">
               <rect x="658" y="116" width="26" height="34" rx="2"/>
@@ -330,7 +344,9 @@
           </g>
 
           <!-- PLC-2 -->
-          <g class="map-node" style="--d:.46s">
+          <g class="map-node" style="--d:.46s" data-node
+             data-name="PLC-2 · storage" data-ip="10.0.0.21"
+             data-fact="Controls the storage tank and its pump (register 40002, safe 20–90). This is the target of the Critical incident — a setpoint of 200 could overflow the tank.">
             <rect x="640" y="270" width="200" height="110" rx="10" fill="#1a2536" stroke="#24344d" stroke-width="1.5"/>
             <g stroke="#6db3e8" stroke-width="2" fill="none" stroke-linecap="round">
               <rect x="658" y="288" width="26" height="34" rx="2"/>
@@ -355,7 +371,9 @@
           </g>
 
           <!-- attacker (outside the boundary) -->
-          <g class="map-node" style="--d:.75s">
+          <g class="map-node" style="--d:.75s" data-node
+             data-name="Attacker" data-ip="10.0.0.66"
+             data-fact="A compromised host sitting inside the OT network but outside the trust boundary. It has no business writing to a PLC — every packet it sends is hostile.">
             <circle class="attacker-glow" cx="180" cy="551" r="64" fill="rgba(214,69,65,0.18)"/>
             <rect x="80" y="512" width="200" height="78" rx="10" fill="#1f1620" stroke="#D64541" stroke-width="1.8"/>
             <g>
@@ -381,65 +399,65 @@
         <div class="matchup-list">
 
           <div class="matchup-row" style="--d:.05s">
-            <div class="mu-cell mu-attack">
+            <div class="mu-cell mu-attack glow-card">
               <h4>Unauthorized write</h4>
               <p>Normal-looking commands… from the wrong host.</p>
               <div class="chips"><span class="chip chip-attack" title="T0855 — Unauthorized Command Message (MITRE ATT&amp;CK for ICS)">T0855</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect">
+            <div class="mu-cell mu-detect glow-card">
               <h4>Write-source allowlist</h4>
               <p>Only <span class="mono">10.0.0.11</span> may write. Anyone else trips the wire.</p>
             </div>
           </div>
 
           <div class="matchup-row" style="--d:.15s">
-            <div class="mu-cell mu-attack">
+            <div class="mu-cell mu-attack glow-card">
               <h4>Dangerous setpoint</h4>
               <p>Pump setpoint forced to <strong>200%</strong> — from the <em>authorized</em> workstation (insider / compromised).</p>
               <div class="chips"><span class="chip chip-attack" title="T0836 — Modify Parameter (MITRE ATT&amp;CK for ICS)">T0836</span><span class="chip chip-attack" title="T0831 — Manipulation of Control (MITRE ATT&amp;CK for ICS)">T0831</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect">
+            <div class="mu-cell mu-detect glow-card">
               <h4>Safe-range check</h4>
               <p>Setpoint <span class="mono">40002</span> must stay within <span class="mono">20–90</span>. Value, not just source.</p>
             </div>
           </div>
 
           <div class="matchup-row" style="--d:.25s">
-            <div class="mu-cell mu-attack">
+            <div class="mu-cell mu-attack glow-card">
               <h4>Recon scan</h4>
               <p><strong>160</strong> register/unit probes in ~4 seconds (benign polling touches 6 points).</p>
               <div class="chips"><span class="chip chip-attack" title="T0846 — Remote System Discovery (MITRE ATT&amp;CK for ICS)">T0846</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect">
+            <div class="mu-cell mu-detect glow-card">
               <h4>Distinct-points window</h4>
               <p>More than <span class="mono">12</span> distinct points in one window means someone is mapping the plant.</p>
             </div>
           </div>
 
           <div class="matchup-row" style="--d:.35s">
-            <div class="mu-cell mu-attack">
+            <div class="mu-cell mu-attack glow-card">
               <h4>Malformed frames</h4>
               <p>Illegal function codes (<span class="mono">0x5A</span>, <span class="mono">0x00</span>), corrupt payloads.</p>
               <div class="chips"><span class="chip chip-attack" title="T0814 — Denial of Service (MITRE ATT&amp;CK for ICS)">T0814</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect">
+            <div class="mu-cell mu-detect glow-card">
               <h4>Structural validation</h4>
               <p>Every frame parsed against the Modbus spec. Garbage never reaches the rules behind it.</p>
             </div>
           </div>
 
           <div class="matchup-row" style="--d:.45s">
-            <div class="mu-cell mu-attack">
+            <div class="mu-cell mu-attack glow-card">
               <h4>Replay flood</h4>
               <p>One captured command replayed <strong>40×/second</strong>, byte-identical.</p>
               <div class="chips"><span class="chip chip-attack" title="T0814 — Denial of Service (MITRE ATT&amp;CK for ICS)">T0814</span><span class="chip chip-attack" title="T0855 — Unauthorized Command Message (MITRE ATT&amp;CK for ICS)">T0855</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
-            <div class="mu-cell mu-detect">
+            <div class="mu-cell mu-detect glow-card">
               <h4>Statistical rate baseline</h4>
               <p>Per-source frame rate vs <span class="mono">mean + 3σ</span> learned from benign traffic.</p>
             </div>
@@ -454,13 +472,13 @@
       <div class="donut-wrap">
         <svg viewBox="0 0 200 200" role="img" aria-label="Severity outcome donut chart: 1 critical, 5 high, 4 medium, 0 low — 10 alerts total.">
           <circle cx="100" cy="100" r="80" fill="none" stroke="#1c2a40" stroke-width="26"/>
-          <circle class="donut-seg sev-glow" cx="100" cy="100" r="80" stroke="#D64541" stroke-width="26"
+          <circle class="donut-seg sev-glow" data-sev="0" data-label="Critical" data-count="1" cx="100" cy="100" r="80" stroke="#D64541" stroke-width="26"
                   stroke-dasharray="46.3 502.65" stroke-dashoffset="46.3"
                   transform="rotate(-90 100 100)" style="--d:.1s"/>
-          <circle class="donut-seg" cx="100" cy="100" r="80" stroke="#F5A623" stroke-width="26"
+          <circle class="donut-seg" data-sev="1" data-label="High" data-count="5" cx="100" cy="100" r="80" stroke="#F5A623" stroke-width="26"
                   stroke-dasharray="247.3 502.65" stroke-dashoffset="247.3"
                   transform="rotate(-54 100 100)" style="--d:.45s"/>
-          <circle class="donut-seg" cx="100" cy="100" r="80" stroke="#2C82C9" stroke-width="26"
+          <circle class="donut-seg" data-sev="2" data-label="Medium" data-count="4" cx="100" cy="100" r="80" stroke="#2C82C9" stroke-width="26"
                   stroke-dasharray="197.1 502.65" stroke-dashoffset="197.1"
                   transform="rotate(126 100 100)" style="--d:.8s"/>
         </svg>
@@ -470,25 +488,25 @@
         </div>
       </div>
       <div class="sev-legend">
-        <div class="sev-row">
+        <div class="sev-row" data-sev="0">
           <span class="dot" style="background:#D64541"></span>
           <span>Critical</span>
           <span class="bar-track"><span class="bar" style="width:20%; background:#D64541; --d:.15s"></span></span>
           <span class="count" data-count="1">1</span>
         </div>
-        <div class="sev-row">
+        <div class="sev-row" data-sev="1">
           <span class="dot" style="background:#F5A623"></span>
           <span>High</span>
           <span class="bar-track"><span class="bar" style="width:100%; background:#F5A623; --d:.3s"></span></span>
           <span class="count" data-count="5">5</span>
         </div>
-        <div class="sev-row">
+        <div class="sev-row" data-sev="2">
           <span class="dot" style="background:#2C82C9"></span>
           <span>Medium</span>
           <span class="bar-track"><span class="bar" style="width:80%; background:#2C82C9; --d:.45s"></span></span>
           <span class="count" data-count="4">4</span>
         </div>
-        <div class="sev-row">
+        <div class="sev-row" data-sev="3">
           <span class="dot" style="background:#2ECC71"></span>
           <span>Low</span>
           <span class="bar-track"><span class="bar" style="width:4px; background:#2ECC71; --d:.6s"></span></span>
@@ -519,6 +537,7 @@
         <span class="mode-badges">
           <span class="chip chip-blue badge-ai">[AI] Claude</span>
           <span class="chip chip-dim">[MOCK] fallback</span>
+          <button class="replay-btn" id="triage-replay" type="button">↻ replay</button>
         </span>
       </div>
       <div class="panel-body" id="triage-body">
@@ -553,23 +572,23 @@
     <h2 class="section-title" id="proof-title" data-animate style="--d:.08s">Quiet on benign. Loud on attacks.</h2>
 
     <div class="stat-strip" id="stats">
-      <div class="stat-card" data-animate style="--d:.05s">
+      <div class="stat-card glow-card" data-animate style="--d:.05s">
         <p class="big"><span data-count="0">0</span></p>
         <p class="label">false positives on benign traffic — tested across seeds and a 10-minute stream</p>
       </div>
-      <div class="stat-card" data-animate style="--d:.13s">
+      <div class="stat-card glow-card" data-animate style="--d:.13s">
         <p class="big"><span class="unit">40× → </span><span data-count="2">2</span></p>
         <p class="label">replay flood coalesced into 2 alerts, not 41 — ~20× fewer LLM calls</p>
       </div>
-      <div class="stat-card" data-animate style="--d:.21s">
+      <div class="stat-card glow-card" data-animate style="--d:.21s">
         <p class="big"><span data-count="75">75</span></p>
         <p class="label">pytest tests verifying every number on this page</p>
       </div>
-      <div class="stat-card" data-animate style="--d:.29s">
+      <div class="stat-card glow-card" data-animate style="--d:.29s">
         <p class="big"><span data-count="0">0</span></p>
         <p class="label">dependencies to run the demo — Python 3.11+ stdlib; <span class="mono">rich</span> + <span class="mono">anthropic</span> optional</p>
       </div>
-      <div class="stat-card" data-animate style="--d:.37s">
+      <div class="stat-card glow-card" data-animate style="--d:.37s">
         <p class="big"><span data-count="1">1</span></p>
         <p class="label">command<br><span class="mono">python -m ics_sentinel.demo</span></p>
       </div>
