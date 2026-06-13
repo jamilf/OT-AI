@@ -1,8 +1,8 @@
 """One-command end-to-end demo: ``python -m ics_sentinel.demo`` (or ``make demo``).
 
 Pipeline: generate traffic (benign + attack scenarios) → detect → map to
-MITRE ATT&CK for ICS → AI triage (Claude, or deterministic [MOCK] fallback)
-→ ranked incident report.
+MITRE ATT&CK for ICS → correlate into incidents → AI triage (Claude, or
+deterministic [MOCK] fallback) → ranked incident report.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from collections import Counter
 
 from . import attack_map, config, report
 from .detection import DetectionEngine, learn_baseline
+from .incidents import correlate
 from .generator import ATTACK_SCENARIOS, TrafficGenerator
 from .modbus import BENIGN_LABEL, ModbusFrame
 from .triage import Triager
@@ -118,7 +119,7 @@ def main(argv: list[str] | None = None) -> None:
     generator = TrafficGenerator(seed=args.seed)
     frames = generator.generate_with_scenarios(args.duration, scenarios)
     print(
-        f"[1/4] Generated {args.duration:g}s of Modbus TCP traffic"
+        f"[1/5] Generated {args.duration:g}s of Modbus TCP traffic"
         + (f" with scenarios: {', '.join(scenarios)}" if scenarios else " (benign)"),
         file=sys.stderr,
     )
@@ -140,34 +141,41 @@ def main(argv: list[str] | None = None) -> None:
         learned = ""
     alerts = engine.analyze(frames)
     print(
-        f"[2/4] Detection engine raised {len(alerts)} alert(s){learned}",
+        f"[2/5] Detection engine raised {len(alerts)} alert(s){learned}",
         file=sys.stderr,
     )
 
-    # 3. ATT&CK mapping
+    # 3. ATT&CK mapping + incident correlation
     alerts = attack_map.enrich(alerts)
     technique_ids = sorted({t.technique_id for a in alerts for t in a.techniques})
+    incidents = correlate(alerts)
     print(
-        f"[3/4] Mapped to MITRE ATT&CK for ICS: {', '.join(technique_ids) or '—'}",
+        f"[3/5] Mapped to MITRE ATT&CK for ICS: {', '.join(technique_ids) or '—'}",
+        file=sys.stderr,
+    )
+    print(
+        f"[4/5] Correlated into {len(incidents)} incident(s) "
+        f"({len(alerts)} alerts → {len(incidents)} triage calls)",
         file=sys.stderr,
     )
 
     # 4. Triage + report
     triager = Triager()
-    print(
-        f"[4/4] Triage mode: {triager.mode}"
-        + ("" if triager.mode == "AI" else "  (set ANTHROPIC_API_KEY for AI triage)"),
-        file=sys.stderr,
+    results = triager.triage_incidents(incidents)
+    summary = triager.executive_summary(incidents, results)
+    tokens = (
+        f" — {triager.input_tokens} in / {triager.output_tokens} out tokens"
+        if triager.mode == "AI"
+        else "  (set ANTHROPIC_API_KEY for AI triage)"
     )
-    results = triager.triage_all(alerts)
-    summary = triager.executive_summary(alerts, results)
+    print(f"[5/5] Triage mode: {triager.mode}{tokens}", file=sys.stderr)
     print(file=sys.stderr)
-    report.render(alerts, results, summary, triager.mode, force_plain=args.plain)
+    report.render(incidents, results, summary, triager.mode, force_plain=args.plain)
 
     if args.output:
         exporter = report.to_json if args.output.endswith(".json") else report.to_markdown
         with open(args.output, "w", encoding="utf-8") as fh:
-            fh.write(exporter(alerts, results, summary, triager.mode) + "\n")
+            fh.write(exporter(incidents, results, summary, triager.mode) + "\n")
         print(f"Report written to {args.output}", file=sys.stderr)
 
 

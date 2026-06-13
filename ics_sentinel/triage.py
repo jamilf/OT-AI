@@ -1,21 +1,24 @@
 """AI triage layer: Claude as the SOC analyst, with a deterministic fallback.
 
-Each alert (plus its ATT&CK context and the plant's process context) is sent
-to Claude, which returns a structured triage: severity with justification, a
-plain-English explanation for a plant operator, an attack narrative,
-validated ATT&CK techniques, ordered response actions, and a false-positive
-assessment. One additional call produces an incident-level executive summary.
+Triage operates on **incidents** (correlated alert groups — see
+:mod:`ics_sentinel.incidents`): each incident, with its member alerts,
+ATT&CK context, and the plant's process context, goes to Claude in one call
+for a structured verdict — severity with justification, a plain-English
+explanation for a plant operator, an attack narrative, validated ATT&CK
+techniques, ordered response actions, and a false-positive assessment. One
+additional call produces an incident-level executive summary.
 
 When ``ANTHROPIC_API_KEY`` is absent (or the ``anthropic`` package isn't
 installed, or the API errors out), the triager falls back to deterministic
-templated triage so the demo always runs end-to-end. Every result carries a
-``mode`` of ``AI`` or ``MOCK`` and the report labels it prominently.
+templated triage so the demo always runs. Every result carries a ``mode``
+of ``AI`` or ``MOCK`` and the report labels it prominently.
 
-Claude is prompted to return only JSON and the response is parsed
-defensively (code fences stripped, braces located, one retry on malformed
-output) rather than relying on newer SDK-side schema enforcement — this
-keeps the module working against any installed ``anthropic`` version, and
-the mock path is the final safety net either way.
+Robustness layers for the AI path, outermost first: schema-enforced
+structured outputs (``output_config.format``) where the installed SDK/model
+supports it, falling back to prompt-instructed JSON; defensive parsing
+(fences stripped, braces located); one format-reminder retry; and finally
+the mock template. The triager also accumulates token usage across calls
+for the demo's cost line.
 """
 
 from __future__ import annotations
@@ -35,6 +38,7 @@ from .detection import (
     RULE_UNAUTHORIZED_WRITE,
     Alert,
 )
+from .incidents import Incident
 
 SEVERITIES = ("Critical", "High", "Medium", "Low")
 
@@ -46,9 +50,9 @@ _SEVERITY_RANK = {sev: i for i, sev in enumerate(SEVERITIES)}
 
 @dataclass(frozen=True, slots=True)
 class TriageResult:
-    """Structured triage verdict for one alert."""
+    """Structured triage verdict for one incident."""
 
-    alert_id: str
+    subject_id: str  # incident id (or alert id for incident-of-one triage)
     severity: str
     severity_justification: str
     plain_english_explanation: str
@@ -68,6 +72,19 @@ class TriageResult:
 # ---------------------------------------------------------------------------
 # Defensive JSON parsing
 # ---------------------------------------------------------------------------
+
+
+def _is_schema_rejection(exc: Exception) -> bool:
+    """True if an exception means 'this SDK/model won't take output_config'.
+
+    Covers the older-SDK case (``TypeError`` on an unknown kwarg) and the
+    API-level rejection (a ``BadRequestError``/400, matched by name so the
+    ``anthropic`` package need not be importable in mock/test environments).
+    """
+    if isinstance(exc, TypeError):
+        return True
+    name = type(exc).__name__
+    return "BadRequest" in name or getattr(exc, "status_code", None) == 400
 
 
 def extract_json(text: str) -> dict:
@@ -100,10 +117,10 @@ def _str_tuple(raw: object) -> tuple[str, ...]:
     return ()
 
 
-def result_from_payload(alert_id: str, payload: dict, mode: str) -> TriageResult:
+def result_from_payload(subject_id: str, payload: dict, mode: str) -> TriageResult:
     """Build a TriageResult from parsed model JSON, validating severity."""
     return TriageResult(
-        alert_id=alert_id,
+        subject_id=subject_id,
         severity=_normalize_severity(payload["severity"]),
         severity_justification=str(payload.get("severity_justification", "")),
         plain_english_explanation=str(payload.get("plain_english_explanation", "")),
@@ -118,6 +135,39 @@ def result_from_payload(alert_id: str, payload: dict, mode: str) -> TriageResult
         false_positive_reasoning=str(payload.get("false_positive_reasoning", "")),
         mode=mode,
     )
+
+
+#: JSON schema for structured outputs (schema-enforced where supported).
+TRIAGE_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "severity": {"type": "string", "enum": list(SEVERITIES)},
+        "severity_justification": {"type": "string"},
+        "plain_english_explanation": {"type": "string"},
+        "attack_narrative": {"type": "string"},
+        "confirmed_attack_techniques": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+        "recommended_actions": {"type": "array", "items": {"type": "string"}},
+        "false_positive_likelihood": {
+            "type": "string",
+            "enum": ["Low", "Medium", "High"],
+        },
+        "false_positive_reasoning": {"type": "string"},
+    },
+    "required": [
+        "severity",
+        "severity_justification",
+        "plain_english_explanation",
+        "attack_narrative",
+        "confirmed_attack_techniques",
+        "recommended_actions",
+        "false_positive_likelihood",
+        "false_positive_reasoning",
+    ],
+    "additionalProperties": False,
+}
 
 
 # ---------------------------------------------------------------------------
@@ -138,22 +188,24 @@ with no authentication — any host on the network can command a PLC).
 Driving the tank past its limits causes overflow or pump damage — a physical
 safety incident, not just an IT incident."""
 
-SYSTEM_PROMPT = f"""You are a senior OT/ICS security analyst triaging alerts \
-from a passive Modbus TCP monitoring system.
+SYSTEM_PROMPT = f"""You are a senior OT/ICS security analyst triaging \
+incidents from a passive Modbus TCP monitoring system. An incident groups one
+or more related alerts attributed to a single source host.
 
 {PROCESS_CONTEXT}
 
-For each alert you receive, respond with ONLY a single JSON object (no markdown
-fences, no prose before or after) with exactly these fields:
-- "severity": one of "Critical", "High", "Medium", "Low"
+For each incident you receive, respond with ONLY a single JSON object (no
+markdown fences, no prose before or after) with exactly these fields:
+- "severity": one of "Critical", "High", "Medium", "Low" — for the incident
+  as a whole (its most dangerous element drives it)
 - "severity_justification": 1-2 sentences
-- "plain_english_explanation": what happened, in terms a plant operator with no
-  security background understands
-- "attack_narrative": how this fits an attacker's likely objective and where it
-  sits in a plausible kill chain
+- "plain_english_explanation": what happened across the incident, in terms a
+  plant operator with no security background understands
+- "attack_narrative": how the member alerts fit together as stages of the
+  attacker's likely campaign
 - "confirmed_attack_techniques": array of strings, each "<ID>: <one-line
   reasoning>", validating (or rejecting) the candidate MITRE ATT&CK for ICS
-  techniques attached to the alert
+  techniques attached to the alerts
 - "recommended_actions": array of concrete, ordered response steps an OT team
   can execute (most urgent first)
 - "false_positive_likelihood": one of "Low", "Medium", "High"
@@ -163,7 +215,7 @@ Severity should reflect physical-process impact first, classic CIA second."""
 
 
 def alert_payload(alert: Alert) -> dict:
-    """The alert as compact JSON for the model (and for tests)."""
+    """One alert as compact JSON for the model (and for tests/exports)."""
     frame = alert.raw_frame
     return {
         "alert_id": alert.id,
@@ -180,6 +232,15 @@ def alert_payload(alert: Alert) -> dict:
         "occurrences": alert.count,
         "description": alert.description,
         "candidate_attack_techniques": [str(t) for t in alert.techniques],
+    }
+
+
+def incident_payload(incident: Incident) -> dict:
+    return {
+        "incident_id": incident.id,
+        "source_ip": incident.src_ip,
+        "alert_count": len(incident.alerts),
+        "alerts": [alert_payload(a) for a in incident.alerts],
     }
 
 
@@ -242,23 +303,6 @@ _MOCK_PROFILES: dict[str, tuple[str, str, str, str, tuple[str, ...]]] = {
             "follow-up",
         ),
     ),
-    RULE_SCAN: (
-        "Medium",
-        "Medium",
-        "Host {src} rapidly read {count_points} across the PLCs, including "
-        "addresses and unit IDs that do not exist — like someone rattling "
-        "every door handle in the plant.",
-        "Enumeration is the staging step: the attacker is mapping registers "
-        "and devices to plan a later, targeted manipulation. Expect "
-        "follow-on writes if not contained.",
-        (
-            "Identify and isolate the scanning host {src}",
-            "Cross-reference with asset inventory — is this an authorized "
-            "scanner?",
-            "Raise monitoring sensitivity for write commands in the next "
-            "24-48h",
-        ),
-    ),
     RULE_SPOOF: (
         "High",
         "Low",
@@ -279,6 +323,23 @@ _MOCK_PROFILES: dict[str, tuple[str, str, str, str, tuple[str, ...]]] = {
             "covering",
         ),
     ),
+    RULE_SCAN: (
+        "Medium",
+        "Medium",
+        "Host {src} rapidly read {count_points} across the PLCs, including "
+        "addresses and unit IDs that do not exist — like someone rattling "
+        "every door handle in the plant.",
+        "Enumeration is the staging step: the attacker is mapping registers "
+        "and devices to plan a later, targeted manipulation. Expect "
+        "follow-on writes if not contained.",
+        (
+            "Identify and isolate the scanning host {src}",
+            "Cross-reference with asset inventory — is this an authorized "
+            "scanner?",
+            "Raise monitoring sensitivity for write commands in the next "
+            "24-48h",
+        ),
+    ),
     RULE_MALFORMED: (
         "Medium",
         "Medium",
@@ -296,9 +357,8 @@ _MOCK_PROFILES: dict[str, tuple[str, str, str, str, tuple[str, ...]]] = {
 }
 
 
-def _mock_triage(alert: Alert) -> TriageResult:
-    severity, fp, explanation, narrative, actions = _MOCK_PROFILES[alert.rule_id]
-    fields = {
+def _profile_fields(alert: Alert) -> dict:
+    return {
         "src": alert.src_ip,
         "dst": alert.dst_ip,
         "function": alert.raw_frame.function_name,
@@ -306,20 +366,63 @@ def _mock_triage(alert: Alert) -> TriageResult:
         "count": alert.count,
         "count_points": f"{alert.count if alert.count > 1 else 'many'} points",
     }
+
+
+def _mock_rank(alert: Alert) -> int:
+    return _SEVERITY_RANK[_MOCK_PROFILES[alert.rule_id][0]]
+
+
+def _mock_incident_triage(incident: Incident) -> TriageResult:
+    """Deterministic incident verdict: lead with the most severe member."""
+    lead = min(incident.alerts, key=lambda a: (_mock_rank(a), a.timestamp))
+    severity, fp, explanation, narrative, _ = _MOCK_PROFILES[lead.rule_id]
+    fields = _profile_fields(lead)
+
+    explanation = explanation.format(**fields)
+    narrative = narrative.format(**fields)
+    if len(incident.alerts) > 1:
+        rule_names = ", ".join(
+            a.rule_name for a in incident.alerts if a.rule_id != lead.rule_id
+        )
+        explanation = (
+            f"{len(incident.alerts)} related alerts from {incident.src_ip}. "
+            f"Most severe: {explanation}"
+        )
+        if rule_names:
+            narrative += (
+                f" Combined with the other activity from this source "
+                f"({rule_names}), this reads as a multi-stage intrusion "
+                "rather than isolated events."
+            )
+
+    # Merge actions across the incident's distinct rules, most severe first.
+    actions: dict[str, None] = {}
+    seen_rules: set[str] = set()
+    for alert in sorted(incident.alerts, key=_mock_rank):
+        if alert.rule_id in seen_rules:
+            continue
+        seen_rules.add(alert.rule_id)
+        for action in _MOCK_PROFILES[alert.rule_id][4]:
+            actions.setdefault(action.format(**_profile_fields(alert)), None)
+    techniques: dict[str, None] = {}
+    for alert in incident.alerts:
+        for t in alert.techniques:
+            techniques.setdefault(
+                f"{t.technique_id}: mapped from rule {alert.rule_id} ({t.name})",
+                None,
+            )
+
     return TriageResult(
-        alert_id=alert.id,
+        subject_id=incident.id,
         severity=severity,
         severity_justification=(
-            f"Deterministic template severity for rule {alert.rule_id} "
+            f"Deterministic template severity led by rule {lead.rule_id} "
             "(no API key — heuristic, not model-reasoned)."
         ),
-        plain_english_explanation=explanation.format(**fields),
-        attack_narrative=narrative.format(**fields),
-        confirmed_attack_techniques=tuple(
-            f"{t.technique_id}: mapped from rule {alert.rule_id} ({t.name})"
-            for t in alert.techniques
-        ),
-        recommended_actions=tuple(a.format(**fields) for a in actions),
+        plain_english_explanation=explanation,
+        attack_narrative=narrative,
+        confirmed_attack_techniques=tuple(techniques),
+        recommended_actions=tuple(list(actions)[:6]),
         false_positive_likelihood=fp,
         false_positive_reasoning=(
             "Template assessment based on rule type; benign traffic does not "
@@ -329,18 +432,16 @@ def _mock_triage(alert: Alert) -> TriageResult:
     )
 
 
-def _mock_summary(alerts: list[Alert], results: list[TriageResult]) -> str:
+def _mock_summary(incidents: list[Incident], results: list[TriageResult]) -> str:
+    alerts = [a for i in incidents for a in i.alerts]
     by_sev: dict[str, int] = {}
     for r in results:
         by_sev[r.severity] = by_sev.get(r.severity, 0) + 1
-    sev_part = ", ".join(
-        f"{by_sev[s]} {s}" for s in SEVERITIES if by_sev.get(s)
-    )
-    sources = sorted({a.src_ip for a in alerts})
-    rules = sorted({a.rule_id for a in alerts})
+    sev_part = ", ".join(f"{by_sev[s]} {s}" for s in SEVERITIES if by_sev.get(s))
+    sources = sorted({i.src_ip for i in incidents})
     story = (
-        f"{len(alerts)} alert(s) ({sev_part}) across rules {', '.join(rules)}, "
-        f"originating from {', '.join(sources)}."
+        f"{len(incidents)} incident(s) ({sev_part}) comprising "
+        f"{len(alerts)} alert(s), from {', '.join(sources)}."
     )
     if config.ATTACKER_IP in sources:
         story += (
@@ -359,10 +460,12 @@ def _mock_summary(alerts: list[Alert], results: list[TriageResult]) -> str:
 
 
 class Triager:
-    """Triage alerts with Claude when possible, mock templates otherwise."""
+    """Triage incidents with Claude when possible, mock templates otherwise."""
 
     def __init__(self, model: str | None = None) -> None:
         self.model = model or os.environ.get("ICS_SENTINEL_MODEL", DEFAULT_MODEL)
+        self.input_tokens = 0
+        self.output_tokens = 0
         self._client = None
         if os.environ.get("ANTHROPIC_API_KEY"):
             try:
@@ -376,70 +479,115 @@ class Triager:
     def mode(self) -> str:
         return "AI" if self._client is not None else "MOCK"
 
-    def triage(self, alert: Alert) -> TriageResult:
+    def triage_incident(self, incident: Incident) -> TriageResult:
         if self._client is None:
-            return _mock_triage(alert)
+            return _mock_incident_triage(incident)
         try:
-            return self._ai_triage(alert)
+            return self._ai_triage(incident)
         except Exception:
             # Whatever the API does, the demo must not break.
-            return _mock_triage(alert)
+            return _mock_incident_triage(incident)
 
-    def triage_all(self, alerts: list[Alert]) -> list[TriageResult]:
-        return [self.triage(alert) for alert in alerts]
+    def triage_incidents(self, incidents: list[Incident]) -> list[TriageResult]:
+        return [self.triage_incident(incident) for incident in incidents]
+
+    def triage(self, alert: Alert) -> TriageResult:
+        """Convenience: triage a single alert as an incident-of-one."""
+        return self.triage_incident(
+            Incident(id=alert.id, src_ip=alert.src_ip, alerts=(alert,))
+        )
 
     def executive_summary(
-        self, alerts: list[Alert], results: list[TriageResult]
+        self, incidents: list[Incident], results: list[TriageResult]
     ) -> str:
-        if not alerts:
+        if not incidents:
             return "No alerts — traffic consistent with the benign baseline."
         if self._client is None:
-            return _mock_summary(alerts, results)
+            return _mock_summary(incidents, results)
         try:
-            return self._ai_summary(alerts, results)
+            return self._ai_summary(incidents, results)
         except Exception:
-            return _mock_summary(alerts, results)
+            return _mock_summary(incidents, results)
 
     # -- AI paths -------------------------------------------------------
 
-    def _ask(self, system: str, user: str, max_tokens: int = 2000) -> str:
-        response = self._client.messages.create(
+    def _ask(
+        self,
+        system: str,
+        user: str,
+        max_tokens: int = 2000,
+        schema: dict | None = None,
+    ) -> str:
+        """One model call. Tries schema-enforced structured output first;
+        falls back to plain prompting on SDKs/models that don't support it."""
+        base = dict(
             model=self.model,
             max_tokens=max_tokens,
             system=system,
             messages=[{"role": "user", "content": user}],
         )
+        if schema is not None:
+            try:
+                response = self._client.messages.create(
+                    **base,
+                    output_config={
+                        "format": {"type": "json_schema", "schema": schema}
+                    },
+                )
+            except Exception as exc:
+                # Older SDK (TypeError on the kwarg) or a model/endpoint that
+                # rejects structured outputs (400) → retry plain-prompted.
+                if not _is_schema_rejection(exc):
+                    raise
+                response = self._client.messages.create(**base)
+        else:
+            response = self._client.messages.create(**base)
+        usage = getattr(response, "usage", None)
+        if usage is not None:
+            self.input_tokens += getattr(usage, "input_tokens", 0) or 0
+            self.output_tokens += getattr(usage, "output_tokens", 0) or 0
         return "".join(
             block.text for block in response.content if block.type == "text"
         )
 
-    def _ai_triage(self, alert: Alert) -> TriageResult:
-        prompt = "Triage this alert:\n" + json.dumps(alert_payload(alert), indent=2)
-        text = self._ask(SYSTEM_PROMPT, prompt)
+    def _ai_triage(self, incident: Incident) -> TriageResult:
+        prompt = "Triage this incident:\n" + json.dumps(
+            incident_payload(incident), indent=2
+        )
+        text = self._ask(SYSTEM_PROMPT, prompt, schema=TRIAGE_SCHEMA)
         try:
             payload = extract_json(text)
-            return result_from_payload(alert.id, payload, mode="AI")
+            return result_from_payload(incident.id, payload, mode="AI")
         except (ValueError, KeyError, json.JSONDecodeError):
             # One retry with an explicit format reminder, then give up to mock.
             text = self._ask(
                 SYSTEM_PROMPT,
                 prompt + "\n\nReturn ONLY the JSON object — no other text.",
+                schema=TRIAGE_SCHEMA,
             )
             payload = extract_json(text)
-            return result_from_payload(alert.id, payload, mode="AI")
+            return result_from_payload(incident.id, payload, mode="AI")
 
-    def _ai_summary(self, alerts: list[Alert], results: list[TriageResult]) -> str:
-        lines = [
-            f"- {r.alert_id} [{r.severity}] {a.rule_name}: "
-            f"{a.src_ip} -> {a.dst_ip} ({a.count}x) — {a.description}"
-            for a, r in zip(alerts, results)
-        ]
+    def _ai_summary(
+        self, incidents: list[Incident], results: list[TriageResult]
+    ) -> str:
+        lines = []
+        for incident, result in zip(incidents, results):
+            lines.append(
+                f"- {incident.id} [{result.severity}] from {incident.src_ip}, "
+                f"{len(incident.alerts)} alert(s):"
+            )
+            lines += [
+                f"    - {a.id} {a.rule_name} -> {a.dst_ip} ({a.count}x): "
+                f"{a.description}"
+                for a in incident.alerts
+            ]
         prompt = (
-            "Here are all triaged alerts from one monitoring window:\n"
+            "Here are all triaged incidents from one monitoring window:\n"
             + "\n".join(lines)
             + "\n\nWrite a 1-2 paragraph executive incident summary for plant "
-            "management: group related alerts into a coherent incident story, "
-            "name the most urgent risk, and state the single most important "
-            "next action. Plain prose, no JSON, no headers."
+            "management: tell the incident story, name the most urgent risk, "
+            "and state the single most important next action. Plain prose, "
+            "no JSON, no headers."
         )
         return self._ask(SYSTEM_PROMPT, prompt, max_tokens=1500).strip()

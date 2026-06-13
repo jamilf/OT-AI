@@ -1,11 +1,12 @@
-"""Analyst report rendering and export.
+"""Analyst report rendering and export (incident-level).
 
-Renders triaged incidents ranked Critical-first. Uses ``rich`` for an
-attractive terminal report when available; falls back to a plain-text
-renderer (also reachable via ``force_plain=True`` / the demo's ``--plain``)
-so the zero-dependency demo still produces a readable report. Exporters
-produce the same ranked content as Markdown or SIEM-shaped JSON.
-The AI-vs-MOCK triage mode is labeled prominently everywhere.
+Renders triaged incidents ranked Critical-first, each with its member
+alerts. Uses ``rich`` for an attractive terminal report when available;
+falls back to a plain-text renderer (also reachable via ``force_plain=True``
+/ the demo's ``--plain``) so the zero-dependency demo still produces a
+readable report. Exporters produce the same ranked content as Markdown or
+SIEM-shaped JSON. The AI-vs-MOCK triage mode is labeled prominently
+everywhere.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ import json
 from datetime import datetime, timezone
 
 from .detection import Alert
+from .incidents import Incident
 from .triage import TriageResult
 
 try:
@@ -41,16 +43,33 @@ def _clock(timestamp: float) -> str:
     )
 
 
+def _short_clock(timestamp: float) -> str:
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc).strftime("%H:%M:%S")
+
+
 def _ranked(
-    alerts: list[Alert], results: list[TriageResult]
-) -> list[tuple[Alert, TriageResult]]:
+    incidents: list[Incident], results: list[TriageResult]
+) -> list[tuple[Incident, TriageResult]]:
     return sorted(
-        zip(alerts, results), key=lambda p: (p[1].severity_rank, p[0].timestamp)
+        zip(incidents, results), key=lambda p: (p[1].severity_rank, p[0].start)
     )
 
 
+def _alert_line(alert: Alert) -> str:
+    frame = alert.raw_frame
+    return (
+        f"{frame.function_name} → {alert.dst_ip} [unit {frame.unit_id}] "
+        f"addr {frame.address} values {list(frame.values)[:8]}"
+        + (f" ×{alert.count}" if alert.count > 1 else "")
+    )
+
+
+def _technique_ids(alert: Alert) -> str:
+    return ", ".join(t.technique_id for t in alert.techniques) or "—"
+
+
 def render(
-    alerts: list[Alert],
+    incidents: list[Incident],
     results: list[TriageResult],
     summary: str,
     mode: str,
@@ -58,138 +77,9 @@ def render(
     force_plain: bool = False,
 ) -> None:
     if HAS_RICH and not force_plain:
-        _render_rich(alerts, results, summary, mode)
+        _render_rich(incidents, results, summary, mode)
     else:
-        _render_plain(alerts, results, summary, mode)
-
-
-# ---------------------------------------------------------------------------
-# Exporters
-# ---------------------------------------------------------------------------
-
-
-def to_markdown(
-    alerts: list[Alert],
-    results: list[TriageResult],
-    summary: str,
-    mode: str,
-) -> str:
-    """The ranked report as a Markdown document."""
-    mode_note = (
-        "`[AI]` triage by Claude"
-        if mode == "AI"
-        else "`[MOCK]` deterministic triage (no API key)"
-    )
-    lines = [
-        "# ICS Sentinel — Incident Report",
-        "",
-        f"{len(alerts)} alert(s) · triage mode: {mode_note}",
-        "",
-        "## Executive summary",
-        "",
-        summary,
-        "",
-    ]
-    for alert, result in _ranked(alerts, results):
-        frame = alert.raw_frame
-        lines += [
-            f"## [{result.severity}] {alert.id} — {alert.rule_name} "
-            f"`[{result.mode}]`",
-            "",
-            f"- **When:** {_clock(alert.timestamp)}",
-            f"- **Flow:** `{alert.src_ip}` → `{alert.dst_ip}`",
-            f"- **Command:** {frame.function_name} · unit {frame.unit_id} · "
-            f"addr {frame.address} · values {list(frame.values)[:8]}"
-            + (f" · ×{alert.count}" if alert.count > 1 else ""),
-            f"- **Detection:** {alert.description}",
-            f"- **ATT&CK (ICS):** "
-            + (
-                ", ".join(f"[{t.technique_id} {t.name}]({t.url})" for t in alert.techniques)
-                or "—"
-            ),
-            f"- **Severity:** {result.severity} — {result.severity_justification}",
-            "",
-            f"**What happened (operator view):** {result.plain_english_explanation}",
-            "",
-            f"**Attack narrative:** {result.attack_narrative}",
-            "",
-            "**Confirmed techniques:**",
-            *[f"- {t}" for t in result.confirmed_attack_techniques],
-            "",
-            "**Recommended actions:**",
-            *[
-                f"{i}. {action}"
-                for i, action in enumerate(result.recommended_actions, 1)
-            ],
-            "",
-            f"*False-positive likelihood: {result.false_positive_likelihood} — "
-            f"{result.false_positive_reasoning}*",
-            "",
-        ]
-    return "\n".join(lines)
-
-
-def to_json(
-    alerts: list[Alert],
-    results: list[TriageResult],
-    summary: str,
-    mode: str,
-) -> str:
-    """The ranked report as SIEM-shaped JSON (stable field names, ISO times)."""
-    items = []
-    for alert, result in _ranked(alerts, results):
-        frame = alert.raw_frame
-        items.append(
-            {
-                "id": alert.id,
-                "rule_id": alert.rule_id,
-                "rule_name": alert.rule_name,
-                "time_utc": datetime.fromtimestamp(
-                    alert.timestamp, tz=timezone.utc
-                ).isoformat(timespec="milliseconds"),
-                "source_ip": alert.src_ip,
-                "dest_ip": alert.dst_ip,
-                "unit_id": frame.unit_id,
-                "function_code": frame.function_code,
-                "function": frame.function_name,
-                "address": frame.address,
-                "values": list(frame.values)[:8],
-                "occurrences": alert.count,
-                "description": alert.description,
-                "attack_techniques": [
-                    {
-                        "id": t.technique_id,
-                        "name": t.name,
-                        "tactic": t.tactic,
-                        "url": t.url,
-                    }
-                    for t in alert.techniques
-                ],
-                "triage": {
-                    "mode": result.mode,
-                    "severity": result.severity,
-                    "severity_justification": result.severity_justification,
-                    "plain_english_explanation": result.plain_english_explanation,
-                    "attack_narrative": result.attack_narrative,
-                    "confirmed_attack_techniques": list(
-                        result.confirmed_attack_techniques
-                    ),
-                    "recommended_actions": list(result.recommended_actions),
-                    "false_positive_likelihood": result.false_positive_likelihood,
-                    "false_positive_reasoning": result.false_positive_reasoning,
-                },
-            }
-        )
-    return json.dumps(
-        {
-            "tool": "ICS Sentinel",
-            "triage_mode": mode,
-            "executive_summary": summary,
-            "alert_count": len(alerts),
-            "alerts": items,
-        },
-        indent=2,
-    )
+        _render_plain(incidents, results, summary, mode)
 
 
 # ---------------------------------------------------------------------------
@@ -197,8 +87,9 @@ def to_json(
 # ---------------------------------------------------------------------------
 
 
-def _render_rich(alerts, results, summary, mode) -> None:
+def _render_rich(incidents, results, summary, mode) -> None:
     console = Console()
+    alert_total = sum(len(i.alerts) for i in incidents)
     badge = (
         "[bold green]\\[AI][/] triage by Claude"
         if mode == "AI"
@@ -208,7 +99,8 @@ def _render_rich(alerts, results, summary, mode) -> None:
     console.print(
         Panel(
             f"[bold]ICS Sentinel — Incident Report[/]\n"
-            f"{len(alerts)} alert(s) · triage mode: {badge}",
+            f"{len(incidents)} incident(s) · {alert_total} alert(s) · "
+            f"triage mode: {badge}",
             box=box.DOUBLE,
             style="cyan",
         )
@@ -216,35 +108,35 @@ def _render_rich(alerts, results, summary, mode) -> None:
     console.print(
         Panel(summary, title="Executive summary", border_style="cyan", expand=True)
     )
-    if not alerts:
+    if not incidents:
         return
 
-    for alert, result in _ranked(alerts, results):
+    for incident, result in _ranked(incidents, results):
         sev_style = SEVERITY_COLORS.get(result.severity, "bold")
-        details = Table(show_header=False, box=box.SIMPLE, pad_edge=False)
-        details.add_column(style="dim", width=14)
-        details.add_column()
-        # Text() cells: frame/technique strings contain literal brackets
-        # ("[unit 2]") that rich would otherwise parse as markup.
-        details.add_row("When", _clock(alert.timestamp))
-        details.add_row("Flow", f"{alert.src_ip} → {alert.dst_ip}")
-        frame = alert.raw_frame
-        details.add_row(
-            "Command",
-            Text(
-                f"{frame.function_name} · unit {frame.unit_id} · "
-                f"addr {frame.address} · values {list(frame.values)[:8]}"
-                + (f" · ×{alert.count}" if alert.count > 1 else "")
-            ),
-        )
-        details.add_row("Detection", Text(alert.description))
-        details.add_row(
-            "ATT&CK (ICS)",
-            Text("\n".join(str(t) for t in alert.techniques) or "—"),
-        )
+
+        members = Table(box=box.SIMPLE, pad_edge=False, show_header=True)
+        members.add_column("alert", style="dim")
+        members.add_column("time")
+        members.add_column("rule")
+        members.add_column("command")
+        members.add_column("ATT&CK")
+        for alert in incident.alerts:
+            members.add_row(
+                alert.id,
+                _short_clock(alert.timestamp),
+                alert.rule_name,
+                Text(_alert_line(alert)),
+                _technique_ids(alert),
+            )
 
         body = [
-            details,
+            Text.assemble(
+                ("Actor: ", "dim"),
+                (incident.src_ip, "bold"),
+                ("   Window: ", "dim"),
+                (f"{_clock(incident.start)} → {_short_clock(incident.end)}",),
+            ),
+            members,
             Text.assemble(("Severity: ", "dim"), (result.severity, sev_style)),
             Text(result.severity_justification, style="italic"),
             Text(""),
@@ -273,7 +165,8 @@ def _render_rich(alerts, results, summary, mode) -> None:
             Panel(
                 Group(*body),
                 title=f"[{sev_style}] {result.severity} [/] "
-                f"[bold]{alert.id}[/] — {alert.rule_name} "
+                f"[bold]{incident.id}[/] — {incident.src_ip} · "
+                f"{len(incident.alerts)} alert(s) "
                 f"[dim]\\[{result.mode}][/]",
                 border_style=sev_style.split()[-1].replace("on ", ""),
             )
@@ -285,32 +178,35 @@ def _render_rich(alerts, results, summary, mode) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _render_plain(alerts, results, summary, mode) -> None:
+def _render_plain(incidents, results, summary, mode) -> None:
     bar = "=" * 78
+    alert_total = sum(len(i.alerts) for i in incidents)
     mode_note = (
         "[AI] triage by Claude"
         if mode == "AI"
         else "[MOCK] deterministic triage (set ANTHROPIC_API_KEY for AI analysis)"
     )
     print(bar)
-    print(f"ICS Sentinel — Incident Report   ({len(alerts)} alerts, {mode_note})")
+    print(
+        f"ICS Sentinel — Incident Report   "
+        f"({len(incidents)} incidents / {alert_total} alerts, {mode_note})"
+    )
     print(bar)
     print(f"\nEXECUTIVE SUMMARY\n{summary}\n")
-    for alert, result in _ranked(alerts, results):
-        frame = alert.raw_frame
+    for incident, result in _ranked(incidents, results):
         print("-" * 78)
-        print(f"[{result.severity.upper()}] {alert.id} — {alert.rule_name} "
-              f"[{result.mode}]")
-        print(f"  When:       {_clock(alert.timestamp)}")
-        print(f"  Flow:       {alert.src_ip} -> {alert.dst_ip}")
         print(
-            f"  Command:    {frame.function_name} unit {frame.unit_id} "
-            f"addr {frame.address} values {list(frame.values)[:8]}"
-            + (f" x{alert.count}" if alert.count > 1 else "")
+            f"[{result.severity.upper()}] {incident.id} — actor {incident.src_ip}, "
+            f"{len(incident.alerts)} alert(s) [{result.mode}]"
         )
-        print(f"  Detection:  {alert.description}")
-        for technique in alert.techniques:
-            print(f"  ATT&CK:     {technique}")
+        print(f"  Window:     {_clock(incident.start)} -> {_short_clock(incident.end)}")
+        for alert in incident.alerts:
+            print(
+                f"  Alert:      {alert.id} {_short_clock(alert.timestamp)} "
+                f"{alert.rule_name} — {_alert_line(alert)} "
+                f"[{_technique_ids(alert)}]"
+            )
+            print(f"              {alert.description}")
         print(f"  Severity:   {result.severity} — {result.severity_justification}")
         print(f"  Operator:   {result.plain_english_explanation}")
         print(f"  Narrative:  {result.attack_narrative}")
@@ -323,3 +219,151 @@ def _render_plain(alerts, results, summary, mode) -> None:
             f"{result.false_positive_reasoning}"
         )
     print("-" * 78)
+
+
+# ---------------------------------------------------------------------------
+# Exporters
+# ---------------------------------------------------------------------------
+
+
+def to_markdown(
+    incidents: list[Incident],
+    results: list[TriageResult],
+    summary: str,
+    mode: str,
+) -> str:
+    """The ranked incident report as a Markdown document."""
+    alert_total = sum(len(i.alerts) for i in incidents)
+    mode_note = (
+        "`[AI]` triage by Claude"
+        if mode == "AI"
+        else "`[MOCK]` deterministic triage (no API key)"
+    )
+    lines = [
+        "# ICS Sentinel — Incident Report",
+        "",
+        f"{len(incidents)} incident(s) · {alert_total} alert(s) · "
+        f"triage mode: {mode_note}",
+        "",
+        "## Executive summary",
+        "",
+        summary,
+        "",
+    ]
+    for incident, result in _ranked(incidents, results):
+        lines += [
+            f"## [{result.severity}] {incident.id} — actor `{incident.src_ip}` "
+            f"({len(incident.alerts)} alerts) `[{result.mode}]`",
+            "",
+            f"**Window:** {_clock(incident.start)} → {_short_clock(incident.end)}",
+            "",
+            "| Alert | Time | Rule | Command | ATT&CK |",
+            "|---|---|---|---|---|",
+            *[
+                f"| {a.id} | {_short_clock(a.timestamp)} | {a.rule_name} "
+                f"| {_alert_line(a)} | "
+                + ", ".join(
+                    f"[{t.technique_id}]({t.url})" for t in a.techniques
+                )
+                + " |"
+                for a in incident.alerts
+            ],
+            "",
+            f"**Severity:** {result.severity} — {result.severity_justification}",
+            "",
+            f"**What happened (operator view):** {result.plain_english_explanation}",
+            "",
+            f"**Attack narrative:** {result.attack_narrative}",
+            "",
+            "**Confirmed techniques:**",
+            *[f"- {t}" for t in result.confirmed_attack_techniques],
+            "",
+            "**Recommended actions:**",
+            *[
+                f"{i}. {action}"
+                for i, action in enumerate(result.recommended_actions, 1)
+            ],
+            "",
+            f"*False-positive likelihood: {result.false_positive_likelihood} — "
+            f"{result.false_positive_reasoning}*",
+            "",
+        ]
+    return "\n".join(lines)
+
+
+def to_json(
+    incidents: list[Incident],
+    results: list[TriageResult],
+    summary: str,
+    mode: str,
+) -> str:
+    """The ranked report as SIEM-shaped JSON (stable field names, ISO times)."""
+
+    def alert_dict(alert: Alert) -> dict:
+        frame = alert.raw_frame
+        return {
+            "id": alert.id,
+            "rule_id": alert.rule_id,
+            "rule_name": alert.rule_name,
+            "time_utc": datetime.fromtimestamp(
+                alert.timestamp, tz=timezone.utc
+            ).isoformat(timespec="milliseconds"),
+            "source_ip": alert.src_ip,
+            "dest_ip": alert.dst_ip,
+            "unit_id": frame.unit_id,
+            "function_code": frame.function_code,
+            "function": frame.function_name,
+            "address": frame.address,
+            "values": list(frame.values)[:8],
+            "occurrences": alert.count,
+            "description": alert.description,
+            "attack_techniques": [
+                {
+                    "id": t.technique_id,
+                    "name": t.name,
+                    "tactic": t.tactic,
+                    "url": t.url,
+                }
+                for t in alert.techniques
+            ],
+        }
+
+    items = []
+    for incident, result in _ranked(incidents, results):
+        items.append(
+            {
+                "id": incident.id,
+                "source_ip": incident.src_ip,
+                "start_utc": datetime.fromtimestamp(
+                    incident.start, tz=timezone.utc
+                ).isoformat(timespec="milliseconds"),
+                "end_utc": datetime.fromtimestamp(
+                    incident.end, tz=timezone.utc
+                ).isoformat(timespec="milliseconds"),
+                "alerts": [alert_dict(a) for a in incident.alerts],
+                "triage": {
+                    "mode": result.mode,
+                    "severity": result.severity,
+                    "severity_justification": result.severity_justification,
+                    "plain_english_explanation": result.plain_english_explanation,
+                    "attack_narrative": result.attack_narrative,
+                    "confirmed_attack_techniques": list(
+                        result.confirmed_attack_techniques
+                    ),
+                    "recommended_actions": list(result.recommended_actions),
+                    "false_positive_likelihood": result.false_positive_likelihood,
+                    "false_positive_reasoning": result.false_positive_reasoning,
+                },
+            }
+        )
+    return json.dumps(
+        {
+            "tool": "ICS Sentinel",
+            "triage_mode": mode,
+            "executive_summary": summary,
+            "incident_count": len(incidents),
+            "alert_count": sum(len(i.alerts) for i in incidents),
+            "incidents": items,
+        },
+        indent=2,
+    )
