@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn — Documentation &amp; ELI5 — ICS Sentinel</title>
+<meta name="description" content="Full ICS Sentinel documentation plus an ELI5 glossary that explains every OT/AI security term — PLC, Modbus, MITRE ATT&CK, triage, baselines — to a complete beginner. A portfolio project by Jamil Flores.">
+<meta name="author" content="Jamil Flores">
+<meta name="theme-color" content="#0d1420">
+<meta property="og:title" content="Learn — Documentation &amp; ELI5 — ICS Sentinel">
+<meta property="og:description" content="Every term on the site explained like you're five, plus the full technical documentation. By Jamil Flores.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z' fill='%230d1420' stroke='%232C82C9' stroke-width='2'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='%232ECC71' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+<noscript>
+<style>
+  [data-animate] { opacity: 1 !important; transform: none !important; filter: none !important; }
+  .eli5-controls { display: none !important; }
+</style>
+</noscript>
+</head>
+<body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<nav class="site-nav" aria-label="Site">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html">
+      <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z" fill="none" stroke="#2C82C9" stroke-width="2.5"/>
+        <path d="M10 16.5l4 4 8-9" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      ICS Sentinel
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">Docs &amp; Replicate</a>
+      <a href="learn.html" class="is-active">Learn</a>
+      <a class="nav-cta" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</nav>
+<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+<header class="docs-hero">
+  <div class="wrap">
+    <p class="section-kicker hero-enter" style="--d:.05s">Learn</p>
+    <h1 class="hero-enter" style="--d:.15s">New to OT security? <span class="accent">Start here.</span></h1>
+    <p class="hero-enter" style="--d:.27s">
+      Two parts: the full technical documentation for how ICS Sentinel works, and a plain-English
+      glossary that explains every term on this site — no industrial-control background needed.
+      If a word ever looked like jargon, it's defined below.
+    </p>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================
+     DOCUMENTATION
+     ============================================================ -->
+<section id="documentation" aria-labelledby="docs-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>01 · Documentation</p>
+    <h2 class="section-title" id="docs-title" data-animate style="--d:.08s">How it works, piece by piece.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">Click any topic to expand it.</p>
+
+    <div class="docs-acc">
+      <details data-animate style="--d:.05s">
+        <summary>The 5 detection rules <span class="chip chip-blue">detection</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <ul>
+            <li><strong>Write-source allowlist</strong> — only <span class="mono">10.0.0.11</span> (the engineering
+              workstation) may write. Any other writer is an unauthorized command message
+              (<span class="mono">T0855</span>).</li>
+            <li><strong>Safe-range check</strong> — the pump setpoint (<span class="mono">40002</span>) must stay in
+              <span class="mono">20–90</span>. A write of <span class="mono">200</span> is flagged even from the authorized
+              host — catching insiders and compromised workstations (<span class="mono">T0836</span>, <span class="mono">T0831</span>).</li>
+            <li><strong>Scan-window rule</strong> — benign polling touches 6 register/unit points; more than
+              <span class="mono">12 distinct points</span> in one window means someone is mapping the plant
+              (<span class="mono">T0846</span>). The demo's scan hits 160 points in ~4 seconds.</li>
+            <li><strong>Structural validation</strong> — every frame is parsed against the Modbus spec; illegal
+              function codes like <span class="mono">0x5A</span> and <span class="mono">0x00</span> never reach the rules behind it
+              (<span class="mono">T0814</span>).</li>
+            <li><strong>Statistical rate baseline</strong> — per-source frame rate vs a
+              <span class="mono">mean + 3σ</span> baseline learned from benign traffic catches the 40×/second
+              replay flood (<span class="mono">T0814</span>, <span class="mono">T0855</span>).</li>
+          </ul>
+          <p><strong>Why is any of this possible?</strong> Standard Modbus/TCP (port
+          <span class="mono">502</span>) predates security: no authentication, no encryption.
+          Modbus/TCP Security (TLS on port <span class="mono">802</span>) exists, but it is rarely
+          deployed in brownfield plants — which is exactly why passive network detection matters.</p>
+        </div>
+      </details>
+
+      <details data-animate style="--d:.1s">
+        <summary>Architecture: the 5-stage pipeline <span class="chip chip-blue">design</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p><strong>Traffic → Detection → ATT&amp;CK mapping → AI triage → Report.</strong></p>
+          <p>The default run narrows like a funnel: <span class="mono">387 frames → 10 alerts → 1 Critical
+          incident → 1 executive summary</span>. Each stage is a small, testable module: the simulator
+          emits Modbus TCP frames, the detection engine raises alerts, every alert is tagged with
+          MITRE ATT&amp;CK for ICS techniques, Claude (or the mock) triages each one, and the
+          reporter ranks them Critical-first with a single executive summary across the incident.</p>
+          <p><strong>Monitoring is fully passive.</strong> Sentinel reads a SPAN/TAP-style mirror of
+          the traffic — it never injects a packet, never polls a device, never touches the process.
+          That matters in OT, where an active scanner can crash a fragile PLC.</p>
+          <p>See the <a href="index.html#pipeline">animated pipeline</a> on the showcase page.</p>
+        </div>
+      </details>
+
+      <details data-animate style="--d:.15s">
+        <summary>The simulated plant <span class="chip chip-green">simulation</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>A water-treatment skid with five hosts:</p>
+          <ul>
+            <li><span class="mono">10.0.0.10</span> — <strong>HMI master</strong>: polls every 2s, never writes</li>
+            <li><span class="mono">10.0.0.11</span> — <strong>Engineering workstation</strong>: the only authorized write source</li>
+            <li><span class="mono">10.0.0.20</span> — <strong>PLC-1</strong> (unit 1, intake)</li>
+            <li><span class="mono">10.0.0.21</span> — <strong>PLC-2</strong> (unit 2, storage)</li>
+            <li><span class="mono">10.0.0.66</span> — <strong>Attacker</strong>: a compromised host on the OT segment</li>
+          </ul>
+          <p>Registers: <span class="mono">40001</span> tank level (0–100%), <span class="mono">40002</span> pump setpoint
+          (safe range 20–90), <span class="mono">coil 0</span> pump on/off. Tank levels follow real pump physics
+          (hysteresis control), so the baseline is physically coherent — not random noise.</p>
+        </div>
+      </details>
+
+      <details data-animate style="--d:.2s">
+        <summary>AI triage &amp; the mock fallback <span class="chip chip-blue">[AI] / [MOCK]</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>For every alert, the analyst produces: a severity with justification, a plain-English
+          explanation an operator can act on, an attack narrative, ordered response actions, and a
+          false-positive likelihood. With <span class="mono">ANTHROPIC_API_KEY</span> set, that's
+          <strong>Claude</strong>; without it, a deterministic mock produces the same structure, so the
+          demo never breaks offline.</p>
+          <p><strong>Alert coalescing</strong> keeps the LLM bill sane: the 40×/second replay flood becomes
+          <strong>2 alerts, not 41</strong> — roughly 20× fewer LLM calls.</p>
+        </div>
+      </details>
+
+      <details data-animate style="--d:.25s">
+        <summary>Severity model &amp; proof points <span class="chip chip-red">quality</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>Default-run outcome: <strong>1 Critical · 5 High · 4 Medium · 0 Low</strong>. The Critical is
+          the process-safety violation — the pump setpoint (expressed in %, safe range
+          <span class="mono">20–90</span>) forced to <span class="mono">200</span> — ranked first in the report.</p>
+          <p><strong>0 false positives</strong> on benign traffic, tested across seeds and a 10-minute
+          stream. <strong>75 pytest tests</strong> pin every number, and the whole demo needs
+          <strong>0 dependencies</strong> beyond Python 3.11+.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ELI5 GLOSSARY
+     ============================================================ -->
+<section id="eli5" aria-labelledby="eli5-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>02 · Explain it like I'm 5</p>
+    <h2 class="section-title" id="eli5-title" data-animate style="--d:.08s">Every term, in plain English.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      Every word on this site, explained like you've never set foot in a plant. Search for a term
+      or filter by category.
+    </p>
+
+    <div class="eli5-controls" data-animate style="--d:.2s">
+      <input class="eli5-search" id="eli5-search" type="search" placeholder="Search terms… (e.g. PLC, Modbus, triage)" aria-label="Search glossary terms">
+      <div class="eli5-chips" id="eli5-chips" role="group" aria-label="Filter by category">
+        <button class="eli5-chip active" data-cat="all">All</button>
+        <button class="eli5-chip" data-cat="plant">Plant floor</button>
+        <button class="eli5-chip" data-cat="network">Network</button>
+        <button class="eli5-chip" data-cat="attacks">Attacks</button>
+        <button class="eli5-chip" data-cat="defense">Defense</button>
+        <button class="eli5-chip" data-cat="ai">AI</button>
+      </div>
+    </div>
+
+    <div class="eli5-grid" id="eli5-grid">
+
+      <div class="eli5-card" data-cat="plant" data-term="ot operational technology">
+        <h3>OT <span class="chip chip-skill">Plant floor</span></h3>
+        <p class="tech">Operational Technology — the computers and controllers that run physical equipment: pumps, valves, turbines, assembly lines.</p>
+        <p class="eli5"><span class="tag">ELI5</span> If IT is the computers that handle your <em>email</em>, OT is the computers that turn the <em>water on</em>. Breaking IT loses data; breaking OT can flood a tank.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="plant" data-term="ics industrial control system">
+        <h3>ICS <span class="chip chip-skill">Plant floor</span></h3>
+        <p class="tech">Industrial Control System — the whole collection of OT gear that monitors and controls an industrial process.</p>
+        <p class="eli5"><span class="tag">ELI5</span> The "nervous system" of a factory or utility: sensors that feel, controllers that decide, and motors that act.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="plant" data-term="plc programmable logic controller">
+        <h3>PLC <span class="chip chip-skill">Plant floor</span></h3>
+        <p class="tech">Programmable Logic Controller — a rugged little computer that reads sensors and drives equipment by simple rules. No keyboard, no antivirus.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A thermostat with a rulebook: "if the tank drops below 20%, turn the pump on." It does exactly what it's told — which is the whole problem when an attacker does the telling.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="plant" data-term="hmi human machine interface master">
+        <h3>HMI <span class="chip chip-skill">Plant floor</span></h3>
+        <p class="tech">Human-Machine Interface — the operator's screen showing tank levels, pump status, and alarms. In this demo it only <em>reads</em>.</p>
+        <p class="eli5"><span class="tag">ELI5</span> The dashboard in your car. It shows your speed; it doesn't press the pedal. So a "command" claiming to come from the dashboard is instantly fishy.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="plant" data-term="engineering workstation ews">
+        <h3>Engineering workstation <span class="chip chip-skill">Plant floor</span></h3>
+        <p class="tech">The one trusted PC engineers use to reprogram or adjust PLCs — the only authorized write source on the network.</p>
+        <p class="eli5"><span class="tag">ELI5</span> The one set of car keys that's allowed to start the engine. Powerful — which is why, if someone steals it, Sentinel still checks <em>what</em> it's trying to do.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="plant" data-term="scada supervisory control">
+        <h3>SCADA <span class="chip chip-skill">Plant floor</span></h3>
+        <p class="tech">Supervisory Control and Data Acquisition — the wider system that gathers data from many PLCs/sites and lets operators supervise them centrally.</p>
+        <p class="eli5"><span class="tag">ELI5</span> Mission control for a plant: lots of screens pulling in readings from equipment that might be spread across a whole city.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="plant" data-term="setpoint">
+        <h3>Setpoint <span class="chip chip-skill">Plant floor</span></h3>
+        <p class="tech">The target value a controller aims for — e.g. pump setpoint 60 means "run the pump at 60%". Safe range here is 20–90.</p>
+        <p class="eli5"><span class="tag">ELI5</span> The number you set on the oven dial. Set it to 200 when the safe max is 90 and something is going to burn — or in our case, overflow.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="plant" data-term="register coil holding 40001 40002">
+        <h3>Register &amp; coil <span class="chip chip-skill">Plant floor</span></h3>
+        <p class="tech">The PLC's memory slots. A register holds a number (tank level, setpoint); a coil holds an on/off bit (pump running or not).</p>
+        <p class="eli5"><span class="tag">ELI5</span> Labeled boxes inside the controller. Box 40001 = how full the tank is. Box 40002 = how hard to run the pump. Coil 0 = pump switch.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="plant" data-term="hysteresis pump physics">
+        <h3>Hysteresis <span class="chip chip-skill">Plant floor</span></h3>
+        <p class="tech">Control that uses a gap between on/off thresholds so equipment doesn't rapidly flip. The demo's tank levels follow this real physics.</p>
+        <p class="eli5"><span class="tag">ELI5</span> Your home heating doesn't flick on and off every second — it waits until the room is a bit too cold, then a bit too warm. That "wait" keeps the pump from chattering, and makes the fake plant behave like a real one.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="network" data-term="modbus tcp protocol 502">
+        <h3>Modbus TCP <span class="chip chip-skill">Network</span></h3>
+        <p class="tech">A 1979 industrial protocol (here over TCP port 502) for talking to PLCs. It has no authentication and no encryption.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A walkie-talkie channel where every device obeys any voice it hears — no password, no caller ID. Whoever speaks, the machine listens.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="network" data-term="frame packet">
+        <h3>Frame / packet <span class="chip chip-skill">Network</span></h3>
+        <p class="tech">One message on the wire — e.g. "read register 40001" or "write 60 to 40002". The demo captured 387 of them in 60 seconds.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A single envelope sent between machines. Sentinel reads every envelope going past and decides which ones look like trouble.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="network" data-term="trust boundary segment">
+        <h3>Trust boundary <span class="chip chip-skill">Network</span></h3>
+        <p class="tech">The line separating devices that belong on the control network from those that don't. The attacker sits outside it.</p>
+        <p class="eli5"><span class="tag">ELI5</span> The fence around a playground. Being inside doesn't make you a kid — but anything that climbed the fence definitely shouldn't be there.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="network" data-term="ip address host">
+        <h3>IP address <span class="chip chip-skill">Network</span></h3>
+        <p class="tech">A device's address on the network, like 10.0.0.21. Sentinel uses them to tell who is talking to whom.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A house number for a computer. 10.0.0.66 is the address Sentinel learns to distrust.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="attacks" data-term="unauthorized write t0855">
+        <h3>Unauthorized write <span class="chip chip-skill">Attacks</span></h3>
+        <p class="tech">A command that changes a PLC, sent from a host that isn't allowed to write (anything but 10.0.0.11). Maps to ATT&amp;CK T0855.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A stranger walking up to the factory controls and flipping a switch. The command looks normal — it's <em>who sent it</em> that's wrong.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="attacks" data-term="recon scan reconnaissance t0846">
+        <h3>Recon scan <span class="chip chip-skill">Attacks</span></h3>
+        <p class="tech">An attacker probing many registers/units to map the plant — 160 points in ~4s vs the 6 that benign polling touches. ATT&amp;CK T0846.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A burglar trying every door and window on the street to learn the layout. Normal residents only ever use their own front door.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="attacks" data-term="replay attack flood">
+        <h3>Replay attack <span class="chip chip-skill">Attacks</span></h3>
+        <p class="tech">Capturing a legitimate command and re-sending it over and over — here 40 times a second, byte-identical. ATT&amp;CK T0814 + T0855.</p>
+        <p class="eli5"><span class="tag">ELI5</span> Recording someone saying "open the gate," then playing it on a loop 40 times a second. The words are real; the spam is the giveaway.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="attacks" data-term="malformed frames illegal function code">
+        <h3>Malformed frames <span class="chip chip-skill">Attacks</span></h3>
+        <p class="tech">Messages that break the Modbus rules — illegal function codes (0x5A, 0x00) or corrupt payloads, often used to crash fragile devices. ATT&amp;CK T0814.</p>
+        <p class="eli5"><span class="tag">ELI5</span> Posting a ripped, gibberish-filled envelope through the slot hoping the machine chokes on it. Sentinel bins it before it can.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="attacks" data-term="dangerous setpoint process safety t0836 t0831">
+        <h3>Dangerous setpoint <span class="chip chip-skill">Attacks</span></h3>
+        <p class="tech">A valid-looking write that pushes a value out of its safe range — pump setpoint forced to 200 (safe max 90), even from the trusted host. ATT&amp;CK T0836 + T0831.</p>
+        <p class="eli5"><span class="tag">ELI5</span> Someone with the real car keys flooring the accelerator to 200 mph. Right key, catastrophic intent — so we check the speed, not just the key.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="attacks" data-term="mitre attack ics technique">
+        <h3>MITRE ATT&amp;CK for ICS <span class="chip chip-skill">Attacks</span></h3>
+        <p class="tech">A public catalog of known adversary techniques against industrial systems, each with an ID (T0855, T0836…). Sentinel tags every alert with the matching ones.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A field guide of known burglar tricks, each with a catalog number. Instead of "something weird happened," the report says exactly which trick this was.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="defense" data-term="passive monitoring span tap">
+        <h3>Passive monitoring <span class="chip chip-skill">Defense</span></h3>
+        <p class="tech">Watching a copy (SPAN/TAP mirror) of network traffic without sending anything yourself — so you can't disturb the process.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A security camera, not a security guard who rattles the doors. It only watches — so it can never accidentally knock something over.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="defense" data-term="soc security operations center analyst">
+        <h3>SOC <span class="chip chip-skill">Defense</span></h3>
+        <p class="tech">Security Operations Center — the team (and tooling) that watches for attacks and responds. ICS Sentinel acts as an AI SOC analyst.</p>
+        <p class="eli5"><span class="tag">ELI5</span> The room full of people watching the security monitors. Sentinel is an AI sitting in one of those chairs.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="defense" data-term="triage prioritize severity">
+        <h3>Triage <span class="chip chip-skill">Defense</span></h3>
+        <p class="tech">Sorting alerts by how serious they are and deciding what to do first — severity, explanation, and response actions for each.</p>
+        <p class="eli5"><span class="tag">ELI5</span> What the ER nurse does: the sickest patient gets seen first. Sentinel puts the tank-overflow alert ahead of the minor ones.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="defense" data-term="alert false positive">
+        <h3>Alert &amp; false positive <span class="chip chip-skill">Defense</span></h3>
+        <p class="tech">An alert flags possible trouble. A false positive is an alert that turns out to be harmless — the noise that buries real threats.</p>
+        <p class="eli5"><span class="tag">ELI5</span> The smoke alarm going off because of toast. Too many and people start ignoring it — which is why "0 false positives" matters so much.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="defense" data-term="baseline mean 3 sigma standard deviation">
+        <h3>Baseline (mean + 3σ) <span class="chip chip-skill">Defense</span></h3>
+        <p class="tech">Learn what "normal" traffic looks like (its average and spread), then flag anything far beyond it — here, 3 standard deviations above the mean rate.</p>
+        <p class="eli5"><span class="tag">ELI5</span> You know your commute takes about 20 minutes. Today it took an hour — way outside normal, so something's clearly wrong. That's the math Sentinel uses on traffic rates.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="defense" data-term="allowlist whitelist">
+        <h3>Allowlist <span class="chip chip-skill">Defense</span></h3>
+        <p class="tech">A short list of who's explicitly permitted to do something (here, write to PLCs). Everyone not on it is denied by default.</p>
+        <p class="eli5"><span class="tag">ELI5</span> The bouncer's guest list. Your name's on it or you're not getting in — no debate.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="ai" data-term="llm large language model claude">
+        <h3>LLM / Claude <span class="chip chip-skill">AI</span></h3>
+        <p class="tech">A Large Language Model — AI that understands and writes text. ICS Sentinel uses Claude to turn raw alerts into plain-English analysis.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A very well-read assistant. Hand it a cryptic alarm and it writes back, in normal words, what happened and what to do about it.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="ai" data-term="mock fallback deterministic">
+        <h3>Mock fallback <span class="chip chip-skill">AI</span></h3>
+        <p class="tech">A deterministic stand-in that produces the same report structure when no AI API key is set, so the demo always runs.</p>
+        <p class="eli5"><span class="tag">ELI5</span> A spare tyre. Not as fancy as the real wheel, but it means you're never stranded — the demo works even with the AI switched off.</p>
+      </div>
+
+      <div class="eli5-card" data-cat="ai" data-term="alert coalescing deduplication">
+        <h3>Alert coalescing <span class="chip chip-skill">AI</span></h3>
+        <p class="tech">Merging a flood of near-identical alerts into a few, so the AI isn't called 41 times for one replay attack — just twice.</p>
+        <p class="eli5"><span class="tag">ELI5</span> One text saying "he knocked 40 times" instead of 40 separate buzzes. Same story, far less noise — and a far smaller AI bill.</p>
+      </div>
+
+    </div>
+    <p class="eli5-empty" id="eli5-empty">No terms match that search. Try "PLC", "Modbus", or clear the filter.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     ABOUT / PORTFOLIO
+     ============================================================ -->
+<section id="about" aria-labelledby="about-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>03 · About the author</p>
+    <h2 class="section-title" id="about-title" data-animate style="--d:.08s">Built by Jamil Flores.</h2>
+
+    <div class="about-card" data-animate="pop" style="--d:.12s">
+      <div class="avatar" aria-hidden="true">JF</div>
+      <div class="about-body">
+        <p class="about-kicker">Portfolio project</p>
+        <h3>Jamil Flores</h3>
+        <p>ICS Sentinel was built end to end by Jamil Flores: a Modbus TCP protocol parser, a
+        physics-coherent plant simulator, five detection rules holding <strong>0 false
+        positives</strong> on benign traffic, MITRE ATT&amp;CK for ICS mapping, and a Claude-powered
+        triage layer with cost-aware alert coalescing — all pinned by 75 tests.</p>
+        <div class="skills-strip" aria-label="Skills demonstrated">
+          <span class="chip chip-skill">Modbus/TCP parsing</span>
+          <span class="chip chip-skill">Detection engineering</span>
+          <span class="chip chip-skill">MITRE ATT&amp;CK for ICS</span>
+          <span class="chip chip-skill">Statistical baselining</span>
+          <span class="chip chip-skill">LLM integration (Claude)</span>
+          <span class="chip chip-skill">Test-driven (75 tests)</span>
+          <span class="chip chip-skill">Zero-dep Python</span>
+        </div>
+        <div class="about-actions">
+          <a class="btn btn-linkedin" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Connect on LinkedIn</a>
+          <a class="btn btn-ghost btn-sm" href="index.html">See the showcase →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="cmd-pill"><span class="prompt-char">$</span> python -m ics_sentinel.demo<span class="cursor" aria-hidden="true"></span></span>
+    <p class="foot-title">ICS Sentinel</p>
+    <p>An AI SOC analyst for industrial networks · built for OT defenders</p>
+    <p class="foot-credit">© Jamil Flores · portfolio project ·
+      <a href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a></p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
