@@ -153,6 +153,42 @@ detect is how ATT&CK coverage tables lose credibility.
 ## Reporting (Phase 6)
 
 One renderer choice per the scope guardrails: a terminal report (no web
-dashboard). `rich` draws severity-ranked panels, Critical first; a small
-plain-text fallback keeps the zero-dependency promise when `rich` isn't
-installed. Both label the triage mode prominently.
+dashboard). `rich` draws an at-a-glance overview table plus severity-ranked
+incident panels, Critical first; a small plain-text fallback keeps the
+zero-dependency promise when `rich` isn't installed (and is reachable on
+demand via `--plain` / `force_plain=True`). Both label the triage mode
+prominently. Markdown and SIEM-shaped JSON exporters (`--output`) render the
+same ranked content for hand-off.
+
+## Refinement (v1.1)
+
+Post-v1 work, each addition kept to the same two-sided-test discipline.
+
+- **R6 conflicting-duplicate response (T0856).** The `response_spoof`
+  scenario injects a second answer per poll with the tank level frozen while
+  the real value moves (the Stuxnet operator-blinding move). R6 groups frames
+  by `(src, dst, unit, fc, address, txn_id)` and fires when two within a 5 s
+  window carry *different* values. The window guards 16-bit txn-id
+  wraparound; the conflict requirement is exactly what separates a spoof from
+  a byte-identical replay — a test asserts `replay_flood` does **not** fire R6.
+- **Learned baselines (`--baseline`).** `learn_baseline()` derives the scan
+  and flood thresholds from a clean sample (busiest observed distinct-point
+  window ×2, busiest write bucket ×3) and never learns *looser* than the
+  static config floor. On the quiet benign baseline it actually tightens the
+  flood floor. Tested to stay silent on its own training traffic yet still
+  catch every scenario.
+- **Incident correlation.** `correlate()` groups alerts by source IP — on an
+  OT segment the source *is* the actor, so one host's scan→write→flood is one
+  incident, not ten tickets. This is the unit of triage now: the demo's 11
+  alerts become 3 incidents (3 LLM calls instead of 11), and the model
+  reasons about the whole campaign at once. Mock severity is led by the most
+  dangerous member with actions/techniques merged across rules.
+- **Structured outputs + cost.** The AI path attempts schema-enforced JSON
+  (`output_config.format`) and degrades to prompt-instructed JSON on older
+  SDKs/models (rejection matched by exception name so `anthropic` need not be
+  importable in mock/test runs); `extract_json` remains the universal net.
+  Token usage is accumulated for the demo's cost line.
+- **Real pcap ingestion (`--pcap`).** `load_pcap()` parses captured Modbus
+  TCP into the *same* `ModbusFrame` objects, pairing requests/responses by
+  transaction so the entire downstream pipeline is source-agnostic. scapy is
+  an optional extra, lazily imported.

@@ -16,21 +16,22 @@ AI image-generation prompt). All numbers are from a real default run
 - **Hook stat (callout):** Modbus has **no authentication and no
   encryption** — any device on the network can command a PLC.
 
-## 2. The core visual: 5-stage pipeline (left → right)
+## 2. The core visual: 6-stage pipeline (left → right)
 
-This is the centerpiece. One horizontal flow, five nodes:
+This is the centerpiece. One horizontal flow, six nodes:
 
 | # | Stage | Icon idea | Caption (short) | Caption (detail) |
 |---|-------|-----------|-----------------|------------------|
-| 1 | **Traffic** | water tank / PLC cabinet | Simulated plant traffic | Synthetic Modbus TCP: an HMI polling 2 PLCs on a water-treatment skid, plus 5 injectable attack scenarios. 387 frames in 60s. |
-| 2 | **Detection** | radar / magnifying glass | 5 rules + statistics | Allowlist, safe-range, scan-window, structural validation, mean+3σ rate baseline. 387 frames → **10 alerts**. |
-| 3 | **ATT&CK mapping** | crosshair matrix / grid | MITRE ATT&CK for ICS | Each alert tagged with real adversary techniques: T0855, T0836, T0831, T0846, T0814. |
-| 4 | **AI triage** | brain / chat spark | Claude as the analyst | Severity + justification, operator-plain-English explanation, attack narrative, ordered response actions, false-positive likelihood. Mock fallback if no API key. |
-| 5 | **Report** | ranked list / dashboard | Ranked incident report | Critical first. One executive summary tells the incident story across all alerts. |
+| 1 | **Traffic** | water tank / PLC cabinet | Simulated plant traffic (or real .pcap) | Synthetic Modbus TCP: an HMI polling 2 PLCs on a water-treatment skid, plus 6 injectable attack scenarios. 396 frames in 60s. |
+| 2 | **Detection** | radar / magnifying glass | 6 rules + statistics | Allowlist, safe-range, scan-window, structural validation, mean+3σ rate baseline, conflicting-response. 396 frames → **11 alerts**. |
+| 3 | **ATT&CK mapping** | crosshair matrix / grid | MITRE ATT&CK for ICS | Each alert tagged with real techniques: T0855, T0836, T0831, T0846, T0814, T0856. |
+| 4 | **Correlate** | cluster / link | Alerts → incidents | Group by source: one actor's scan→write→flood becomes one incident. 11 alerts → **3 incidents**. |
+| 5 | **AI triage** | brain / chat spark | Claude as the analyst | Per incident: severity + justification, operator-plain-English explanation, attack narrative, ordered actions, false-positive likelihood. Mock fallback if no API key. |
+| 6 | **Report** | ranked list / dashboard | Ranked incident report | Critical first; terminal, Markdown, or JSON. One executive summary tells the campaign story. |
 
 Funnel framing for the flow (numbers shrink left to right — visualize as a
-narrowing funnel): **387 frames → 10 alerts → 1 Critical incident → 1
-executive summary**.
+narrowing funnel): **396 frames → 11 alerts → 3 incidents → 1 Critical
+priority**.
 
 ## 3. The plant (small network diagram)
 
@@ -60,9 +61,10 @@ the ATT&CK ID as a badge.
 | **Recon scan** | **160** register/unit probes in ~4 seconds (benign polling touches 6 points) | Distinct-points window (threshold 12) | T0846 |
 | **Malformed frames** | Illegal function codes (0x5A, 0x00), corrupt payloads | Structural validation | T0814 |
 | **Replay flood** | One captured command replayed **40×/second**, byte-identical | Statistical rate baseline (mean+3σ) | T0814 + T0855 |
+| **Response spoof** | Frozen "all-normal" reading injected over real polls (Stuxnet move) | Conflicting-duplicate response | T0856 |
 
-Severity outcome of the default run (small stacked bar or donut):
-**1 Critical · 5 High · 4 Medium · 0 Low**.
+Severity outcome of the default run, after correlation (small stacked bar or
+donut): **3 incidents — 1 Critical · 2 High** (from 11 underlying alerts).
 
 ## 5. The AI triage card (show one real example)
 
@@ -84,9 +86,9 @@ fallback — the demo never breaks without an API key.
 ## 6. Proof points (stat strip along the bottom)
 
 - **0** false positives on benign traffic (tested across seeds + a 10-minute stream)
-- **40× replay → 2 alerts**, not 41 (alert coalescing; ~20× fewer LLM calls)
-- **75** pytest tests
-- **0** dependencies to run the demo (Python 3.11+ stdlib; `rich` + `anthropic` optional)
+- **11 alerts → 3 incidents** correlated before triage (≈4× fewer LLM calls)
+- **102** pytest tests
+- **0** dependencies to run the demo (Python 3.11+ stdlib; `rich`/`anthropic`/`scapy` optional)
 - **1 command:** `python -m ics_sentinel.demo`
 
 ## 7. Suggested visual language
@@ -106,15 +108,15 @@ fallback — the demo never breaks without an API key.
 ## 8. Ready-to-use generation prompt
 
 > A clean, dark-themed technical infographic titled "ICS Sentinel — an AI SOC
-> analyst for industrial networks." A horizontal 5-stage pipeline (Traffic →
-> Detection → ATT&CK Mapping → AI Triage → Report) drawn as a narrowing
-> funnel labeled 387 frames → 10 alerts → 1 critical incident. Below it: a
-> small OT network map (HMI, engineering workstation, two PLCs with a water
-> tank, and a red attacker node at 10.0.0.66 outside a dashed trust
-> boundary), beside a table pairing five attacks with the five detection
-> rules that catch them, each tagged with MITRE ATT&CK badges (T0855, T0836,
-> T0831, T0846, T0814). A highlighted "Critical incident" analyst card shows
-> a pump setpoint forced to 200% with recommended response actions. Bottom
-> stat strip: 0 false positives, 75 tests, 0 dependencies, 1 command.
-> Industrial safety palette (slate, red, amber, blue), monospace accents,
-> terminal-panel styling.
+> analyst for industrial networks." A horizontal 6-stage pipeline (Traffic →
+> Detection → ATT&CK Mapping → Correlate → AI Triage → Report) drawn as a
+> narrowing funnel labeled 396 frames → 11 alerts → 3 incidents → 1 critical
+> priority. Below it: a small OT network map (HMI, engineering workstation,
+> two PLCs with a water tank, and a red attacker node at 10.0.0.66 outside a
+> dashed trust boundary), beside a table pairing six attacks with the six
+> detection rules that catch them, each tagged with MITRE ATT&CK badges
+> (T0855, T0836, T0831, T0846, T0814, T0856). A highlighted "Critical
+> incident" analyst card shows a pump setpoint forced to 200% with
+> recommended response actions. Bottom stat strip: 0 false positives, 102
+> tests, 0 dependencies, 1 command. Industrial safety palette (slate, red,
+> amber, blue), monospace accents, terminal-panel styling.

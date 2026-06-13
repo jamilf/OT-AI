@@ -22,12 +22,12 @@ requires a scarce specialist.
 
 ```mermaid
 flowchart LR
-    G[Traffic Source<br/>synthetic Modbus TCP generator] --> D[Detection Engine<br/>rules + statistics]
+    G[Traffic Source<br/>synthetic generator or .pcap] --> D[Detection Engine<br/>rules + statistics]
     D --> A[Alerts]
     A --> M[ATT&CK for ICS<br/>technique mapping]
-    M --> T[AI Triage<br/>Claude]
-    T --> E[Enriched Incidents]
-    E --> R[Ranked Analyst Report]
+    M --> C[Correlate<br/>alerts → incidents]
+    C --> T[AI Triage<br/>Claude]
+    T --> R[Ranked Analyst Report<br/>terminal · Markdown · JSON]
 ```
 
 ## Quickstart
@@ -53,8 +53,18 @@ labeled **`[MOCK]`** deterministic triage; with a key, triage is performed by
 Claude (`claude-opus-4-8`, override via `ICS_SENTINEL_MODEL`) and labeled
 **`[AI]`**.
 
-Useful flags: `--scenario unauthorized_write` (repeatable; default all),
-`--show-traffic` to print the raw frame stream, `--duration`, `--seed`.
+### Flags
+
+| Flag | Effect |
+|---|---|
+| `--scenario NAME` | Inject one attack scenario (repeatable; default = all). |
+| `--benign` | Clean baseline, no attacks — proves zero false positives. |
+| `--baseline` | Learn scan/flood thresholds from a clean sample instead of static config. |
+| `--pcap FILE` | Analyze a real Modbus TCP capture instead of synthetic traffic (needs `scapy`: `pip install 'ics-sentinel[pcap]'`). |
+| `--output PATH` | Also write the report to `.md` or `.json` (SIEM-shaped). |
+| `--plain` | Force the plain-text report (no `rich` panels). |
+| `--show-traffic` | Print the raw frame stream before the report. |
+| `--duration` / `--seed` | Length of the simulated window / RNG seed. |
 
 ## Threat model
 
@@ -73,9 +83,13 @@ arbitrary Modbus frames.
 | `recon_scan` | 160 register/unit probes in ~4s | R3 distinct-points window | T0846 Remote System Discovery |
 | `malformed_frame` | Illegal function codes, corrupt PDU | R4 structural validation | T0814 Denial of Service |
 | `replay_flood` | Identical command 40×/s (byte-identical replay) | R5 statistical write-rate baseline | T0814 Denial of Service, T0855 |
+| `response_spoof` | Frozen tank-level injected over real polls (Stuxnet-style) | R6 conflicting-duplicate response | T0856 Spoof Reporting Message |
 
 Detection never reads the generator's ground-truth labels — alerts are earned
 from the traffic, and a test proves relabeling frames changes nothing.
+Related alerts are then **correlated by source into incidents** (one actor's
+scan→write→flood is one incident, not ten tickets), which is the unit the AI
+triages — fewer, richer LLM calls.
 
 ## Sample output
 
@@ -83,27 +97,27 @@ Real run of `python -m ics_sentinel.demo` (mock mode, plain renderer; the
 `rich` version draws the same content in colored severity-ranked panels):
 
 ```
-[1/4] Generated 60s of Modbus TCP traffic with scenarios: unauthorized_write, dangerous_setpoint, recon_scan, malformed_frame, replay_flood
-      387 frames — 340 reads / 45 writes / 2 illegal — sources: 10.0.0.66 (205), 10.0.0.10 (180), 10.0.0.11 (2)
-[2/4] Detection engine raised 10 alert(s)
-[3/4] Mapped to MITRE ATT&CK for ICS: T0814, T0831, T0836, T0846, T0855
-[4/4] Triage mode: MOCK  (set ANTHROPIC_API_KEY for AI triage)
+[1/5] Generated 60s of Modbus TCP traffic with scenarios: unauthorized_write, dangerous_setpoint, recon_scan, malformed_frame, replay_flood, response_spoof
+      396 frames — 349 reads / 45 writes / 2 illegal — sources: 10.0.0.66 (205), 10.0.0.10 (189), 10.0.0.11 (2)
+[2/5] Detection engine raised 11 alert(s)
+[3/5] Mapped to MITRE ATT&CK for ICS: T0814, T0831, T0836, T0846, T0855, T0856
+[4/5] Correlated into 3 incident(s) (11 alerts → 3 triage calls)
+[5/5] Triage mode: MOCK  (set ANTHROPIC_API_KEY for AI triage)
 
 EXECUTIVE SUMMARY
-10 alert(s) (1 Critical, 5 High, 4 Medium) ... Activity from 10.0.0.66 forms a
-coherent intrusion: reconnaissance and/or direct process commands from a host
-with no business issuing them. Recommended priority: isolate 10.0.0.66, verify
-PLC state, then investigate any anomalies from authorized hosts.
+3 incident(s) (1 Critical, 2 High) comprising 11 alert(s), from 10.0.0.10,
+10.0.0.11, 10.0.0.66. Activity from 10.0.0.66 forms a coherent intrusion:
+reconnaissance and/or direct process commands from a host with no business
+issuing them. Recommended priority: isolate 10.0.0.66, verify PLC state, then
+investigate any anomalies from authorized hosts.
 
 ------------------------------------------------------------------------------
-[CRITICAL] ALT-003 — Process safety violation [MOCK]
-  When:       2026-01-05 08:00:19 UTC
-  Flow:       10.0.0.11 -> 10.0.0.21
-  Command:    Write Single Register unit 2 addr 40002 values [200]
-  Detection:  Write of 200 to register 40002 on 10.0.0.21 [unit 2] is outside
+[CRITICAL] INC-02 — actor 10.0.0.11, 1 alert(s) [MOCK]
+  Window:     2026-01-05 08:00:18 UTC -> 08:00:18
+  Alert:      ALT-003 08:00:18 Process safety violation — Write Single Register
+              → 10.0.0.21 [unit 2] addr 40002 values [200] [T0836, T0831]
+              Write of 200 to register 40002 on 10.0.0.21 [unit 2] is outside
               the safe operating range 20–90.
-  ATT&CK:     T0836 Modify Parameter [Impair Process Control]
-  ATT&CK:     T0831 Manipulation of Control [Impact]
   Severity:   Critical
   Operator:   A command set Write Single Register at 10.0.0.21 to 200, far
               outside the safe operating range. If the controller obeys it,
@@ -114,6 +128,8 @@ PLC state, then investigate any anomalies from authorized hosts.
               forensic review
   ...
 ```
+
+The full mock-mode run is saved at [`demo/sample-report.md`](demo/sample-report.md).
 
 ## The simulated plant
 
@@ -138,6 +154,7 @@ detection thresholds live in [`ics_sentinel/config.py`](ics_sentinel/config.py).
 | 4 | MITRE ATT&CK for ICS mapping | ✅ |
 | 5 | AI triage layer (Claude, with mock fallback) | ✅ |
 | 6 | Ranked incident report + one-command demo | ✅ |
+| v1.1 | T0856 spoof rule, learned baselines, incident correlation, structured-output triage, real `.pcap` ingestion, MD/JSON export | ✅ |
 
 ## Scope & limitations / what I'd build next
 
@@ -145,19 +162,20 @@ This is deliberately a weekend-sized build. Honest boundaries:
 
 - **Modbus TCP only.** DNP3, S7comm, and OPC-UA are future work; the frame
   model was designed so a new protocol slots in behind the same detections.
-- **Synthetic traffic is the primary source.** A `scapy`-based pcap ingestion
-  path that populates the same `ModbusFrame` dataclass is the natural next
-  step (everything downstream is already source-agnostic).
+- **Synthetic traffic is the primary source**, but real `.pcap` captures work
+  too (`--pcap`, via the optional `scapy` extra) — they populate the same
+  `ModbusFrame` objects, so the whole pipeline is source-agnostic.
 - **Statistical baselines, not trained ML.** The frequency rule uses a
-  leave-one-out mean+3σ bound; a `--baseline` mode that learns thresholds
-  from a clean capture would be the first upgrade.
+  leave-one-out mean+3σ bound; `--baseline` additionally learns thresholds
+  from a clean capture. A trained-model detector is still future work.
 - **Attack frames don't feed back into the physics.** Detection works on
-  traffic, not consequences; closing that loop would enable detection of
-  *stealthy* manipulation (e.g. T0856 spoofed responses).
+  traffic, not consequences. The T0856 spoof rule catches *injected*
+  conflicting responses on the wire, but a controller acting on a stealthily
+  manipulated value (with no wire conflict) would need a process-model check.
 - **In-memory, single-shot analysis.** No streaming daemon, no database, no
   alert state across runs — right-sized for a demo, wrong-sized for a plant.
-- Alert correlation is minimal (dedup + one executive summary); grouping
-  alerts into multi-stage incidents before triage would cut LLM calls further.
+- **Correlation is by source IP.** Good enough to group one actor's campaign;
+  multi-host coordinated attacks would need a richer correlation model.
 
 See [`DESIGN.md`](DESIGN.md) for why each detection exists and why it maps to
 its ATT&CK technique.

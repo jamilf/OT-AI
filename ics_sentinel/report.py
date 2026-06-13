@@ -111,6 +111,29 @@ def _render_rich(incidents, results, summary, mode) -> None:
     if not incidents:
         return
 
+    # At-a-glance overview table (the "dashboard" view), ranked.
+    overview = Table(title="Incidents (ranked)", box=box.ROUNDED, expand=True)
+    overview.add_column("Incident", style="bold")
+    overview.add_column("Severity")
+    overview.add_column("Actor")
+    overview.add_column("Alerts", justify="right")
+    overview.add_column("Rules")
+    overview.add_column("ATT&CK")
+    for incident, result in _ranked(incidents, results):
+        sev_style = SEVERITY_COLORS.get(result.severity, "bold")
+        technique_ids = sorted(
+            {t.technique_id for a in incident.alerts for t in a.techniques}
+        )
+        overview.add_row(
+            incident.id,
+            Text(result.severity, style=sev_style),
+            incident.src_ip,
+            str(len(incident.alerts)),
+            Text(", ".join(incident.rule_ids)),
+            Text(", ".join(technique_ids)),
+        )
+    console.print(overview)
+
     for incident, result in _ranked(incidents, results):
         sev_style = SEVERITY_COLORS.get(result.severity, "bold")
 
