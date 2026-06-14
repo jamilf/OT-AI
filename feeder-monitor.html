@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Distribution Feeder Monitor — a trade build by Jamil Flores</title>
+<meta name="description" content="An extra-low-voltage (battery/USB) feeder-monitoring build by Jamil Flores: senses voltage, current and temperature on a simulated feeder and raises a SCADA-style alarm — documented to AS/NZS standards with a single-line diagram, safe-isolation procedure and risk assessment. No mains wiring.">
+<meta name="author" content="Jamil Flores">
+<meta name="theme-color" content="#14161b">
+<meta property="og:title" content="Distribution Feeder Monitor — a trade build by Jamil Flores">
+<meta property="og:description" content="A hands-on extra-low-voltage build, documented to AS/NZS standards: build circuits, measure, work safely, read single-line diagrams. Battery/USB powered — no mains wiring.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z' fill='%2314161b' stroke='%2333a35a' stroke-width='2'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='%232ECC71' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<noscript>
+<style>[data-animate]{opacity:1!important;transform:none!important;filter:none!important;}</style>
+</noscript>
+</head>
+<body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<nav class="site-nav" aria-label="Site">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html">
+      <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z" fill="none" stroke="#33a35a" stroke-width="2.5"/>
+        <path d="M10 16.5l4 4 8-9" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Jamil Flores
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="feeder-monitor.html" class="is-active">The Build</a>
+      <a href="learn.html">Learn</a>
+      <a class="nav-cta" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</nav>
+<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+<header class="docs-hero app-hero">
+  <div class="wrap">
+    <div class="hero-badge hero-enter" style="--d:.05s">
+      <span class="pulse-dot" aria-hidden="true"></span>
+      <span>trade build &nbsp;·&nbsp; extra-low voltage &nbsp;·&nbsp; battery / USB &nbsp;·&nbsp; no mains wiring</span>
+    </div>
+    <h1 class="hero-enter" style="--d:.15s">Distribution <span class="accent">feeder monitor.</span></h1>
+    <p class="hero-enter" style="--d:.27s">
+      A hands-on extra-low-voltage build, documented to AS/NZS standards. It senses a simulated feeder —
+      voltage, current and temperature — and raises a SCADA-style alarm when a reading crosses a safe
+      limit. It shows I can build a circuit, measure it, work safely, and read and draw a single-line
+      diagram.
+    </p>
+    <div class="hero-ctas hero-enter" style="--d:.39s">
+      <a class="btn btn-amber" href="#safety">Read the safety method ↓</a>
+      <a class="btn btn-ghost" href="index.html">Back to home</a>
+    </div>
+    <div class="callout is-status hero-enter" style="--d:.5s">
+      <h3>Build in progress</h3>
+      <p>The design, single-line diagram and safety documentation are below. I'm adding step-by-step
+      build photos and real meter readings as I put it together — anything not yet measured is marked
+      clearly, not assumed.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================
+     WHAT & WHY
+     ============================================================ -->
+<section id="what" aria-labelledby="what-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>01 · What I'm building</p>
+    <h2 class="section-title" id="what-title" data-animate style="--d:.08s">A bench model of how a feeder is watched.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      Out on the network, a remote terminal unit (RTU) in a substation watches a feeder and flags an
+      over-current or over-temperature. I'm building a small, safe version of that on the bench: a
+      microcontroller reads an extra-low-voltage test circuit and trips an alarm past a threshold. It's
+      the trade in miniature — a circuit to build, readings to take, protection logic, a diagram to
+      draw, and a safe way to work on it.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SINGLE-LINE DIAGRAM (infographic)
+     ============================================================ -->
+<section id="sld" aria-labelledby="sld-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>02 · The single-line diagram</p>
+    <h2 class="section-title" id="sld-title" data-animate style="--d:.08s">Drawn to AS/NZS conventions.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      One line per circuit, a logical top-to-bottom flow, an isolation point, and an earth — the way a
+      switchboard or substation one-liner is read on site (AS/NZS 60617 symbols).
+    </p>
+
+    <figure class="diagram" data-animate style="--d:.2s">
+      <svg viewBox="0 0 920 320" role="img" aria-label="Single-line diagram of the extra-low-voltage feeder-monitor rig: 230V GPO to a 5V plug-pack, through an isolator with lock and tag, to an ELV bus feeding a monitored circuit of fuse, current shunt, LED loads and a temperature sensor, with a microcontroller RTU model reading voltage, current and temperature and driving an alarm above threshold, returning to a 0V earth.">
+        <title>ELV feeder-monitor single-line diagram</title>
+        <!-- supply chain -->
+        <text class="dgm-sub" x="46" y="26" text-anchor="middle">230 V GPO</text>
+        <circle class="dgm-ln" cx="46" cy="56" r="15"/>
+        <text class="dgm-sub" x="46" y="61" text-anchor="middle">~</text>
+        <path class="dgm-ln" d="M61 56 H110"/>
+        <rect class="dgm-box" x="110" y="40" width="118" height="32" rx="3"/>
+        <text class="dgm-lbl" x="169" y="60" text-anchor="middle">PLUG-PACK 5 V</text>
+        <path class="dgm-ln" d="M228 56 H300"/>
+        <!-- isolator + lock/tag -->
+        <circle class="dgm-node" cx="300" cy="56" r="3"/>
+        <path class="dgm-ln" d="M305 60 L332 44"/>
+        <circle class="dgm-node" cx="338" cy="56" r="3"/>
+        <rect class="dgm-warn" x="312" y="22" width="14" height="9" rx="1"/>
+        <path class="dgm-warn" d="M315 22 a4 4 0 0 1 8 0"/>
+        <text class="dgm-sub" x="322" y="86" text-anchor="middle">ISOLATE · LOCK + TAG</text>
+        <path class="dgm-ln" d="M338 56 H470"/>
+        <!-- ELV bus -->
+        <circle class="dgm-node" cx="470" cy="56" r="3.5"/>
+        <text class="dgm-sub" x="486" y="50">ELV BUS</text>
+        <!-- 5V feed down to RTU -->
+        <path class="dgm-ln" d="M169 72 V208"/>
+        <text class="dgm-sub" x="150" y="150">5 V</text>
+        <!-- monitored circuit (live) -->
+        <path class="dgm-live" d="M470 56 V168 H840"/>
+        <rect class="dgm-box" x="505" y="156" width="42" height="24" rx="2"/>
+        <path class="dgm-ln" d="M507 168 H545"/>
+        <text class="dgm-sub" x="526" y="150" text-anchor="middle">FUSE</text>
+        <rect class="dgm-box" x="587" y="156" width="46" height="24" rx="2"/>
+        <text class="dgm-sub" x="610" y="150" text-anchor="middle">SHUNT</text>
+        <!-- LED load symbol -->
+        <path class="dgm-ln" d="M690 160 L690 176 L706 168 Z" fill="none"/>
+        <path class="dgm-ln" d="M706 158 V178"/>
+        <text class="dgm-sub" x="700" y="150" text-anchor="middle">LED LOADS</text>
+        <!-- temp sensor -->
+        <path class="dgm-ln" d="M730 168 V196"/>
+        <rect class="dgm-box" x="690" y="196" width="86" height="30" rx="3"/>
+        <text class="dgm-lbl" x="733" y="215" text-anchor="middle">TEMP °C</text>
+        <!-- return + earth -->
+        <circle class="dgm-node" cx="840" cy="168" r="3"/>
+        <path class="dgm-ln" d="M840 168 V250 H470"/>
+        <circle class="dgm-node" cx="470" cy="250" r="3"/>
+        <path class="dgm-earth" d="M470 250 V268"/>
+        <path class="dgm-earth" d="M458 268 H482 M462 273 H478 M466 278 H474"/>
+        <text class="dgm-sub" x="470" y="296" text-anchor="middle">0 V / EARTH</text>
+        <!-- RTU -->
+        <rect class="dgm-box" x="95" y="208" width="150" height="70" rx="4"/>
+        <text class="dgm-lbl" x="170" y="238" text-anchor="middle">RTU MODEL</text>
+        <text class="dgm-sub" x="170" y="256" text-anchor="middle">ESP32 / Arduino</text>
+        <!-- sense lines V / I / T into RTU top -->
+        <path class="dgm-sense" d="M470 120 L212 208"/>
+        <text class="dgm-sub" x="232" y="150">V</text>
+        <path class="dgm-sense" d="M610 180 L186 208"/>
+        <text class="dgm-sub" x="206" y="172">I</text>
+        <path class="dgm-sense" d="M733 226 L160 208"/>
+        <text class="dgm-sub" x="180" y="196">T</text>
+        <!-- alarm output -->
+        <path class="dgm-warn" d="M120 208 V150"/>
+        <rect class="dgm-warn" x="60" y="118" width="160" height="32" rx="4" fill="none"/>
+        <text class="dgm-warntext" x="140" y="138" text-anchor="middle">ALARM &#9656; over threshold</text>
+      </svg>
+      <figcaption>Extra-low-voltage test rig — everything downstream of a plug-pack/USB supply. Not connected to fixed mains wiring.</figcaption>
+    </figure>
+
+    <div class="photo-grid" data-animate style="--d:.24s">
+      <div class="photo-slot">photo: breadboard build — to come</div>
+      <div class="photo-slot">photo: meter reading V/I — to come</div>
+      <div class="photo-slot">photo: alarm tripping — to come</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     GRID CONTEXT (infographic)
+     ============================================================ -->
+<section id="grid" aria-labelledby="grid-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>03 · Where it sits on the grid</p>
+    <h2 class="section-title" id="grid-title" data-animate style="--d:.08s">From 500 kV to my bench.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      The model stands in for the low-voltage end of a long chain. Voltages are typical NSW ranges —
+      they vary by network and location.
+    </p>
+
+    <figure class="diagram" data-animate style="--d:.2s">
+      <svg viewBox="0 0 960 150" role="img" aria-label="Grid context: transmission at 500 to 132 kV (Transgrid) steps down at a zone substation to 11 to 22 kV, then at a distribution substation to 415/230 volts along a feeder to customers; my bench model represents that low-voltage end at extra-low voltage.">
+        <title>Where the model sits on the grid</title>
+        <g>
+          <rect class="dgm-box" x="10" y="40" width="150" height="58" rx="6"/>
+          <text class="dgm-lbl" x="85" y="66" text-anchor="middle">TRANSMISSION</text>
+          <text class="dgm-sub" x="85" y="84" text-anchor="middle">500–132 kV · Transgrid</text>
+
+          <rect class="dgm-box" x="210" y="40" width="150" height="58" rx="6"/>
+          <text class="dgm-lbl" x="285" y="66" text-anchor="middle">ZONE SUBSTATION</text>
+          <text class="dgm-sub" x="285" y="84" text-anchor="middle">step down → 11–22 kV</text>
+
+          <rect class="dgm-box" x="410" y="40" width="160" height="58" rx="6"/>
+          <text class="dgm-lbl" x="490" y="66" text-anchor="middle">DISTRIBUTION SUB</text>
+          <text class="dgm-sub" x="490" y="84" text-anchor="middle">→ 415 / 230 V</text>
+
+          <rect class="dgm-box" x="620" y="40" width="150" height="58" rx="6"/>
+          <text class="dgm-lbl" x="695" y="66" text-anchor="middle">FEEDER → LOADS</text>
+          <text class="dgm-sub" x="695" y="84" text-anchor="middle">homes &amp; businesses</text>
+
+          <rect x="820" y="40" width="130" height="58" rx="6" fill="rgba(51,163,90,0.12)" stroke="#33a35a" stroke-width="1.6"/>
+          <text class="dgm-lbl" x="885" y="66" text-anchor="middle" fill="#3fbf6c">MY MODEL</text>
+          <text class="dgm-sub" x="885" y="84" text-anchor="middle">ELV bench rig</text>
+        </g>
+        <g class="dgm-ln">
+          <path d="M160 69 H210" marker-end="url(#ga)"/>
+          <path d="M360 69 H410" marker-end="url(#ga)"/>
+          <path d="M570 69 H620" marker-end="url(#ga)"/>
+          <path d="M770 69 H820" marker-end="url(#ga)"/>
+        </g>
+        <defs>
+          <marker id="ga" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#5b6675"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>Transmission → zone substation → distribution substation → feeder → the bench model.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================
+     SAFETY FIRST
+     ============================================================ -->
+<section id="safety" aria-labelledby="safety-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>04 · Safety first</p>
+    <h2 class="section-title" id="safety-title" data-animate style="--d:.08s">How I make it safe before I touch it.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      Even on an extra-low-voltage rig, I work the way the trade works. The sequence below follows
+      AS/NZS 4836 and the SafeWork NSW <em>Managing electrical risks in the workplace</em> Code of
+      Practice (WHS Regulation Part 4.7).
+    </p>
+
+    <ol class="proc-list" data-animate style="--d:.2s">
+      <li><strong>Identify &amp; notify.</strong> Know what I'm working on and tell anyone nearby.</li>
+      <li><strong>Shut down &amp; isolate.</strong> Operate the energy-isolating device — unplug the
+        plug-pack and open the rig's isolator. A functional switch is not an isolation point.</li>
+      <li><strong>Lock out &amp; tag out.</strong> Personal danger lock plus a danger tag. A tag is not
+        an isolation device — the lock is.</li>
+      <li><strong>Dissipate stored energy.</strong> Discharge any capacitor; treat the battery as a
+        live source and disconnect it.</li>
+      <li><strong>Prove dead — test before touch.</strong> Prove the tester on a known live source,
+        test the rig dead, then prove the tester live again.</li>
+      <li><strong>Then work.</strong> Only once it's proven dead and locked out.</li>
+    </ol>
+
+    <h3 class="section-sub" data-animate style="--d:.26s; margin-top:36px; font-weight:600; color:var(--text);">Risk assessment</h3>
+    <div class="table-wrap" data-animate style="--d:.3s">
+      <table class="data">
+        <thead><tr><th>Hazard</th><th>Risk</th><th>Control</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Lithium battery</strong></td><td>Overheat / fire if shorted</td><td>Protected cell in a holder, in-line fuse, never left charging unattended</td></tr>
+          <tr><td><strong>Short circuit</strong></td><td>Heat, damaged parts</td><td>Current-limited supply, correctly rated fuse, check polarity before power-up</td></tr>
+          <tr><td><strong>Soldering iron</strong></td><td>Burns, fumes</td><td>Iron stand, ventilation, eye protection, tidy bench</td></tr>
+          <tr><td><strong>Hand tools / cuts</strong></td><td>Minor injury</td><td>Sharp tools used correctly, cut away from the body, first-aid kit on hand</td></tr>
+          <tr><td><strong>Small parts</strong></td><td>Loss / mix-up</td><td>Labelled trays, dismantle methodically, store removed parts tagged</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout is-legal" data-animate style="--d:.34s">
+      <h3>Built entirely at extra-low voltage — no mains wiring</h3>
+      <p>The whole rig runs from a plug-pack/USB or battery and stays at or below <span class="mono">50 V
+      AC / 120 V DC</span>. In NSW, extra-low voltage is excluded from "electrical installation," so this
+      is not licensable electrical wiring work under the <span class="mono">Gas and Electricity
+      (Consumer Safety) Act 2017</span> and its 2018 Regulation — provided nothing connects to, modifies
+      or hardwires into fixed mains wiring.</p>
+      <p>Anything touching fixed wiring, switchboards, power points or a hardwired transformer is a
+      licensed electrician's job, and I leave it there. Knowing exactly where that line sits is part of
+      working safely.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     WHAT I LEARNED (documentation accordions)
+     ============================================================ -->
+<section id="learned" aria-labelledby="learned-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>05 · The theory behind it</p>
+    <h2 class="section-title" id="learned-title" data-animate style="--d:.08s">What the build taught me.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">Open any topic.</p>
+
+    <div class="docs-acc">
+      <details data-animate style="--d:.05s">
+        <summary>Measurement &amp; Ohm's law <span class="chip chip-green">numeracy</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>Voltage, current and resistance tie together as <span class="mono">V = I × R</span>, and
+          power as <span class="mono">P = V × I</span>. The monitor measures current as the small voltage
+          across a known shunt resistor, then works back to amps. Doing the sums by hand — series and
+          parallel loads, voltage drop — is the same numeracy the aptitude tests check.</p>
+        </div>
+      </details>
+      <details data-animate style="--d:.1s">
+        <summary>Protection &amp; earthing <span class="chip chip-green">protection</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>Circuit breakers and fuses interrupt overload and short-circuit current; protection relays
+          detect a fault and trip a breaker; RCDs catch earth leakage. Earthing gives fault current a
+          return path so protection operates inside the required disconnection time (for example 0.4 s
+          on a final subcircuit ≤32 A). The monitor's threshold-and-alarm is the same idea in miniature:
+          sense a fault condition, act on it.</p>
+        </div>
+      </details>
+      <details data-animate style="--d:.15s">
+        <summary>NSW grid structure <span class="chip chip-blue">network</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>Transgrid runs the high-voltage transmission network (around 500/330/220/132 kV) and feeds
+          the distribution businesses — Ausgrid, Endeavour and Essential. Zone substations step
+          sub-transmission down to about 11–22 kV; distribution substations step that down to 415 V
+          three-phase / 230 V single-phase. Feeders are the 11–33 kV lines between them. Sydney Trains
+          runs its own HV network plus 1500 V DC traction.</p>
+        </div>
+      </details>
+      <details data-animate style="--d:.2s">
+        <summary>Single-line diagrams &amp; wiring colours <span class="chip chip-blue">drawings</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>An SLD uses one line to stand for a multi-conductor circuit: supply → main switch →
+          protective devices → subcircuits, with the MEN link shown at the main switchboard and every
+          circuit labelled. Symbols follow AS/NZS 60617 — kept to one style, never mixed. Under AS/NZS
+          3000, earth is green/yellow, neutral is blue, and active is brown (among the permitted
+          colours). Reading and drawing these maps straight to pre-apprenticeship unit UEECD0051.</p>
+        </div>
+      </details>
+      <details data-animate style="--d:.25s">
+        <summary>Bill of materials <span class="chip chip-green">~A$60–120</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr><th>Part</th><th>Purpose</th><th>Approx. cost</th></tr></thead>
+              <tbody>
+                <tr><td><strong>ESP32 / Arduino</strong></td><td>Reads sensors, runs the threshold logic</td><td>A$15–40</td></tr>
+                <tr><td><strong>Current shunt + sensor</strong></td><td>Measures load current</td><td>A$5–15</td></tr>
+                <tr><td><strong>Temperature sensor</strong></td><td>Measures load temperature</td><td>A$3–8</td></tr>
+                <tr><td><strong>Breadboard, jumpers, LEDs, buzzer</strong></td><td>The test circuit &amp; alarm</td><td>A$15–30</td></tr>
+                <tr><td><strong>Multimeter</strong> (if needed)</td><td>Prove-test-prove &amp; verification</td><td>A$20–40</td></tr>
+                <tr><td><strong>Lockout hasp + danger tag</strong></td><td>Isolation method</td><td>A$10–20</td></tr>
+              </tbody>
+              <tfoot><tr><td>Total</td><td></td><td>~A$60–120</td></tr></tfoot>
+            </table>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     BONUS: THE DIGITAL GRID
+     ============================================================ -->
+<section id="bonus" aria-labelledby="bonus-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>06 · A small bonus</p>
+    <h2 class="section-title" id="bonus-title" data-animate style="--d:.08s">The digital side, briefly.</h2>
+    <div class="callout" data-animate style="--d:.16s">
+      <p>Because the monitor logs data like a real RTU, it touches the part of the grid that's going
+      digital — SCADA, RTUs and IEC 61850 substation messaging, which Australian utilities secure under
+      the AESCSF. That overlaps my cybersecurity study, so I built a separate software project to learn
+      it properly: <a href="project.html">ICS Sentinel — a self-driven OT-security project →</a>. It's
+      not trade work; it's how I keep learning. On the tools, the trade comes first.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     UNITS + TICKETS
+     ============================================================ -->
+<section id="proof" aria-labelledby="proof-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>07 · What this maps to</p>
+    <h2 class="section-title" id="proof-title" data-animate style="--d:.08s">Pre-apprenticeship units &amp; tickets.</h2>
+    <p class="section-sub" data-animate style="--d:.16s">
+      The build puts the foundational units I've completed into practice.
+    </p>
+    <p class="cred-extra" data-animate style="--d:.2s">
+      <span class="chip chip-skill">UEECD0007 — WHS → the safety method</span>
+      <span class="chip chip-skill">UEECD0019 — Fabrication → the build</span>
+      <span class="chip chip-skill">UEECD0051 — Drawings → the single-line diagram</span>
+      <span class="chip chip-skill">White Card</span>
+      <span class="chip chip-skill">First Aid</span>
+      <span class="chip chip-skill">Licence + car</span>
+    </p>
+
+    <div class="about-card" data-animate="pop" style="--d:.28s">
+      <div class="avatar" aria-hidden="true">JF</div>
+      <div class="about-body">
+        <p class="about-kicker">Electrical apprentice · Sydney</p>
+        <h3>Jamil Flores</h3>
+        <p>I'm after an electrical apprenticeship with one of the NSW networks or a group training
+        organisation that places into them. I've done my pre-apprenticeship, I've got my tickets, I'm
+        available now and happy to relocate regionally. I'd like to talk.</p>
+        <div class="about-actions">
+          <a class="btn btn-linkedin" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Connect on LinkedIn</a>
+          <a class="btn btn-ghost btn-sm" href="index.html">Back to home →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-title">Jamil Flores</p>
+    <p>Electrical apprenticeship candidate · Sydney, NSW · ready to start, and to see it through.</p>
+    <p class="foot-credit">© Jamil Flores ·
+      <a href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a> ·
+      <a href="index.html">Home</a></p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
