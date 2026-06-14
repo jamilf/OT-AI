@@ -284,52 +284,6 @@
      INTERACTION LAYER
      ======================================================== */
 
-  /* ---------- scroll progress bar ---------- */
-  var progress = document.getElementById("scroll-progress");
-  if (progress) {
-    var ticking = false;
-    function updateProgress() {
-      var h = document.documentElement;
-      var max = h.scrollHeight - h.clientHeight;
-      var p = max > 0 ? h.scrollTop / max : 0;
-      progress.style.transform = "scaleX(" + p + ")";
-      ticking = false;
-    }
-    window.addEventListener("scroll", function () {
-      if (!ticking) { requestAnimationFrame(updateProgress); ticking = true; }
-    }, { passive: true });
-    updateProgress();
-  }
-
-  /* ---------- pointer-tracked card glow ---------- */
-  if (!reducedMotion && window.matchMedia("(hover: hover)").matches) {
-    document.addEventListener("pointermove", function (e) {
-      var card = e.target.closest && e.target.closest(".glow-card");
-      if (!card) return;
-      var r = card.getBoundingClientRect();
-      card.style.setProperty("--mx", (e.clientX - r.left) + "px");
-      card.style.setProperty("--my", (e.clientY - r.top) + "px");
-    }, { passive: true });
-  }
-
-  /* ---------- hero parallax glow ---------- */
-  var glow = document.querySelector(".bg-glow");
-  if (glow && !reducedMotion && window.matchMedia("(hover: hover)").matches) {
-    var gx = 0, gy = 0, gTick = false;
-    window.addEventListener("pointermove", function (e) {
-      gx = (e.clientX / window.innerWidth - 0.5) * 40;
-      gy = (e.clientY / window.innerHeight - 0.5) * 40;
-      if (!gTick) {
-        requestAnimationFrame(function () {
-          glow.style.marginLeft = gx + "px";
-          glow.style.marginTop = gy + "px";
-          gTick = false;
-        });
-        gTick = true;
-      }
-    }, { passive: true });
-  }
-
   /* ---------- interactive plant map ---------- */
   var simBtn = document.getElementById("sim-attack");
   var mapWrap = document.querySelector(".plant-map");

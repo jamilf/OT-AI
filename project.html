@@ -51,7 +51,6 @@
     </div>
   </div>
 </nav>
-<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
 <!-- ============================================================
      HERO
@@ -64,7 +63,7 @@
     </div>
 
     <p class="hero-enter project-framing" style="--d:.1s">
-      A project I built in my own time — how I learn, and that I finish.
+      A project I built in my own time. It shows how I learn, and that I finish what I start.
       <a href="index.html">← Back to my apprenticeship page</a>
     </p>
 
@@ -77,7 +76,7 @@
     </p>
 
     <div class="hook-stat hero-enter" style="--d:.52s" role="note">
-      <p><strong>Modbus has no authentication and no encryption</strong> — any device on the
+      <p><strong>Modbus has no authentication and no encryption.</strong> Any device on the
       network can command a PLC. The protocol will obey whoever speaks it first.</p>
     </div>
 
@@ -112,7 +111,7 @@
     <p class="section-sub" data-animate style="--d:.16s">
       Every number below is from a real default run
       (<span class="mono">python -m ics_sentinel.demo</span>, seed 42, 60-second window) and verified by tests.
-      Monitoring is fully passive — Sentinel reads a SPAN/TAP-style mirror of the traffic and
+      Monitoring is fully passive. Sentinel reads a SPAN/TAP-style mirror of the traffic and
       never injects a packet into the process.
     </p>
 
@@ -228,7 +227,7 @@
         <p class="stage-num">STAGE 05</p>
         <h3>Report</h3>
         <p class="stage-stat"><span data-count="1">1</span><small> summary</small></p>
-        <p>Ranked incident report — Critical first. One executive summary tells the incident story across all alerts.</p>
+        <p>Ranked incident report, Critical first. One executive summary tells the incident story across all alerts.</p>
       </div>
     </div>
 
@@ -253,12 +252,12 @@
     <h2 class="section-title" id="plant-title" data-animate style="--d:.08s">A water-treatment skid, watched end to end.</h2>
     <p class="section-sub" data-animate style="--d:.16s">
       Tank levels follow real pump physics (hysteresis control), so the baseline is physically
-      coherent — not random noise. Five attack scenarios, five rules that catch them.
+      coherent, not random noise. Five attack scenarios, five rules that catch them.
     </p>
 
     <div class="map-toolbar" data-animate style="--d:.05s">
       <button class="sim-btn" id="sim-attack" type="button">Simulate attack</button>
-      <span class="map-hint">Watch <span class="mono">10.0.0.66</span> try to reach PLC-2 — and get caught. Hover any node for details.</span>
+      <span class="map-hint">Watch <span class="mono">10.0.0.66</span> try to reach PLC-2, and get caught. Hover any node for details.</span>
     </div>
 
     <div class="plant-grid">
@@ -305,7 +304,7 @@
           <!-- HMI master -->
           <g class="map-node" style="--d:.1s" data-node
              data-name="HMI master" data-ip="10.0.0.10"
-             data-fact="The operator's screen. It only reads — polling both PLCs every 2 seconds — so any write claiming to come from here is automatically suspicious.">
+             data-fact="The operator's screen. It only reads, polling both PLCs every 2 seconds, so any write claiming to come from here is automatically suspicious.">
             <rect x="80" y="100" width="200" height="86" rx="10" fill="#232730" stroke="#333a45" stroke-width="1.5"/>
             <g stroke="#4fb877" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <rect x="100" y="118" width="30" height="20" rx="2"/>
@@ -319,7 +318,7 @@
           <!-- Engineering workstation -->
           <g class="map-node" style="--d:.22s" data-node
              data-name="Engineering workstation" data-ip="10.0.0.11"
-             data-fact="The only machine allowed to write to the PLCs — which is exactly why rule #2 still checks the values it sends. A trusted host can still be compromised.">
+             data-fact="The only machine allowed to write to the PLCs, which is exactly why rule #2 still checks the values it sends. A trusted host can still be compromised.">
             <rect x="80" y="280" width="200" height="100" rx="10" fill="#232730" stroke="#333a45" stroke-width="1.5"/>
             <g stroke="#4fb877" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <rect x="100" y="298" width="28" height="18" rx="2"/>
@@ -334,7 +333,7 @@
           <!-- PLC-1 -->
           <g class="map-node" style="--d:.34s" data-node
              data-name="PLC-1 · intake" data-ip="10.0.0.20"
-             data-fact="The controller running the intake pump. A small ruggedized computer that reads sensors and drives physical equipment — no keyboard, no antivirus, just logic.">
+             data-fact="The controller running the intake pump. A small ruggedized computer that reads sensors and drives physical equipment: no keyboard, no antivirus, just logic.">
             <rect x="640" y="100" width="200" height="86" rx="10" fill="#232730" stroke="#333a45" stroke-width="1.5"/>
             <g stroke="#4fb877" stroke-width="2" fill="none" stroke-linecap="round">
               <rect x="658" y="116" width="26" height="34" rx="2"/>
@@ -353,7 +352,7 @@
           <!-- PLC-2 -->
           <g class="map-node" style="--d:.46s" data-node
              data-name="PLC-2 · storage" data-ip="10.0.0.21"
-             data-fact="Controls the storage tank and its pump (register 40002, safe 20–90). This is the target of the Critical incident — a setpoint of 200 could overflow the tank.">
+             data-fact="Controls the storage tank and its pump (register 40002, safe 20–90). This is the target of the Critical incident: a setpoint of 200 could overflow the tank.">
             <rect x="640" y="270" width="200" height="110" rx="10" fill="#232730" stroke="#333a45" stroke-width="1.5"/>
             <g stroke="#4fb877" stroke-width="2" fill="none" stroke-linecap="round">
               <rect x="658" y="288" width="26" height="34" rx="2"/>
@@ -380,7 +379,7 @@
           <!-- attacker (outside the boundary) -->
           <g class="map-node" style="--d:.75s" data-node
              data-name="Attacker" data-ip="10.0.0.66"
-             data-fact="A compromised host sitting inside the OT network but outside the trust boundary. It has no business writing to a PLC — every packet it sends is hostile.">
+             data-fact="A compromised host sitting inside the OT network but outside the trust boundary. It has no business writing to a PLC; every packet it sends is hostile.">
             <circle class="attacker-glow" cx="180" cy="551" r="64" fill="rgba(214,69,65,0.18)"/>
             <rect x="80" y="512" width="200" height="78" rx="10" fill="#1f1620" stroke="#D64541" stroke-width="1.8"/>
             <g>
@@ -421,7 +420,7 @@
           <div class="matchup-row" style="--d:.15s">
             <div class="mu-cell mu-attack glow-card">
               <h4>Dangerous setpoint</h4>
-              <p>Pump setpoint forced to <strong>200%</strong> — from the <em>authorized</em> workstation (insider / compromised).</p>
+              <p>Pump setpoint forced to <strong>200%</strong>, from the <em>authorized</em> workstation (insider / compromised).</p>
               <div class="chips"><span class="chip chip-attack" title="T0836 — Modify Parameter (MITRE ATT&amp;CK for ICS)">T0836</span><span class="chip chip-attack" title="T0831 — Manipulation of Control (MITRE ATT&amp;CK for ICS)">T0831</span></div>
             </div>
             <div class="mu-vs" aria-hidden="true"></div>
@@ -477,7 +476,7 @@
     <!-- severity outcome -->
     <div class="severity-box" id="severity" data-animate style="--d:.1s">
       <div class="donut-wrap">
-        <svg viewBox="0 0 200 200" role="img" aria-label="Severity outcome donut chart: 1 critical, 5 high, 4 medium, 0 low — 10 alerts total.">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Severity outcome donut chart: 1 critical, 5 high, 4 medium, 0 low; 10 alerts total.">
           <circle cx="100" cy="100" r="80" fill="none" stroke="#232730" stroke-width="26"/>
           <circle class="donut-seg sev-glow" data-sev="0" data-label="Critical" data-count="1" cx="100" cy="100" r="80" stroke="#D64541" stroke-width="26"
                   stroke-dasharray="46.3 502.65" stroke-dashoffset="46.3"
@@ -533,7 +532,7 @@
     <p class="section-kicker" data-animate>03 · The analyst</p>
     <h2 class="section-title" id="triage-title" data-animate style="--d:.08s">Claude reads the alert so your operator doesn't have to.</h2>
     <p class="section-sub" data-animate style="--d:.16s">
-      The Critical incident from the default run, exactly as triaged — severity, ATT&amp;CK context,
+      The Critical incident from the default run, exactly as triaged: severity, ATT&amp;CK context,
       a plain-English operator view, and ordered response actions.
     </p>
 
@@ -565,7 +564,7 @@
 
     <p class="triage-note" data-animate style="--d:.2s">
       <span class="chip chip-blue">[AI]</span> triage by Claude &nbsp;·&nbsp;
-      <span class="chip chip-dim">[MOCK]</span> deterministic fallback — the demo never breaks without an API key.
+      <span class="chip chip-dim">[MOCK]</span> deterministic fallback, so the demo never breaks without an API key.
     </p>
   </div>
 </section>
@@ -581,11 +580,11 @@
     <div class="stat-strip" id="stats">
       <div class="stat-card glow-card" data-animate style="--d:.05s">
         <p class="big"><span data-count="0">0</span></p>
-        <p class="label">false positives on benign traffic — tested across seeds and a 10-minute stream</p>
+        <p class="label">false positives on benign traffic, tested across seeds and a 10-minute stream</p>
       </div>
       <div class="stat-card glow-card" data-animate style="--d:.13s">
         <p class="big"><span class="unit">40× → </span><span data-count="2">2</span></p>
-        <p class="label">replay flood coalesced into 2 alerts, not 41 — ~20× fewer LLM calls</p>
+        <p class="label">replay flood coalesced into 2 alerts, not 41: ~20× fewer LLM calls</p>
       </div>
       <div class="stat-card glow-card" data-animate style="--d:.21s">
         <p class="big"><span data-count="75">75</span></p>
@@ -593,7 +592,7 @@
       </div>
       <div class="stat-card glow-card" data-animate style="--d:.29s">
         <p class="big"><span data-count="0">0</span></p>
-        <p class="label">dependencies to run the demo — Python 3.11+ stdlib; <span class="mono">rich</span> + <span class="mono">anthropic</span> optional</p>
+        <p class="label">dependencies to run the demo: Python 3.11+ stdlib; <span class="mono">rich</span> + <span class="mono">anthropic</span> optional</p>
       </div>
       <div class="stat-card glow-card" data-animate style="--d:.37s">
         <p class="big"><span data-count="1">1</span></p>
@@ -619,7 +618,7 @@
         <p>ICS Sentinel was built end to end by Jamil Flores: a Modbus TCP protocol parser, a
         physics-coherent plant simulator, five detection rules holding <strong>0 false
         positives</strong> on benign traffic, MITRE ATT&amp;CK for ICS mapping, and a Claude-powered
-        triage layer with cost-aware alert coalescing — all pinned by 75 tests.</p>
+        triage layer with cost-aware alert coalescing, all pinned by 75 tests.</p>
         <div class="skills-strip" aria-label="Skills demonstrated">
           <span class="chip chip-skill">Modbus/TCP parsing</span>
           <span class="chip chip-skill">Detection engineering</span>
