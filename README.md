@@ -12,8 +12,11 @@ starts, not as the day job.
 
 Pure static files, zero dependencies, no build step:
 - `index.html` — apprenticeship-first homepage (the pitch recruiters land on)
-- `project.html` — the ICS Sentinel showcase (the technical proof)
-- `docs.html` — interactive replication guide
+- `feeder-monitor.html` — headline trade project: an extra-low-voltage
+  "distribution feeder monitor" build, documented to AS/NZS standards
+  (single-line diagram, safe-isolation method, risk assessment)
+- `project.html` — the ICS Sentinel software project (secondary, self-driven learning)
+- `docs.html` — interactive replication guide for ICS Sentinel
 - `learn.html` — documentation + ELI5 glossary
 - `apprenticeship.html` — redirect to `index.html` (legacy URL)
 - `styles.css`, `app.js`
