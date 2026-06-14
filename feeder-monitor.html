@@ -41,7 +41,6 @@
     </div>
   </div>
 </nav>
-<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
 <header class="docs-hero app-hero">
   <div class="wrap">
@@ -51,9 +50,7 @@
     </div>
     <h1 class="hero-enter" style="--d:.15s">Distribution <span class="accent">feeder monitor.</span></h1>
     <p class="hero-enter" style="--d:.27s">
-      A hands-on extra-low-voltage build, documented to AS/NZS standards. It senses a simulated feeder —
-      voltage, current and temperature — and raises a SCADA-style alarm when a reading crosses a safe
-      limit. It shows I can build a circuit, measure it, work safely, and read and draw a single-line
+      A hands-on extra-low-voltage build, documented to AS/NZS standards. It senses a simulated feeder (voltage, current and temperature) and raises a SCADA-style alarm when a reading crosses a safe limit. It shows I can build a circuit, measure it, work safely, and read and draw a single-line
       diagram.
     </p>
     <div class="hero-ctas hero-enter" style="--d:.39s">
@@ -63,8 +60,7 @@
     <div class="callout is-status hero-enter" style="--d:.5s">
       <h3>Build in progress</h3>
       <p>The design, single-line diagram and safety documentation are below. I'm adding step-by-step
-      build photos and real meter readings as I put it together — anything not yet measured is marked
-      clearly, not assumed.</p>
+      build photos and real meter readings as I put it together. Anything not yet measured is marked clearly, not assumed.</p>
     </div>
   </div>
 </header>
@@ -82,7 +78,7 @@
       Out on the network, a remote terminal unit (RTU) in a substation watches a feeder and flags an
       over-current or over-temperature. I'm building a small, safe version of that on the bench: a
       microcontroller reads an extra-low-voltage test circuit and trips an alarm past a threshold. It's
-      the trade in miniature — a circuit to build, readings to take, protection logic, a diagram to
+      the trade in miniature: a circuit to build, readings to take, protection logic, a diagram to
       draw, and a safe way to work on it.
     </p>
   </div>
@@ -96,7 +92,7 @@
     <p class="section-kicker" data-animate>02 · The single-line diagram</p>
     <h2 class="section-title" id="sld-title" data-animate style="--d:.08s">Drawn to AS/NZS conventions.</h2>
     <p class="section-sub" data-animate style="--d:.16s">
-      One line per circuit, a logical top-to-bottom flow, an isolation point, and an earth — the way a
+      One line per circuit, a logical top-to-bottom flow, an isolation point and an earth, the way a
       switchboard or substation one-liner is read on site (AS/NZS 60617 symbols).
     </p>
 
@@ -163,13 +159,13 @@
         <rect class="dgm-warn" x="60" y="118" width="160" height="32" rx="4" fill="none"/>
         <text class="dgm-warntext" x="140" y="138" text-anchor="middle">ALARM &#9656; over threshold</text>
       </svg>
-      <figcaption>Extra-low-voltage test rig — everything downstream of a plug-pack/USB supply. Not connected to fixed mains wiring.</figcaption>
+      <figcaption>Extra-low-voltage test rig. Everything sits downstream of a plug-pack/USB supply, with nothing wired to fixed mains.</figcaption>
     </figure>
 
     <div class="photo-grid" data-animate style="--d:.24s">
-      <div class="photo-slot">photo: breadboard build — to come</div>
-      <div class="photo-slot">photo: meter reading V/I — to come</div>
-      <div class="photo-slot">photo: alarm tripping — to come</div>
+      <div class="photo-slot">photo: breadboard build (to come)</div>
+      <div class="photo-slot">photo: meter reading V/I (to come)</div>
+      <div class="photo-slot">photo: alarm tripping (to come)</div>
     </div>
   </div>
 </section>
@@ -182,8 +178,7 @@
     <p class="section-kicker" data-animate>03 · Where it sits on the grid</p>
     <h2 class="section-title" id="grid-title" data-animate style="--d:.08s">From 500 kV to my bench.</h2>
     <p class="section-sub" data-animate style="--d:.16s">
-      The model stands in for the low-voltage end of a long chain. Voltages are typical NSW ranges —
-      they vary by network and location.
+      The model stands in for the low-voltage end of a long chain. Voltages are typical NSW ranges; they vary by network and location.
     </p>
 
     <figure class="diagram" data-animate style="--d:.2s">
@@ -242,13 +237,13 @@
 
     <ol class="proc-list" data-animate style="--d:.2s">
       <li><strong>Identify &amp; notify.</strong> Know what I'm working on and tell anyone nearby.</li>
-      <li><strong>Shut down &amp; isolate.</strong> Operate the energy-isolating device — unplug the
+      <li><strong>Shut down &amp; isolate.</strong> Operate the energy-isolating device: unplug the
         plug-pack and open the rig's isolator. A functional switch is not an isolation point.</li>
       <li><strong>Lock out &amp; tag out.</strong> Personal danger lock plus a danger tag. A tag is not
-        an isolation device — the lock is.</li>
+        an isolation device; the lock is.</li>
       <li><strong>Dissipate stored energy.</strong> Discharge any capacitor; treat the battery as a
         live source and disconnect it.</li>
-      <li><strong>Prove dead — test before touch.</strong> Prove the tester on a known live source,
+      <li><strong>Prove dead, then test before touch.</strong> Prove the tester on a known live source,
         test the rig dead, then prove the tester live again.</li>
       <li><strong>Then work.</strong> Only once it's proven dead and locked out.</li>
     </ol>
@@ -268,11 +263,11 @@
     </div>
 
     <div class="callout is-legal" data-animate style="--d:.34s">
-      <h3>Built entirely at extra-low voltage — no mains wiring</h3>
+      <h3>Built entirely at extra-low voltage, no mains wiring</h3>
       <p>The whole rig runs from a plug-pack/USB or battery and stays at or below <span class="mono">50 V
       AC / 120 V DC</span>. In NSW, extra-low voltage is excluded from "electrical installation," so this
       is not licensable electrical wiring work under the <span class="mono">Gas and Electricity
-      (Consumer Safety) Act 2017</span> and its 2018 Regulation — provided nothing connects to, modifies
+      (Consumer Safety) Act 2017</span> and its 2018 Regulation, provided nothing connects to, modifies
       or hardwires into fixed mains wiring.</p>
       <p>Anything touching fixed wiring, switchboards, power points or a hardwired transformer is a
       licensed electrician's job, and I leave it there. Knowing exactly where that line sits is part of
@@ -296,8 +291,7 @@
         <div class="acc-body">
           <p>Voltage, current and resistance tie together as <span class="mono">V = I × R</span>, and
           power as <span class="mono">P = V × I</span>. The monitor measures current as the small voltage
-          across a known shunt resistor, then works back to amps. Doing the sums by hand — series and
-          parallel loads, voltage drop — is the same numeracy the aptitude tests check.</p>
+          across a known shunt resistor, then works back to amps. Doing the sums by hand (series and parallel loads, voltage drop) is the same numeracy the aptitude tests check.</p>
         </div>
       </details>
       <details data-animate style="--d:.1s">
@@ -314,7 +308,7 @@
         <summary>NSW grid structure <span class="chip chip-blue">network</span><span class="chev" aria-hidden="true"></span></summary>
         <div class="acc-body">
           <p>Transgrid runs the high-voltage transmission network (around 500/330/220/132 kV) and feeds
-          the distribution businesses — Ausgrid, Endeavour and Essential. Zone substations step
+          the distribution businesses: Ausgrid, Endeavour and Essential. Zone substations step
           sub-transmission down to about 11–22 kV; distribution substations step that down to 415 V
           three-phase / 230 V single-phase. Feeders are the 11–33 kV lines between them. Sydney Trains
           runs its own HV network plus 1500 V DC traction.</p>
@@ -325,7 +319,7 @@
         <div class="acc-body">
           <p>An SLD uses one line to stand for a multi-conductor circuit: supply → main switch →
           protective devices → subcircuits, with the MEN link shown at the main switchboard and every
-          circuit labelled. Symbols follow AS/NZS 60617 — kept to one style, never mixed. Under AS/NZS
+          circuit labelled. Symbols follow AS/NZS 60617, kept to one style and never mixed. Under AS/NZS
           3000, earth is green/yellow, neutral is blue, and active is brown (among the permitted
           colours). Reading and drawing these maps straight to pre-apprenticeship unit UEECD0051.</p>
         </div>
@@ -361,11 +355,9 @@
     <p class="section-kicker" data-animate>06 · A small bonus</p>
     <h2 class="section-title" id="bonus-title" data-animate style="--d:.08s">The digital side, briefly.</h2>
     <div class="callout" data-animate style="--d:.16s">
-      <p>Because the monitor logs data like a real RTU, it touches the part of the grid that's going
-      digital — SCADA, RTUs and IEC 61850 substation messaging, which Australian utilities secure under
+      <p>Because the monitor logs data like a real RTU, it touches the part of the grid that's going digital: SCADA, RTUs and IEC 61850 substation messaging, which Australian utilities secure under
       the AESCSF. That overlaps my cybersecurity study, so I built a separate software project to learn
-      it properly: <a href="project.html">ICS Sentinel — a self-driven OT-security project →</a>. It's
-      not trade work; it's how I keep learning. On the tools, the trade comes first.</p>
+      it properly: <a href="project.html">ICS Sentinel — a self-driven OT-security project →</a>. It isn't trade work. It's how I keep learning, and on the tools the trade comes first.</p>
     </div>
   </div>
 </section>

@@ -65,17 +65,18 @@ svg { display: block; }
 
 .mono { font-family: var(--font-mono); }
 
-/* ---------- ambient background: quiet steel drafting grid ---------- */
+/* ---------- ambient background: PLC ladder-logic schematic ---------- */
 .bg-grid {
   position: fixed;
   inset: 0;
   z-index: -2;
   background-image:
-    linear-gradient(rgba(120, 140, 170, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 140, 170, 0.05) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 150% 120% at 50% 30%, #000 55%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 150% 120% at 50% 30%, #000 55%, transparent 100%);
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27300%27%20height%3D%27150%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2333a35a%27%20stroke-opacity%3D%270.10%27%20stroke-width%3D%271.5%27%3E%3Cpath%20d%3D%27M0%200V150%27%2F%3E%3Cpath%20d%3D%27M0%2075H66%27%2F%3E%3Cpath%20d%3D%27M70%2064V86M80%2064V86%27%2F%3E%3Cpath%20d%3D%27M84%2075H176%27%2F%3E%3Cpath%20d%3D%27M180%2061A15%2015%200%200%200%20180%2089%27%2F%3E%3Cpath%20d%3D%27M206%2061A15%2015%200%200%201%20206%2089%27%2F%3E%3Cpath%20d%3D%27M210%2075H300%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%2333a35a%27%20fill-opacity%3D%270.14%27%3E%3Ccircle%20cx%3D%270%27%20cy%3D%2775%27%20r%3D%272.4%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+    linear-gradient(rgba(120, 140, 170, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 140, 170, 0.04) 1px, transparent 1px);
+  background-size: 300px 150px, 60px 60px, 60px 60px;
+  mask-image: radial-gradient(ellipse 150% 125% at 50% 32%, #000 58%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 150% 125% at 50% 32%, #000 58%, transparent 100%);
 }
 /* faint static depth wash (no animation) */
 .bg-glow {
@@ -1212,19 +1213,6 @@ footer .foot-title { color: var(--text-dim); font-weight: 700; margin-bottom: 6p
 /* ============================================================
    INTERACTION LAYER
    ============================================================ */
-/* scroll progress bar */
-.scroll-progress {
-  position: fixed;
-  top: 58px; left: 0;
-  width: 100%;
-  height: 3px;
-  z-index: 49;
-  background: linear-gradient(90deg, var(--blue), #3fbf6c);
-  transform-origin: left;
-  transform: scaleX(0);
-  pointer-events: none;
-}
-
 /* keyboard focus — visible everywhere (quality floor) */
 a:focus-visible,
 button:focus-visible,
@@ -1687,7 +1675,6 @@ button:focus-visible,
   .spine-packet, .mp, .mp-attack, .impact-ring, .crit-ring,
   .hero-line .packet, .cursor, .triage-cursor { display: none !important; }
   .sev-row .bar { transform: scaleX(1) !important; }
-  .scroll-progress { display: none !important; }
   .sld-pulse { display: none !important; }
 }
 
