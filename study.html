@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'">
+<meta name="robots" content="index,follow">
 <title>Study tool — Jamil Flores · Aptitude & trade-knowledge prep</title>
 <meta name="description" content="A spaced-repetition study tool Jamil Flores built to prepare for the NSW network aptitude assessments. Electrical-knowledge flashcards, every fact pinned to a verified source, with progress saved in the browser.">
 <meta name="keywords" content="electrical apprenticeship study, aptitude test prep NSW, spaced repetition, Ausgrid Endeavour Essential Transgrid, Jamil Flores">
@@ -15,6 +17,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<link rel="canonical" href="https://jamilf.github.io/OT-AI/study.html">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="styles.css">
 <noscript>
 <style>
@@ -23,6 +28,7 @@
 </noscript>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-glow" aria-hidden="true"></div>
@@ -70,7 +76,7 @@
   </div>
 </header>
 
-<main>
+<main id="main" tabindex="-1">
 
 <section aria-labelledby="tool-title">
   <div class="wrap">
@@ -91,6 +97,7 @@
         <button id="mode-knowledge" class="mode-tab is-active" role="tab" aria-selected="true" type="button">Knowledge</button>
         <button id="mode-aptitude" class="mode-tab" role="tab" aria-selected="false" type="button">Aptitude</button>
       </div>
+      <div id="storage-warn" class="storage-warn" role="alert" hidden></div>
 
       <div id="sr-root">
       <!-- DASHBOARD -->
@@ -194,7 +201,7 @@
         <!-- DRILLS -->
         <div id="apt-drills" class="apt-view" hidden>
           <div class="session-top">
-            <span class="session-progress" id="drill-progress">0 correct</span>
+            <span class="session-progress" id="drill-progress" role="status" aria-live="polite">0 correct</span>
             <button id="drill-end" class="btn btn-ghost btn-sm" type="button">End drills</button>
           </div>
           <div id="drill-area"></div>
@@ -203,8 +210,8 @@
         <!-- MOCK -->
         <div id="apt-mock" class="apt-view" hidden>
           <div class="session-top">
-            <span class="mock-timer" id="mock-timer">15:00</span>
-            <span class="session-progress" id="mock-progress">Q 1 of 20</span>
+            <span class="mock-timer" id="mock-timer" role="timer" aria-label="Time remaining">15:00</span>
+            <span class="session-progress" id="mock-progress" aria-live="polite">Q 1 of 20</span>
             <button id="mock-submit" class="btn btn-ghost btn-sm" type="button">Submit now</button>
           </div>
           <div class="progress-bar" aria-hidden="true"><span id="mock-fill"></span></div>

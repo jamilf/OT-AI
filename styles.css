@@ -2021,3 +2021,19 @@ table.data tfoot td { color: var(--text); font-weight: 600; border-bottom: none;
 .apt-focus { font-size: 14px; color: var(--amber); margin-top: 4px; }
 .apt-diag-note { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
 .apt-time { font-size: 13px; color: var(--text-dim); margin-top: 12px; font-family: var(--font-mono); }
+
+/* ---- skip link (a11y) ---- */
+.skip-link {
+  position: absolute; left: 8px; top: -48px; z-index: 1000;
+  background: var(--blue); color: #fff; padding: 9px 16px; border-radius: 8px;
+  font-weight: 600; font-size: 14px; text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus { top: 8px; outline: 2px solid var(--hazard); outline-offset: 2px; }
+
+/* ---- storage warning banner ---- */
+.storage-warn {
+  margin-bottom: 18px; padding: 12px 16px; border-radius: var(--radius);
+  background: var(--amber-soft); border: 1px solid rgba(233, 194, 10, 0.45);
+  color: var(--text); font-size: 14px; line-height: 1.5;
+}

@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'">
+<meta name="robots" content="index,follow">
 <title>The Project — ICS Sentinel, by Jamil Flores</title>
 <meta name="description" content="ICS Sentinel — a self-built project by Jamil Flores that monitors industrial control networks (PLCs, SCADA-style OT), detects attacks on Modbus TCP, and triages them. The technical proof behind my electrical-apprenticeship pitch.">
 <meta name="author" content="Jamil Flores">
@@ -14,6 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<link rel="canonical" href="https://jamilf.github.io/OT-AI/project.html">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="styles.css">
 <noscript>
 <style>
@@ -30,6 +35,7 @@
 </noscript>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-glow" aria-hidden="true"></div>
@@ -100,7 +106,7 @@
   </div>
 </header>
 
-<main>
+<main id="main" tabindex="-1">
 
 <!-- ============================================================
      PIPELINE FUNNEL

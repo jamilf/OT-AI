@@ -406,3 +406,10 @@
     }
   }
 })();
+
+/* Service worker registration (offline / installable). External file keeps CSP strict. */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
