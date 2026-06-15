@@ -1904,3 +1904,85 @@ table.data tfoot td { color: var(--text); font-weight: 600; border-bottom: none;
   .grade-row { grid-template-columns: repeat(2, 1fr); }
   .flashcard { padding: 24px 20px; }
 }
+
+/* ============================================================
+   APTITUDE MODE — mode switch, MCQ, mock timer, results
+   ============================================================ */
+.mode-switch {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 24px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.mode-tab {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.mode-tab:hover { color: var(--text); }
+.mode-tab.is-active { color: #fff; background: var(--blue); }
+
+.chip-amber { color: var(--amber); background: var(--amber-soft); border: 1px solid rgba(233, 194, 10, 0.35); }
+
+.apt-cat-levels { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+.lvl-chip {
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim);
+  background: var(--bg-panel); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px;
+}
+.apt-hint { margin-top: 16px; font-size: 13.5px; color: var(--text-faint); max-width: 640px; line-height: 1.6; }
+
+.apt-q { font-family: var(--font-display); font-size: clamp(19px, 2.6vw, 24px); font-weight: 600; color: var(--text); line-height: 1.35; margin: 14px 0 18px; }
+.apt-passage { padding: 18px 20px; margin-bottom: 16px; }
+.apt-passage h4 { font-size: 15px; margin-bottom: 8px; color: var(--text); }
+.apt-passage p { color: var(--text-dim); font-size: 14.5px; line-height: 1.65; }
+
+.mcq-list { display: flex; flex-direction: column; gap: 10px; }
+.mcq-option {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  font-family: var(--font-sans); font-size: 15px; color: var(--text);
+  background: var(--bg-panel); border: 1px solid var(--line); border-radius: 9px;
+  padding: 13px 16px; cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.12s ease;
+}
+.mcq-option:hover:not([disabled]) { border-color: var(--blue); transform: translateY(-1px); }
+.mcq-option .mcq-key {
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: 5px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-faint);
+  background: var(--bg-deep); border: 1px solid var(--line);
+}
+.mcq-option.is-selected { border-color: var(--blue); background: var(--blue-soft); }
+.mcq-option.is-correct { border-color: var(--green); background: var(--green-soft); color: var(--text); }
+.mcq-option.is-wrong { border-color: var(--red); background: var(--red-soft); }
+.mcq-option[disabled] { cursor: default; }
+
+.mcq-explain {
+  margin-top: 16px; padding: 14px 16px; font-size: 14px; color: var(--text-dim); line-height: 1.6;
+  background: var(--bg-panel); border: 1px solid var(--line-soft); border-radius: var(--radius);
+}
+.mcq-explain .bi-src { margin-top: 8px; font-size: 12px; color: var(--text-faint); }
+.apt-next-wrap { margin-top: 18px; }
+
+.mock-timer { font-family: var(--font-mono); font-size: 20px; font-weight: 500; color: var(--text); }
+.mock-timer.is-warning { color: var(--amber); }
+.mock-timer.is-critical { color: var(--red); }
+.mock-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; }
+
+.apt-results-table { margin-top: 6px; }
+.apt-review-h { margin: 26px 0 14px; font-size: 16px; }
+.browse-item .bi-correct { color: var(--green); }
+
+@media (max-width: 520px) {
+  .mode-switch { display: flex; }
+  .mode-tab { flex: 1; text-align: center; }
+}

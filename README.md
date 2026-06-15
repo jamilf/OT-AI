@@ -18,12 +18,17 @@ Pure static files, zero dependencies, no build step:
 - `project.html` — the ICS Sentinel software project (secondary, self-driven learning)
 - `docs.html` — interactive replication guide for ICS Sentinel
 - `learn.html` — documentation + ELI5 glossary
-- `study.html` — a spaced-repetition (SM-2) study tool for the NSW network
-  aptitude prep; facts pinned to a verified appendix, progress saved in the
-  browser with JSON export/import
+- `study.html` — a study tool for the NSW network aptitude prep, with two modes:
+  **Knowledge** (spaced-repetition SM-2 flashcards, facts pinned to a verified
+  appendix) and **Aptitude** (procedurally-generated numeracy, sequence and
+  mechanical-reasoning questions with computed answers, plus hand-authored
+  reading and safety items; adaptive difficulty, interleaved drills, and a timed
+  mock exam). Progress saved in the browser with JSON export/import
 - `apprenticeship.html` — redirect to `index.html` (legacy URL)
 - `styles.css`, `app.js`
-- `study.js`, `study-data.js` — study-tool engine and its verified card deck
+- `study.js`, `study-data.js` — Knowledge engine and its verified card deck
+- `aptitude.js`, `aptitude-data.js` — Aptitude engine (generators + adaptive
+  difficulty + mock exam) and its verified authored reading/safety items
 
 View it locally:
 

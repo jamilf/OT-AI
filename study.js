@@ -298,9 +298,11 @@
         data.state = incoming.state || data.state;
         if (incoming.stats) { data.stats = incoming.stats; data.stats.byDay = data.stats.byDay || {}; }
         if (incoming.settings) { data.settings = incoming.settings; }
+        if (incoming.aptitude) { data.aptitude = incoming.aptitude; }
         save();
         renderChips();
         renderDash();
+        if (window.AptitudeTool) { window.AptitudeTool.refresh(); }
         flash("Progress imported.");
       } catch (e) {
         flash("Couldn't read that file.");
@@ -346,4 +348,12 @@
 
   renderChips();
   renderDash();
+
+  /* ---- bridge for the aptitude module (shares one data object + save path) ---- */
+  window.StudyTool = {
+    showSR: show,
+    refreshDash: function () { renderChips(); renderDash(); },
+    getData: function () { return data; },
+    save: save
+  };
 })();
