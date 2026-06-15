@@ -1,0 +1,13 @@
+{
+  "name": "Jamil Flores — Study tool",
+  "short_name": "Study tool",
+  "description": "Spaced-repetition knowledge deck and aptitude practice for the NSW network apprenticeship assessments.",
+  "start_url": "study.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#14161b",
+  "theme_color": "#14161b",
+  "icons": [
+    { "src": "icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any maskable" }
+  ]
+}

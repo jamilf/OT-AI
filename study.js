@@ -41,8 +41,19 @@
       return d;
     } catch (e) { return defaultData(); }
   }
+  var storageWarned = false;
+  function notifyStorage() {
+    if (storageWarned) { return; }
+    storageWarned = true;
+    var el = document.getElementById("storage-warn");
+    if (el) {
+      el.textContent = "Heads up: progress can't be saved on this device — storage may be full or disabled. Use Export to keep a backup.";
+      el.hidden = false;
+    }
+  }
   function save() {
-    try { window.localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+    try { window.localStorage.setItem(KEY, JSON.stringify(data)); return true; }
+    catch (e) { notifyStorage(); return false; }
   }
 
   var data = load();
@@ -400,6 +411,12 @@
       // default button behaviour handles it
     }
   });
+
+  /* one-time storage probe: warn early if writes will fail */
+  (function () {
+    try { window.localStorage.setItem("__probe__", "1"); window.localStorage.removeItem("__probe__"); }
+    catch (e) { notifyStorage(); }
+  })();
 
   renderChips();
   renderDash();

@@ -27,9 +27,14 @@ Pure static files, zero dependencies, no build step:
   (true/false/cannot-say)** and safety — generated answers correct by
   construction; adaptive difficulty, interleaved drills, per-question timing, a
   "beat the clock" speeded mode, a timed mock, and focus-here diagnostics).
-  Progress saved in the browser with JSON export/import
+  Progress saved in the browser with JSON export/import. **Works offline and is
+  installable (PWA)**; figures carry text alternatives for screen readers, and a
+  warning shows if the device can't save progress.
 - `apprenticeship.html` — redirect to `index.html` (legacy URL)
 - `styles.css`, `app.js`
+- `sw.js`, `manifest.webmanifest`, `icon.svg` — service worker (offline cache),
+  web manifest, app icon. `robots.txt`, `sitemap.xml`, `.nojekyll` for SEO/Pages.
+  Every page carries a Content-Security-Policy, canonical and robots meta.
 - `study.js`, `study-data.js`, `knowledge-gen.js` — Knowledge engine, its
   authored verified card core, and the deterministic computed-card generator
 - `aptitude.js`, `aptitude-data.js` — Aptitude engine (generators, adaptive

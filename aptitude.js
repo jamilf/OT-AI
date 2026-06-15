@@ -85,7 +85,7 @@
       if (!seen[d.key]) { seen[d.key] = true; pool.push(d); }
     }
     shuffle(pool);
-    return { options: pool.map(function (o) { return { svg: o.svg }; }), answer: pool.indexOf(correct) };
+    return { options: pool.map(function (o) { return { svg: o.svg, alt: o.alt }; }), answer: pool.indexOf(correct) };
   }
 
   /* ================= NUMERACY ================= */
@@ -334,78 +334,129 @@
     var h = size / 2;
     return svgWrap('<rect x="' + (30 - h) + '" y="' + (30 - h) + '" width="' + size + '" height="' + size + '" fill="none" stroke="currentColor" stroke-width="3"/>');
   }
+  function filledDotsCell(total, filled) {
+    var pos = [[18, 18], [42, 18], [18, 42], [42, 42], [30, 30], [30, 18]];
+    var s = "";
+    for (var i = 0; i < total && i < pos.length; i++) {
+      var f = i < filled;
+      s += '<circle cx="' + pos[i][0] + '" cy="' + pos[i][1] + '" r="5" ' + (f ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2"') + '/>';
+    }
+    return svgWrap(s);
+  }
+  function posDotCell(idx) {
+    var p = [[20, 20], [40, 20], [40, 40], [20, 40]][idx];
+    return svgWrap('<rect x="8" y="8" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/><circle cx="' + p[0] + '" cy="' + p[1] + '" r="6" fill="currentColor"/>');
+  }
+  function barsCell(n) {
+    var s = "";
+    for (var i = 0; i < n && i < 8; i++) { s += '<rect x="' + (12 + i * 6) + '" y="16" width="3.5" height="28" fill="currentColor"/>'; }
+    return svgWrap(s);
+  }
+  var POLY = { 3: "triangle", 4: "square", 5: "pentagon", 6: "hexagon", 7: "heptagon", 8: "octagon", 9: "nonagon" };
+  function polyName(s) { return POLY[s] || (s + "-gon"); }
+  function arrowDir(deg) {
+    var d = ((deg % 360) + 360) % 360;
+    return { 0: "up", 45: "up and right", 90: "right", 135: "down and right", 180: "down", 225: "down and left", 270: "left", 315: "up and left" }[d] || (d + "°");
+  }
+  var POSNAME = ["top-left", "top-right", "bottom-right", "bottom-left"];
   function rowFigure(cellSvgs) {
     return '<div class="apt-figrow">' + cellSvgs.join("") + '<div class="apt-cell apt-cell-q">?</div></div>';
   }
   function genAbstract(level) {
-    var t = pick(["count", "sides", "size", "rotate"]);
-    var cfg;
+    var t = pick(["count", "sides", "size", "rotate", "fillcount", "position", "bars"]);
+    var cfg, norm = function (x) { return ((x % 360) + 360) % 360; };
     if (t === "count") {
       var step = pick([1, 2]); var start = step === 2 ? 1 : rint(1, 5);
-      var vals = [start, start + step, start + 2 * step, start + 3 * step], correct = start + 4 * step;
-      var cands = [correct - 1, correct - 2, correct + 1, correct + 2, correct - 3].filter(function (v) { return v >= 1 && v <= 9 && v !== correct; });
-      cfg = { vals: vals, correct: correct, cands: cands, cell: dotsCell, key: function (v) { return "n" + v; }, explain: "Each box has " + step + " more dot" + (step === 1 ? "" : "s") + " than the one before." };
+      cfg = { vals: [start, start + step, start + 2 * step, start + 3 * step], correct: start + 4 * step,
+        cands: [start + 4 * step - 1, start + 4 * step - 2, start + 4 * step + 1, start + 4 * step + 2, start + 4 * step - 3],
+        bound: function (v) { return v >= 1 && v <= 9; }, cell: dotsCell, alt: function (v) { return v + " dots"; }, key: function (v) { return "n" + v; },
+        explain: "Each box has " + step + " more dot" + (step === 1 ? "" : "s") + " than the one before." };
     } else if (t === "sides") {
-      var s0 = pick([3, 4]); var sv = [s0, s0 + 1, s0 + 2, s0 + 3], sc = s0 + 4;
-      var scd = [sc - 1, sc + 1, sc - 2, sc + 2].filter(function (v) { return v >= 3 && v <= 9 && v !== sc; });
-      cfg = { vals: sv, correct: sc, cands: scd, cell: polyCell, key: function (v) { return "s" + v; }, explain: "The shape gains one side each step." };
+      var s0 = pick([3, 4]); var sc = s0 + 4;
+      cfg = { vals: [s0, s0 + 1, s0 + 2, s0 + 3], correct: sc, cands: [sc - 1, sc + 1, sc - 2, sc + 2],
+        bound: function (v) { return v >= 3 && v <= 9; }, cell: polyCell, alt: function (v) { return polyName(v) + " (" + v + " sides)"; }, key: function (v) { return "s" + v; },
+        explain: "The shape gains one side each step." };
     } else if (t === "size") {
-      var z0 = pick([10, 14]); var st = pick([7, 9]); var zv = [z0, z0 + st, z0 + 2 * st, z0 + 3 * st], zc = z0 + 4 * st;
-      var zcd = [zc - st, zc - 2 * st, zc - 3 * st, zc + st].filter(function (v) { return v >= 8 && v <= 52 && v !== zc; });
-      cfg = { vals: zv, correct: zc, cands: zcd, cell: squareCell, key: function (v) { return "z" + v; }, explain: "The square grows by the same amount each step." };
+      var z0 = pick([10, 14]); var st = pick([7, 9]); var zc = z0 + 4 * st;
+      cfg = { vals: [z0, z0 + st, z0 + 2 * st, z0 + 3 * st], correct: zc, cands: [zc - st, zc - 2 * st, zc - 3 * st, zc + st],
+        bound: function (v) { return v >= 8 && v <= 52; }, cell: squareCell, alt: function (v) { return "square of size " + v; }, key: function (v) { return "z" + v; },
+        explain: "The square grows by the same amount each step." };
+    } else if (t === "rotate") {
+      var rstep = pick([45, 90]); var rstart = pick([0, 45, 90, 135]); var rc = rstart + 4 * rstep;
+      cfg = { vals: [rstart, rstart + rstep, rstart + 2 * rstep, rstart + 3 * rstep], correct: rc,
+        cands: [rc - rstep, rc + rstep, rc + 2 * rstep, rc - 2 * rstep], bound: function () { return true; },
+        cell: arrowCell, alt: function (v) { return "arrow pointing " + arrowDir(v); }, key: function (v) { return "r" + norm(v); },
+        explain: "The arrow turns " + rstep + "° each step." };
+    } else if (t === "fillcount") {
+      var total = 6; var fstart = pick([1, 2]); var fc = fstart + 4;
+      cfg = { vals: [fstart, fstart + 1, fstart + 2, fstart + 3], correct: fc, cands: [fc - 1, fc - 2, fc - 3, fc + 1, fc + 2],
+        bound: function (v) { return v >= 0 && v <= total; }, cell: function (v) { return filledDotsCell(total, v); },
+        alt: function (v) { return v + " of " + total + " filled"; }, key: function (v) { return "f" + v; },
+        explain: "One more of the " + total + " dots is filled each step." };
+    } else if (t === "position") {
+      var dir = pick([1, 3]); var ps = rint(0, 3); var pc = (ps + 4 * dir) % 4;
+      cfg = { vals: [ps, (ps + dir) % 4, (ps + 2 * dir) % 4, (ps + 3 * dir) % 4], correct: pc, cands: [0, 1, 2, 3],
+        bound: function () { return true; }, cell: posDotCell, alt: function (v) { return "dot " + POSNAME[v]; }, key: function (v) { return "p" + v; },
+        explain: "The dot moves " + (dir === 1 ? "clockwise" : "anticlockwise") + " one corner each step." };
     } else {
-      var rstep = pick([45, 90]); var rstart = pick([0, 45, 90, 135]);
-      var norm = function (x) { return ((x % 360) + 360) % 360; };
-      var rv = [rstart, rstart + rstep, rstart + 2 * rstep, rstart + 3 * rstep], rc = rstart + 4 * rstep;
-      var rcd = [rc - rstep, rc + rstep, rc + 2 * rstep, rc - 2 * rstep].map(norm).filter(function (v) { return v !== norm(rc); });
-      cfg = { vals: rv, correct: rc, cands: rcd, cell: arrowCell, key: function (v) { return "r" + norm(v); }, explain: "The arrow turns " + rstep + "° each step." };
+      var bstart = pick([1, 2, 3]); var bc = bstart + 4;
+      cfg = { vals: [bstart, bstart + 1, bstart + 2, bstart + 3], correct: bc, cands: [bc - 1, bc - 2, bc + 1, bc - 3],
+        bound: function (v) { return v >= 1 && v <= 8; }, cell: barsCell, alt: function (v) { return v + " bars"; }, key: function (v) { return "b" + v; },
+        explain: "Each box has one more bar than the last." };
     }
-    var seenK = {}; seenK[cfg.key(cfg.correct)] = true; var dist = [];
+    var correctKey = cfg.key(cfg.correct), seenK = {}; seenK[correctKey] = true; var dist = [];
     for (var i = 0; i < cfg.cands.length && dist.length < 3; i++) {
-      var k = cfg.key(cfg.cands[i]);
-      if (!seenK[k]) { seenK[k] = true; dist.push({ key: k, svg: cfg.cell(cfg.cands[i]) }); }
+      var v = cfg.cands[i];
+      if (!cfg.bound(v) || v === cfg.correct) { continue; }
+      var k = cfg.key(v);
+      if (!seenK[k]) { seenK[k] = true; dist.push({ key: k, svg: cfg.cell(v), alt: cfg.alt(v) }); }
     }
     var figure = rowFigure(cfg.vals.map(cfg.cell));
-    var correctOpt = { key: cfg.key(cfg.correct), svg: cfg.cell(cfg.correct) };
+    var figureAlt = "Sequence: " + cfg.vals.map(cfg.alt).join(", then ") + ", then ? (choose the figure that comes next).";
+    var correctOpt = { key: correctKey, svg: cfg.cell(cfg.correct), alt: cfg.alt(cfg.correct) };
     var mcq = buildFigureMCQ(correctOpt, dist);
-    return { category: "abstract", figure: figure, q: "Which figure completes the sequence?", options: mcq.options, answer: mcq.answer, explain: cfg.explain };
+    return { category: "abstract", figure: figure, figureAlt: figureAlt, q: "Which figure completes the sequence?", options: mcq.options, answer: mcq.answer, explain: cfg.explain };
   }
 
   /* ================= SPATIAL (visual) ================= */
-  function glyphCell(rot, mirror) {
-    // an asymmetric "flag" glyph: vertical pole + flag on the upper-right; mirror flips chirality
-    var inner = '<g transform="rotate(' + rot + ' 30 30)' + (mirror ? ' translate(60 0) scale(-1 1)' : '') + '">' +
-      '<line x1="22" y1="12" x2="22" y2="48" stroke="currentColor" stroke-width="3"/>' +
-      '<path d="M22 14 L42 20 L22 28 Z" fill="currentColor"/>' +
-      '<circle cx="22" cy="48" r="3.5" fill="currentColor"/></g>';
-    return svgWrap(inner);
+  function glyphPath(shape) {
+    if (shape === "flag") { return '<line x1="22" y1="12" x2="22" y2="48" stroke="currentColor" stroke-width="3"/><path d="M22 14 L42 20 L22 28 Z" fill="currentColor"/><circle cx="22" cy="48" r="3.5" fill="currentColor"/>'; }
+    if (shape === "L") { return '<path d="M20 12 L20 46 L42 46" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="12" r="3.5" fill="currentColor"/>'; }
+    if (shape === "boot") { return '<path d="M24 12 L24 40 L42 40 L42 48 L20 48 L20 12 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>'; }
+    return '<path d="M16 16 L44 16 L28 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  function glyphCell(shape, rot, mirror) {
+    return svgWrap('<g transform="rotate(' + rot + ' 30 30)' + (mirror ? ' translate(60 0) scale(-1 1)' : '') + '">' + glyphPath(shape) + '</g>');
   }
   function genSpatial(level) {
+    var shape = pick(["flag", "L", "boot", "seven"]);
+    var type = pick(["rot", "mirror", "odd"]);
     var rots = shuffle([60, 120, 180, 240, 300]);
-    if (Math.random() < 0.5) {
-      // rotation-match: one true rotation (same chirality) among mirrored distractors
-      var target = glyphCell(0, false);
-      var correct = { key: "c-rot", svg: glyphCell(rots[0], false) };
-      var dist = [
-        { key: "m1", svg: glyphCell(rots[1], true) },
-        { key: "m2", svg: glyphCell(rots[2], true) },
-        { key: "m3", svg: glyphCell(rots[3], true) }
-      ];
+    var optAlt = "visual figure option";
+    if (type === "rot") {
+      var correct = { key: "c", svg: glyphCell(shape, rots[0], false), alt: optAlt };
+      var dist = [1, 2, 3].map(function (i) { return { key: "m" + i, svg: glyphCell(shape, rots[i], true), alt: optAlt }; });
       var mcq = buildFigureMCQ(correct, dist);
-      return { category: "spatial", figure: '<div class="apt-figrow"><span class="apt-cell-label">Target</span>' + target + '</div>',
-        q: "Which option is the target shape simply rotated (not flipped)?", options: mcq.options, answer: mcq.answer,
+      return { category: "spatial", figure: '<div class="apt-figrow"><span class="apt-cell-label">Target</span>' + glyphCell(shape, 0, false) + '</div>',
+        figureAlt: "A target shape, then four options (visual spatial reasoning).",
+        q: "Which option is the target simply rotated (not flipped)?", options: mcq.options, answer: mcq.answer,
         explain: "Only one option is a true rotation of the target; the others are mirror images (flipped)." };
     }
-    // odd-one-out: three rotations of the same glyph + one mirrored
-    var correct2 = { key: "odd", svg: glyphCell(rots[3], true) };
-    var dist2 = [
-      { key: "r1", svg: glyphCell(rots[0], false) },
-      { key: "r2", svg: glyphCell(rots[1], false) },
-      { key: "r3", svg: glyphCell(rots[2], false) }
-    ];
-    var mcq2 = buildFigureMCQ(correct2, dist2);
-    return { category: "spatial", figure: "", q: "Three of these are the same shape rotated. Which is the odd one out (a mirror image)?",
-      options: mcq2.options, answer: mcq2.answer, explain: "Three options are rotations of one shape; the odd one is flipped (mirror image)." };
+    if (type === "mirror") {
+      var correct2 = { key: "c", svg: glyphCell(shape, rots[0], true), alt: optAlt };
+      var dist2 = [1, 2, 3].map(function (i) { return { key: "r" + i, svg: glyphCell(shape, rots[i], false), alt: optAlt }; });
+      var mcq2 = buildFigureMCQ(correct2, dist2);
+      return { category: "spatial", figure: '<div class="apt-figrow"><span class="apt-cell-label">Target</span>' + glyphCell(shape, 0, false) + '</div>',
+        figureAlt: "A target shape, then four options (visual spatial reasoning).",
+        q: "Which option is a mirror image (flip) of the target?", options: mcq2.options, answer: mcq2.answer,
+        explain: "Only one option is flipped; the others are plain rotations." };
+    }
+    var correct3 = { key: "odd", svg: glyphCell(shape, rots[3], true), alt: optAlt };
+    var dist3 = [0, 1, 2].map(function (i) { return { key: "r" + i, svg: glyphCell(shape, rots[i], false), alt: optAlt }; });
+    var mcq3 = buildFigureMCQ(correct3, dist3);
+    return { category: "spatial", figure: "", figureAlt: "",
+      q: "Three of these are the same shape rotated. Which is the odd one out (a mirror image)?",
+      options: mcq3.options, answer: mcq3.answer, explain: "Three options are rotations of one shape; the odd one is flipped (mirror image)." };
   }
 
   /* ================= AUTHORED (reading / safety / verbal) ================= */
@@ -514,7 +565,8 @@
       b.className = "mcq-option" + (isFig ? " mcq-option-fig" : "");
       var key = document.createElement("span"); key.className = "mcq-key"; key.textContent = i + 1;
       var span = document.createElement("span"); span.className = "mcq-text";
-      if (isFig) { span.innerHTML = opt.svg; } else { span.textContent = opt; }
+      if (isFig) { span.innerHTML = opt.svg; b.setAttribute("aria-label", "Option " + (i + 1) + ": " + (opt.alt || "figure")); }
+      else { span.textContent = opt; }
       b.appendChild(key); b.appendChild(span);
       if (opts.reveal) {
         if (i === item.answer) { b.classList.add("is-correct"); }
@@ -538,12 +590,17 @@
     }
     var chip = document.createElement("span"); chip.className = "chip " + catChipClass(item.category); chip.textContent = catLabel(item.category);
     container.appendChild(chip);
-    if (item.figure) { var fig = document.createElement("div"); fig.className = "apt-figure"; fig.innerHTML = item.figure; container.appendChild(fig); }
+    if (item.figure) {
+      var fig = document.createElement("div"); fig.className = "apt-figure"; fig.innerHTML = item.figure;
+      if (item.figureAlt) { fig.setAttribute("role", "img"); fig.setAttribute("aria-label", item.figureAlt); }
+      else { fig.setAttribute("aria-hidden", "true"); }
+      container.appendChild(fig);
+    }
     if (item.table) { var tw = document.createElement("div"); tw.className = "table-wrap apt-table-wrap"; tw.innerHTML = item.table; container.appendChild(tw); }
     var q = document.createElement("p"); q.className = "apt-q"; q.textContent = item.q; container.appendChild(q);
     container.appendChild(optionList(item, opts));
     if (opts.reveal) {
-      var ex = document.createElement("div"); ex.className = "mcq-explain";
+      var ex = document.createElement("div"); ex.className = "mcq-explain"; ex.setAttribute("role", "status");
       var lab = document.createElement("span"); lab.className = "src-label";
       lab.textContent = (opts.selected === item.answer) ? "Correct" : "Answer";
       ex.appendChild(lab);
@@ -851,7 +908,7 @@
     var hh = document.createElement("h4"); hh.className = "apt-review-h";
     hh.textContent = missed.length ? ("Review — " + missed.length + " to check") : "Every question correct. Nicely done.";
     area.appendChild(hh);
-    function optText(opt) { return (opt && typeof opt === "object") ? "(figure)" : opt; }
+    function optText(opt) { return (opt && typeof opt === "object") ? (opt.alt || "(figure)") : opt; }
     missed.forEach(function (m) {
       var card = document.createElement("div"); card.className = "browse-item";
       var q = document.createElement("p"); q.className = "bi-q"; q.textContent = m.it.q; card.appendChild(q);
