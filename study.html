@@ -74,8 +74,8 @@
 
 <section aria-labelledby="tool-title">
   <div class="wrap">
-    <p class="section-kicker" data-animate>01 · The deck</p>
-    <h2 class="section-title" id="tool-title" data-animate style="--d:.08s">Electrical knowledge.</h2>
+    <p class="section-kicker" data-animate>01 · The tool</p>
+    <h2 class="section-title" id="tool-title" data-animate style="--d:.08s">Two ways to practise.</h2>
 
     <div id="study-app" data-animate style="--d:.16s">
       <noscript>
@@ -87,6 +87,12 @@
         </div>
       </noscript>
 
+      <div class="mode-switch" role="tablist" aria-label="Practice mode">
+        <button id="mode-knowledge" class="mode-tab is-active" role="tab" aria-selected="true" type="button">Knowledge</button>
+        <button id="mode-aptitude" class="mode-tab" role="tab" aria-selected="false" type="button">Aptitude</button>
+      </div>
+
+      <div id="sr-root">
       <!-- DASHBOARD -->
       <div id="study-dash" class="study-view">
         <div class="study-dash">
@@ -155,6 +161,59 @@
         </div>
         <div id="browse-list"></div>
       </div>
+      </div><!-- /#sr-root -->
+
+      <div id="apt-root" hidden>
+        <!-- APTITUDE DASHBOARD -->
+        <div id="apt-dash" class="apt-view">
+          <div class="study-dash">
+            <div class="stat-tile"><span class="stat-num" id="apt-best">—</span><span class="stat-label">Mock best</span></div>
+            <div class="stat-tile"><span class="stat-num" id="apt-last">—</span><span class="stat-label">Mock last</span></div>
+            <div class="stat-tile"><span class="stat-num" id="apt-answered">0</span><span class="stat-label">Questions done</span></div>
+            <div class="stat-tile"><span class="stat-num" id="apt-acc">—</span><span class="stat-label">Accuracy</span></div>
+          </div>
+          <div class="apt-cat-levels" id="apt-cat-levels"></div>
+          <div class="study-controls">
+            <button id="apt-start-drills" class="btn btn-primary" type="button">Start drills</button>
+            <button id="apt-start-mock" class="btn btn-ghost" type="button">Timed mock — 20 Q / 15 min</button>
+          </div>
+          <div class="study-filter">
+            <span class="filter-label">Drill mix:</span>
+            <div class="eli5-chips" id="apt-cat-chips"></div>
+          </div>
+          <p class="apt-hint">Untimed drills give instant feedback and adapt to how you go. The mock is timed, with no feedback until the end. Progress saves on this device; use <strong>Export</strong> on the Knowledge tab to back up everything, aptitude included.</p>
+        </div>
+
+        <!-- DRILLS -->
+        <div id="apt-drills" class="apt-view" hidden>
+          <div class="session-top">
+            <span class="session-progress" id="drill-progress">0 correct</span>
+            <button id="drill-end" class="btn btn-ghost btn-sm" type="button">End drills</button>
+          </div>
+          <div id="drill-area"></div>
+        </div>
+
+        <!-- MOCK -->
+        <div id="apt-mock" class="apt-view" hidden>
+          <div class="session-top">
+            <span class="mock-timer" id="mock-timer">15:00</span>
+            <span class="session-progress" id="mock-progress">Q 1 of 20</span>
+            <button id="mock-submit" class="btn btn-ghost btn-sm" type="button">Submit now</button>
+          </div>
+          <div class="progress-bar" aria-hidden="true"><span id="mock-fill"></span></div>
+          <div id="mock-area"></div>
+          <div class="mock-nav">
+            <button id="mock-prev" class="btn btn-ghost btn-sm" type="button">Previous</button>
+            <button id="mock-next" class="btn btn-primary btn-sm" type="button">Next</button>
+          </div>
+        </div>
+
+        <!-- RESULTS -->
+        <div id="apt-results" class="apt-view" hidden>
+          <div id="results-area"></div>
+          <button id="apt-results-back" class="btn btn-primary" type="button">Back to aptitude</button>
+        </div>
+      </div><!-- /#apt-root -->
 
     </div>
   </div>
@@ -182,12 +241,13 @@
         </div>
       </details>
       <details>
-        <summary>What this deck doesn't do yet <span class="chip chip-dim">honest</span><span class="chev" aria-hidden="true"></span></summary>
+        <summary>Generated aptitude, computed answers <span class="chip chip-blue">aptitude</span><span class="chev" aria-hidden="true"></span></summary>
         <div class="acc-body">
-          <p>Spaced repetition is strong for knowledge: formulas, definitions, the isolation
-          sequence. Raw aptitude speed (numeracy and pattern-spotting under the clock) improves
-          mostly through timed volume. A generated, timed aptitude deck is the next thing I want to
-          add; this build is the knowledge half done well first.</p>
+          <p>The Aptitude tab generates numeracy, sequence and mechanical-reasoning questions in
+          code, so the answer is worked out by the program and can't be wrong. Difficulty adapts to
+          how you go, the categories interleave, and the timed mock builds in the part that matters
+          most on the day: speed under the clock. Reading and safety questions there are written and
+          checked by hand, same rule as the cards.</p>
         </div>
       </details>
     </div>
@@ -209,5 +269,7 @@
 <script src="app.js" defer></script>
 <script src="study-data.js" defer></script>
 <script src="study.js" defer></script>
+<script src="aptitude-data.js" defer></script>
+<script src="aptitude.js" defer></script>
 </body>
 </html>
