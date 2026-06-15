@@ -26,7 +26,9 @@ Pure static files, zero dependencies, no build step:
   reasoning with diagrams, data-table numeracy, reading, **verbal
   (true/false/cannot-say)** and safety — generated answers correct by
   construction; adaptive difficulty, interleaved drills, per-question timing, a
-  "beat the clock" speeded mode, a timed mock, and focus-here diagnostics).
+  "beat the clock" speeded mode, a timed mock, an optional **estimated-IQ
+  reasoning test** (a banded, capped, heavily-caveated indicative estimate —
+  explicitly *not* a clinical IQ), and focus-here diagnostics).
   Progress saved in the browser with JSON export/import. **Works offline and is
   installable (PWA)**; figures carry text alternatives for screen readers, and a
   warning shows if the device can't save progress.

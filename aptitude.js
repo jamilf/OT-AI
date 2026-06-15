@@ -526,6 +526,8 @@
     a.speed = a.speed || { best: 0 };
     a.mock = a.mock || { best: null, last: null, history: [] };
     a.mock.history = a.mock.history || [];
+    a.iq = a.iq || { best: null, last: null, history: [] };
+    a.iq.history = a.iq.history || [];
     a.settings = a.settings || {};
     if (!a.settings.drillCats) { a.settings.drillCats = {}; CATS.forEach(function (c) { a.settings.drillCats[c] = true; }); }
     if (typeof a.settings.mockCount !== "number") { a.settings.mockCount = 20; }
@@ -645,6 +647,7 @@
     CATS.forEach(function (c) { seen += A.stats[c].seen; correct += A.stats[c].correct; });
     $("apt-answered").textContent = seen;
     $("apt-acc").textContent = seen ? Math.round(correct / seen * 100) + "%" : "—";
+    if ($("apt-iq")) { $("apt-iq").textContent = A.iq.last ? A.iq.last.point : "—"; }
     var lv = $("apt-cat-levels"); lv.innerHTML = "";
     CATS.forEach(function (c) {
       var chip = document.createElement("span"); chip.className = "lvl-chip";
@@ -657,6 +660,11 @@
     var diag = $("apt-diag");
     if (diag) {
       diag.innerHTML = "";
+      if (A.iq.last) {
+        var iql = document.createElement("p"); iql.className = "apt-diag-line";
+        iql.textContent = "Last estimated IQ ≈ " + A.iq.last.point + " (range " + A.iq.last.low + "–" + A.iq.last.high + ") — indicative only, not a clinical IQ.";
+        diag.appendChild(iql);
+      }
       if (seen >= 5) {
         var overall = Math.round(correct / seen * 100);
         var line = document.createElement("p"); line.className = "apt-diag-line";
@@ -783,47 +791,82 @@
   var mockQs = [], mockAnswers = [], mockIdx = 0, mockEndTs = 0, mockTimerId = null, mockSubmitted = false,
     mockStartTs = 0, mockElapsedMs = 0;
   function stopMockTimer() { if (mockTimerId) { clearInterval(mockTimerId); mockTimerId = null; } }
-  function buildMock() {
-    var A = ensureApt();
-    var cap = {
+  var MOCK_CFG = { kind: "mock" };
+  var IQ_CFG = { kind: "iq", cats: ["abstract", "spatial", "sequences", "numeracy", "verbal"],
+    count: 25, minutes: 13, levels: [3, 4, 4, 5, 5], weight: { abstract: 6, spatial: 5, sequences: 5, numeracy: 5, verbal: 4 } };
+  var testKind = "mock", testMinutes = 15;
+
+  function authoredCaps() {
+    return {
       reading: APT_READING.reduce(function (a, r) { return a + r.questions.length; }, 0),
       safety: APT_SAFETY.length,
       verbal: APT_VERBAL.reduce(function (a, v) { return a + v.statements.length; }, 0)
     };
-    var per = {}; CATS.forEach(function (c) { per[c] = 0; });
-    var total = A.settings.mockCount, order = CATS.slice(), i = 0, guard = 0;
-    while (total > 0 && guard < 2000) {
-      guard++;
-      var c = order[i % order.length]; i++;
-      var lim = cap.hasOwnProperty(c) ? cap[c] : Infinity;
-      if (per[c] < lim) { per[c]++; total--; }
+  }
+  function buildTest(cfg) {
+    var A = ensureApt();
+    var cats = cfg.cats || CATS;
+    var count = cfg.count || A.settings.mockCount;
+    var levels = cfg.levels || [2, 3, 3, 4];
+    var cap = authoredCaps();
+    var per = {}; cats.forEach(function (c) { per[c] = 0; });
+    if (cfg.weight) {
+      cats.forEach(function (c) { per[c] = Math.min(cfg.weight[c] || 0, cap.hasOwnProperty(c) ? cap[c] : Infinity); });
+      var gen = cats.filter(function (c) { return !cap.hasOwnProperty(c); });
+      var sum = cats.reduce(function (s, c) { return s + per[c]; }, 0), gi = 0, guard = 0;
+      while (sum < count && gen.length && guard < 2000) { guard++; per[gen[gi % gen.length]]++; gi++; sum++; }
+      while (sum > count && gen.length && guard < 4000) { guard++; var g = gen[gi % gen.length]; gi++; if (per[g] > 0) { per[g]--; sum--; } }
+    } else {
+      var total = count, order = cats.slice(), i = 0, g2 = 0;
+      while (total > 0 && g2 < 2000) { g2++; var c0 = order[i % order.length]; i++; var lim = cap.hasOwnProperty(c0) ? cap[c0] : Infinity; if (per[c0] < lim) { per[c0]++; total--; } }
     }
-    var levels = [2, 3, 3, 4], qs = [], seenQ = {};
-    CATS.forEach(function (c) {
+    var qs = [], seenQ = {};
+    cats.forEach(function (c) {
       var made = 0, tries = 0;
       while (made < per[c] && tries < 80) {
         tries++;
-        var it = generate(c, levels[made % levels.length]);
+        var lvl = levels[made % levels.length];
+        var it = generate(c, lvl);
         var keyq = it.q + "|" + (it.figure || "") + "|" + it.options.map(function (o) { return o.svg || o; }).join("~");
         if (seenQ[keyq]) { continue; }
-        seenQ[keyq] = true; qs.push(it); made++;
+        seenQ[keyq] = true; it._lvl = lvl; qs.push(it); made++;
       }
     });
     return shuffle(qs);
   }
-  function startMock() {
+  function startTest(cfg) {
     var A = ensureApt();
-    mockQs = buildMock();
+    testKind = cfg.kind;
+    testMinutes = cfg.minutes || A.settings.mockMinutes;
+    mockQs = buildTest(cfg);
     mockAnswers = mockQs.map(function () { return -1; });
     mockIdx = 0; mockSubmitted = false;
     mockStartTs = Date.now();
-    mockEndTs = Date.now() + A.settings.mockMinutes * 60000;
+    mockEndTs = Date.now() + testMinutes * 60000;
     aptShow("apt-mock");
     renderMockQ();
     stopMockTimer();
     mockTimerId = setInterval(tickMock, 250);
     tickMock();
     focusFirstOption("mock-area");
+  }
+
+  /* ---- estimated IQ (transparent, conservative, banded) ---- */
+  function iqMap(raw) { return Math.max(70, Math.min(130, Math.round(100 + (raw - 0.5) * 60))); }
+  function iqBand(p) { return p < 85 ? "below average" : p < 115 ? "broadly average" : p < 130 ? "above average" : "high (capped)"; }
+  function computeIQ() {
+    var earned = 0, maxw = 0, correct = 0, answered = 0;
+    mockQs.forEach(function (it, idx) {
+      var lvl = it._lvl || 3;
+      maxw += lvl;
+      if (mockAnswers[idx] >= 0) { answered++; }
+      if (mockAnswers[idx] === it.answer) { earned += lvl; correct++; }
+    });
+    var raw = maxw ? earned / maxw : 0;
+    var point = iqMap(raw);
+    return { point: point, low: Math.max(70, point - 8), high: Math.min(130, point + 8),
+      raw: Math.round(raw * 100), correct: correct, total: mockQs.length, answered: answered,
+      minutes: Math.round(mockElapsedMs / 60000 * 10) / 10, date: new Date().toISOString().slice(0, 10) };
   }
   function tickMock() {
     var remaining = mockEndTs - Date.now();
@@ -855,7 +898,7 @@
     if (mockSubmitted) { return; }
     mockSubmitted = true;
     stopMockTimer();
-    mockElapsedMs = Math.min(Date.now() - mockStartTs, ensureApt().settings.mockMinutes * 60000);
+    mockElapsedMs = Math.min(Date.now() - mockStartTs, testMinutes * 60000);
     var A = ensureApt(), score = 0, byCat = {};
     CATS.forEach(function (c) { byCat[c] = { c: 0, n: 0 }; });
     mockQs.forEach(function (it, idx) {
@@ -863,6 +906,15 @@
       if (mockAnswers[idx] === it.answer) { score++; byCat[it.category].c++; }
     });
     var total = mockQs.length, pct = Math.round(score / total * 100);
+    if (testKind === "iq") {
+      var iq = computeIQ();
+      A.iq.last = iq;
+      if (!A.iq.best || iq.point > A.iq.best.point) { A.iq.best = iq; }
+      A.iq.history.push(iq); if (A.iq.history.length > 20) { A.iq.history = A.iq.history.slice(-20); }
+      save();
+      renderIqResults(iq, byCat);
+      return;
+    }
     var rec = { score: score, total: total, pct: pct, date: new Date().toISOString().slice(0, 10) };
     A.mock.last = rec;
     if (!A.mock.best || pct > A.mock.best.pct) { A.mock.best = rec; }
@@ -871,26 +923,7 @@
     save();
     renderResults(score, total, pct, byCat);
   }
-  function renderResults(score, total, pct, byCat) {
-    var A = ensureApt(), area = $("results-area");
-    area.innerHTML = "";
-    var head = document.createElement("div"); head.className = "panel summary-card";
-    var h = document.createElement("h3"); h.textContent = "Mock score: " + score + " / " + total + " (" + pct + "%)"; head.appendChild(h);
-    var avgs = total ? (mockElapsedMs / 1000 / total).toFixed(1) : "0";
-    var sub = document.createElement("p");
-    sub.textContent = band(pct) + " · " + avgs + " s per question · " + (A.mock.best ? "best " + A.mock.best.pct + "%" : "first run") + ". Rough self-guide, not an official score.";
-    head.appendChild(sub);
-    // focus-here: weakest categories in THIS mock
-    var weak = [];
-    CATS.forEach(function (c) { if (byCat[c].n) { weak.push({ c: c, pct: Math.round(byCat[c].c / byCat[c].n * 100) }); } });
-    weak.sort(function (x, y) { return x.pct - y.pct; });
-    if (weak.length && weak[0].pct < 100) {
-      var fh = document.createElement("p"); fh.className = "apt-focus";
-      fh.textContent = "Focus here: " + weak.slice(0, 2).map(function (w) { return catLabel(w.c) + " (" + w.pct + "%)"; }).join(", ") + ".";
-      head.appendChild(fh);
-    }
-    area.appendChild(head);
-
+  function appendBreakdown(area, byCat) {
     var tw = document.createElement("div"); tw.className = "table-wrap";
     var t = document.createElement("table"); t.className = "data apt-results-table";
     t.innerHTML = "<thead><tr><th>Category</th><th>Correct</th><th>Score</th></tr></thead>";
@@ -923,6 +956,47 @@
       var ex = document.createElement("p"); ex.className = "bi-src"; ex.textContent = m.it.explain + (m.it.source ? " · " + m.it.source : ""); card.appendChild(ex);
       area.appendChild(card);
     });
+  }
+
+  function renderIqResults(iq, byCat) {
+    var A = ensureApt(), area = $("results-area");
+    area.innerHTML = "";
+    var card = document.createElement("div"); card.className = "panel summary-card iq-result";
+    var h = document.createElement("h3"); h.textContent = "Estimated IQ"; card.appendChild(h);
+    var big = document.createElement("p"); big.className = "iq-score"; big.textContent = "≈ " + iq.point; card.appendChild(big);
+    var rng = document.createElement("p"); rng.className = "iq-range";
+    rng.textContent = "indicative range " + iq.low + "–" + iq.high + " · " + iqBand(iq.point); card.appendChild(rng);
+    var work = document.createElement("p"); work.className = "iq-work";
+    work.textContent = "You earned " + iq.raw + "% of the difficulty-weighted points (" + iq.correct + "/" + iq.total + " correct) in " + iq.minutes + " min" + (A.iq.best ? " · best ≈ " + A.iq.best.point : "") + ".";
+    card.appendChild(work);
+    var cav = document.createElement("p"); cav.className = "iq-caveat";
+    cav.textContent = "Indicative only — a short, unproctored, self-administered reasoning test, not a clinical or professionally-normed IQ. It can't measure above ~130 (the questions only get so hard), repeat attempts inflate it, and only an honest single timed sitting means anything.";
+    card.appendChild(cav);
+    area.appendChild(card);
+    appendBreakdown(area, byCat);
+    aptShow("apt-results");
+  }
+
+  function renderResults(score, total, pct, byCat) {
+    var A = ensureApt(), area = $("results-area");
+    area.innerHTML = "";
+    var head = document.createElement("div"); head.className = "panel summary-card";
+    var h = document.createElement("h3"); h.textContent = "Mock score: " + score + " / " + total + " (" + pct + "%)"; head.appendChild(h);
+    var avgs = total ? (mockElapsedMs / 1000 / total).toFixed(1) : "0";
+    var sub = document.createElement("p");
+    sub.textContent = band(pct) + " · " + avgs + " s per question · " + (A.mock.best ? "best " + A.mock.best.pct + "%" : "first run") + ". Rough self-guide, not an official score.";
+    head.appendChild(sub);
+    // focus-here: weakest categories in THIS mock
+    var weak = [];
+    CATS.forEach(function (c) { if (byCat[c].n) { weak.push({ c: c, pct: Math.round(byCat[c].c / byCat[c].n * 100) }); } });
+    weak.sort(function (x, y) { return x.pct - y.pct; });
+    if (weak.length && weak[0].pct < 100) {
+      var fh = document.createElement("p"); fh.className = "apt-focus";
+      fh.textContent = "Focus here: " + weak.slice(0, 2).map(function (w) { return catLabel(w.c) + " (" + w.pct + "%)"; }).join(", ") + ".";
+      head.appendChild(fh);
+    }
+    area.appendChild(head);
+    appendBreakdown(area, byCat);
     aptShow("apt-results");
   }
 
@@ -943,7 +1017,8 @@
   $("mode-knowledge").addEventListener("click", function () { setMode("knowledge"); });
   $("mode-aptitude").addEventListener("click", function () { setMode("aptitude"); });
   $("apt-start-drills").addEventListener("click", startDrills);
-  $("apt-start-mock").addEventListener("click", startMock);
+  $("apt-start-mock").addEventListener("click", function () { startTest(MOCK_CFG); });
+  if ($("apt-start-iq")) { $("apt-start-iq").addEventListener("click", function () { startTest(IQ_CFG); }); }
   if ($("apt-start-speed")) { $("apt-start-speed").addEventListener("click", startSpeed); }
   $("drill-end").addEventListener("click", function () {
     if (drillMode === "speed") { stopSpeedTimer(); endSpeed(); } else { renderAptDash(); }
@@ -974,6 +1049,7 @@
     refresh: function () { ensureApt(); if (!$("apt-root").hidden) { renderAptDash(); } },
     generate: generate,
     buildMCQ: buildMCQ,
+    iqMap: iqMap,
     cats: CATS
   };
 })();
