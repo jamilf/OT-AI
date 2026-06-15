@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study tool — Jamil Flores · Aptitude & trade-knowledge prep</title>
+<meta name="description" content="A spaced-repetition study tool Jamil Flores built to prepare for the NSW network aptitude assessments. Electrical-knowledge flashcards, every fact pinned to a verified source, with progress saved in the browser.">
+<meta name="keywords" content="electrical apprenticeship study, aptitude test prep NSW, spaced repetition, Ausgrid Endeavour Essential Transgrid, Jamil Flores">
+<meta name="author" content="Jamil Flores">
+<meta name="theme-color" content="#14161b">
+<meta property="og:title" content="Study tool — Jamil Flores">
+<meta property="og:description" content="A spaced-repetition study tool built to prepare properly for the NSW network aptitude assessments. Every fact pinned to a verified source.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z' fill='%2314161b' stroke='%2333a35a' stroke-width='2'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='%232ECC71' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<noscript>
+<style>
+  [data-animate] { opacity: 1 !important; transform: none !important; filter: none !important; }
+</style>
+</noscript>
+</head>
+<body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<nav class="site-nav" aria-label="Site">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html">
+      <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z" fill="none" stroke="#33a35a" stroke-width="2.5"/>
+        <path d="M10 16.5l4 4 8-9" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Jamil Flores
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="feeder-monitor.html">The Build</a>
+      <a href="learn.html">Learn</a>
+      <a href="study.html" class="is-active">Study</a>
+      <a class="nav-cta" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="docs-hero app-hero">
+  <div class="wrap">
+    <div class="hero-badge hero-enter" style="--d:.05s">
+      <span class="pulse-dot" aria-hidden="true"></span>
+      study tool · runs in your browser
+    </div>
+    <h1 class="hero-enter" style="--d:.12s">I built myself a study system to prepare <span class="accent">properly</span>.</h1>
+    <p class="hero-enter" style="--d:.2s">
+      The NSW network assessments test numeracy, reasoning and trade knowledge under time
+      pressure. Rather than cram, I built a spaced-repetition tool to learn the knowledge side
+      and keep it. Every fact in the deck is pinned to a source I can point to, so it never
+      drills me on something wrong. This first deck is electrical knowledge, and it doubles as
+      interview prep.
+    </p>
+    <div class="callout is-status hero-enter" style="--d:.28s">
+      <h3>How to read this</h3>
+      <p>It's a working tool, not a screenshot. Press <strong>Start review</strong> and grade
+      yourself honestly. Progress saves on this device; use <span class="mono">Export</span> to
+      keep a backup. The facts come from the same material on my
+      <a href="feeder-monitor.html">build</a> and <a href="learn.html">learn</a> pages.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section aria-labelledby="tool-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>01 · The deck</p>
+    <h2 class="section-title" id="tool-title" data-animate style="--d:.08s">Electrical knowledge.</h2>
+
+    <div id="study-app" data-animate style="--d:.16s">
+      <noscript>
+        <div class="callout">
+          <h3>This tool needs JavaScript</h3>
+          <p>The interactive review runs in your browser with JavaScript on. The same facts are
+          written out in plain English on the <a href="learn.html">Learn</a> and
+          <a href="feeder-monitor.html">Build</a> pages.</p>
+        </div>
+      </noscript>
+
+      <!-- DASHBOARD -->
+      <div id="study-dash" class="study-view">
+        <div class="study-dash">
+          <div class="stat-tile"><span class="stat-num" id="stat-due">0</span><span class="stat-label">Due today</span></div>
+          <div class="stat-tile"><span class="stat-num" id="stat-new">0</span><span class="stat-label">New today</span></div>
+          <div class="stat-tile"><span class="stat-num" id="stat-total">0</span><span class="stat-label">Cards in deck</span></div>
+          <div class="stat-tile"><span class="stat-num" id="stat-streak">0</span><span class="stat-label">Day streak</span></div>
+          <div class="stat-tile"><span class="stat-num" id="stat-acc">—</span><span class="stat-label">Recall accuracy</span></div>
+        </div>
+        <div class="study-controls">
+          <button id="start-review" class="btn btn-primary" type="button">Start review</button>
+          <button id="browse-toggle" class="btn btn-ghost" type="button">Browse the deck</button>
+        </div>
+        <div class="study-filter">
+          <span class="filter-label">Focus:</span>
+          <div class="eli5-chips" id="cat-chips"></div>
+        </div>
+        <div class="study-backup">
+          <button id="export-btn" class="btn btn-ghost btn-sm" type="button">Export progress</button>
+          <label class="btn btn-ghost btn-sm" for="import-input">Import progress</label>
+          <input id="import-input" type="file" accept="application/json" hidden>
+          <span id="backup-msg" class="backup-msg" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <!-- SESSION -->
+      <div id="study-session" class="study-view" hidden>
+        <div class="session-top">
+          <span class="session-progress" id="session-progress">Reviewed 0</span>
+          <button id="end-session" class="btn btn-ghost btn-sm" type="button">End session</button>
+        </div>
+        <div class="progress-bar" aria-hidden="true"><span id="progress-fill"></span></div>
+        <div class="flashcard panel">
+          <div class="fc-cat"><span class="chip chip-blue" id="fc-cat"></span></div>
+          <div class="fc-front" id="fc-front"></div>
+          <div class="fc-back" id="fc-back" hidden>
+            <div class="fc-answer" id="fc-answer"></div>
+            <p class="fc-source"><span class="src-label">Source</span> <span id="fc-source"></span></p>
+          </div>
+        </div>
+        <div class="fc-actions">
+          <button id="reveal-btn" class="btn btn-primary" type="button">Show answer</button>
+          <div class="grade-row" id="grade-row" hidden>
+            <button class="grade-btn g-again" data-grade="again" type="button">Again<small>1</small></button>
+            <button class="grade-btn g-hard" data-grade="hard" type="button">Hard<small>2</small></button>
+            <button class="grade-btn g-good" data-grade="good" type="button">Good<small>3</small></button>
+            <button class="grade-btn g-easy" data-grade="easy" type="button">Easy<small>4</small></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div id="study-summary" class="study-view" hidden>
+        <div class="panel summary-card">
+          <h3>Session done.</h3>
+          <p id="summary-text"></p>
+          <button id="back-dash" class="btn btn-primary" type="button">Back to dashboard</button>
+        </div>
+      </div>
+
+      <!-- BROWSE -->
+      <div id="study-browse" class="study-view" hidden>
+        <div class="browse-top">
+          <h3 class="browse-title">The deck: every card, with its source</h3>
+          <button id="browse-back" class="btn btn-ghost btn-sm" type="button">Back to dashboard</button>
+        </div>
+        <div id="browse-list"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="how-title">
+  <div class="wrap">
+    <p class="section-kicker" data-animate>02 · How it works</p>
+    <h2 class="section-title" id="how-title" data-animate style="--d:.08s">Built to be honest with myself.</h2>
+    <div class="docs-acc" data-animate style="--d:.16s">
+      <details>
+        <summary>Spaced repetition (SM-2) <span class="chip chip-blue">method</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>Each card is scheduled with SM-2, the algorithm behind Anki. Grade a card well and
+          the gap before you see it again grows; miss it and it comes back soon. Reviewing right
+          before you'd forget is what makes knowledge stick, instead of cramming and losing it.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Facts pinned to a source <span class="chip chip-green">no guessing</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>Every card carries a source. The deck only contains facts already written up and
+          checked on this site or standard electrical fundamentals. A study tool that quietly
+          teaches you the wrong thing before an exam is worse than no tool, so I built it not to.</p>
+        </div>
+      </details>
+      <details>
+        <summary>What this deck doesn't do yet <span class="chip chip-dim">honest</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="acc-body">
+          <p>Spaced repetition is strong for knowledge: formulas, definitions, the isolation
+          sequence. Raw aptitude speed (numeracy and pattern-spotting under the clock) improves
+          mostly through timed volume. A generated, timed aptitude deck is the next thing I want to
+          add; this build is the knowledge half done well first.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-title">Jamil Flores</p>
+    <p>Electrical apprenticeship candidate · Sydney, NSW · ready to start, and to see it through.</p>
+    <p class="foot-credit">© Jamil Flores ·
+      <a href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">LinkedIn</a> ·
+      <a href="feeder-monitor.html">The Build</a></p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+<script src="study-data.js" defer></script>
+<script src="study.js" defer></script>
+</body>
+</html>
