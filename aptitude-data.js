@@ -151,3 +151,50 @@ var APT_SAFETY = [
     source: "SafeWork NSW general construction induction" }
 
 ];
+
+/* Verbal reasoning: read the passage, judge each statement.
+   answer index into ["True","False","Cannot say"]: 0 = True, 1 = False, 2 = Cannot say.
+   True = stated/entailed; False = contradicted; Cannot say = not determinable. */
+var APT_VERBAL = [
+
+  { id: "vb-access", level: 2, title: "Site access",
+    passage: "All visitors to the site must sign in at the gate and complete a safety induction before entering. Contractors who completed the induction within the past twelve months do not need to repeat it. High-visibility clothing is required beyond the gate.",
+    statements: [
+      { s: "A first-time visitor must complete a safety induction before entering.", answer: 0, explain: "All visitors must induct before entering, and a first-timer has not done so." },
+      { s: "A contractor inducted six months ago must induct again today.", answer: 1, explain: "Those inducted within the past twelve months do not need to repeat it." },
+      { s: "High-visibility clothing is required at the sign-in gate itself.", answer: 2, explain: "Hi-vis is required beyond the gate; the passage doesn't say what applies at the gate itself." }
+    ] },
+
+  { id: "vb-tools", level: 2, title: "Tool store",
+    passage: "Power tools are signed out from the store each morning and returned by 4 pm. Any damaged tool must be tagged out and reported. The store keeps two cordless drills and one rotary hammer.",
+    statements: [
+      { s: "The store has more cordless drills than rotary hammers.", answer: 0, explain: "Two cordless drills versus one rotary hammer." },
+      { s: "A tool with a frayed cord may simply be put back on the shelf.", answer: 1, explain: "Damaged tools must be tagged out and reported, not returned to use." },
+      { s: "The store opens at 7 am.", answer: 2, explain: "The opening time is not stated." }
+    ] },
+
+  { id: "vb-roster", level: 3, title: "Crew roster",
+    passage: "The crew works Monday to Friday. Saturday work is occasionally offered and is voluntary. Public holidays are not worked.",
+    statements: [
+      { s: "Crew members can be required to work on Saturdays.", answer: 1, explain: "Saturday work is voluntary, so it cannot be required." },
+      { s: "Saturday work is sometimes available.", answer: 0, explain: "It is occasionally offered." },
+      { s: "The crew starts at 6:30 am on weekdays.", answer: 2, explain: "Start times are not stated." }
+    ] },
+
+  { id: "vb-delivery", level: 3, title: "Deliveries",
+    passage: "Cable drums are delivered on Tuesdays. Each delivery is checked against the order before the driver leaves. Short deliveries are recorded and the supplier is notified the same day.",
+    statements: [
+      { s: "Deliveries are checked before the driver departs.", answer: 0, explain: "The passage says each delivery is checked before the driver leaves." },
+      { s: "If items are missing, the supplier is told the following week.", answer: 1, explain: "Short deliveries are notified the same day." },
+      { s: "Conduit is delivered on Tuesdays.", answer: 2, explain: "Only cable drums are mentioned; conduit is not stated." }
+    ] },
+
+  { id: "vb-weather", level: 4, title: "Weather and work",
+    passage: "Work at height stops when wind gusts exceed the site limit. In heavy rain, outdoor electrical work is paused. Indoor work continues in wet weather.",
+    statements: [
+      { s: "Outdoor electrical work continues during heavy rain.", answer: 1, explain: "Outdoor electrical work is paused in heavy rain." },
+      { s: "Indoor work can continue when it is raining.", answer: 0, explain: "Indoor work continues in wet weather." },
+      { s: "Work at height stops in a light drizzle.", answer: 2, explain: "Height work stops on wind gusts over the limit; drizzle alone isn't addressed." }
+    ] }
+
+];

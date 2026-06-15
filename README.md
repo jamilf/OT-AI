@@ -19,16 +19,22 @@ Pure static files, zero dependencies, no build step:
 - `docs.html` — interactive replication guide for ICS Sentinel
 - `learn.html` — documentation + ELI5 glossary
 - `study.html` — a study tool for the NSW network aptitude prep, with two modes:
-  **Knowledge** (spaced-repetition SM-2 flashcards, facts pinned to a verified
-  appendix) and **Aptitude** (procedurally-generated numeracy, sequence and
-  mechanical-reasoning questions with computed answers, plus hand-authored
-  reading and safety items; adaptive difficulty, interleaved drills, and a timed
-  mock exam). Progress saved in the browser with JSON export/import
+  **Knowledge** (spaced-repetition SM-2, a 1000+ card deck: an authored core of
+  standard fundamentals plus deterministically computed cards; new-cards-per-day
+  control and a fast, searchable, lazy browse) and **Aptitude** (numeracy,
+  number/letter sequences, **visual abstract reasoning**, **spatial**, mechanical
+  reasoning with diagrams, data-table numeracy, reading, **verbal
+  (true/false/cannot-say)** and safety — generated answers correct by
+  construction; adaptive difficulty, interleaved drills, per-question timing, a
+  "beat the clock" speeded mode, a timed mock, and focus-here diagnostics).
+  Progress saved in the browser with JSON export/import
 - `apprenticeship.html` — redirect to `index.html` (legacy URL)
 - `styles.css`, `app.js`
-- `study.js`, `study-data.js` — Knowledge engine and its verified card deck
-- `aptitude.js`, `aptitude-data.js` — Aptitude engine (generators + adaptive
-  difficulty + mock exam) and its verified authored reading/safety items
+- `study.js`, `study-data.js`, `knowledge-gen.js` — Knowledge engine, its
+  authored verified card core, and the deterministic computed-card generator
+- `aptitude.js`, `aptitude-data.js` — Aptitude engine (generators, adaptive
+  difficulty, timing/diagnostics, speeded mode, mock) and its verified authored
+  reading/verbal/safety items
 
 View it locally:
 
