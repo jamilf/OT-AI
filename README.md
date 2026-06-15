@@ -18,8 +18,12 @@ Pure static files, zero dependencies, no build step:
 - `project.html` — the ICS Sentinel software project (secondary, self-driven learning)
 - `docs.html` — interactive replication guide for ICS Sentinel
 - `learn.html` — documentation + ELI5 glossary
+- `study.html` — a spaced-repetition (SM-2) study tool for the NSW network
+  aptitude prep; facts pinned to a verified appendix, progress saved in the
+  browser with JSON export/import
 - `apprenticeship.html` — redirect to `index.html` (legacy URL)
 - `styles.css`, `app.js`
+- `study.js`, `study-data.js` — study-tool engine and its verified card deck
 
 View it locally:
 
