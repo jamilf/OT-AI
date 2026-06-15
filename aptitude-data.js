@@ -88,6 +88,46 @@ var APT_READING = [
         options: ["44 litres", "48 litres", "40 litres", "56 litres"],
         answer: 0,
         explain: "56 litres minus the 12-litre hourly fall gives 44 litres at 12 pm." }
+    ] },
+
+  { id: "rd-reel", level: 2,
+    title: "Cable reels",
+    passage: "A cable reel is rolled in the direction the cable is wound, so the cable stays tight on the drum. Reels are stored on their edge, never flat, to stop the flanges bending. A reel heavier than 25 kg is moved with a trolley or by two people.",
+    questions: [
+      { q: "How should a reel be rolled?", options: ["In the direction the cable is wound", "Backwards against the winding", "Only downhill", "On its flat side"], answer: 0, explain: "Rolling with the winding keeps the cable tight on the drum." },
+      { q: "How are reels stored?", options: ["On their edge", "Flat on the ground", "Hung from a hook", "Stacked three high"], answer: 0, explain: "They are stored on edge so the flanges don't bend." }
+    ] },
+
+  { id: "rd-ladder", level: 2,
+    title: "Ladder set-up",
+    passage: "A straight ladder is set at about a 4-to-1 angle: one unit out from the base for every four units of height. It must be footed or tied so it can't slip, and it should extend about a metre above the landing it serves. Metal ladders are not used near live electrical work.",
+    questions: [
+      { q: "What angle should the ladder be set at?", options: ["About 4 up to 1 out", "About 1 up to 1 out", "About 2 up to 3 out", "Flat as possible"], answer: 0, explain: "The passage gives a 4-to-1 ratio: four up for one out." },
+      { q: "Why avoid a metal ladder near live electrical work?", options: ["Metal conducts electricity", "It is too heavy", "It rusts", "It is too tall"], answer: 0, explain: "Implied by the rule against metal ladders near live work: metal conducts." }
+    ] },
+
+  { id: "rd-waste", level: 3,
+    title: "Site waste",
+    passage: "Offcuts of copper and aluminium go in the labelled metals bin for recycling. Cable offcuts with insulation still on go in general waste unless the insulation is stripped first. Batteries are never put in any of the bins; they go to the marked battery box.",
+    questions: [
+      { q: "Where do clean copper offcuts go?", options: ["The metals recycling bin", "General waste", "The battery box", "Down the drain"], answer: 0, explain: "Clean copper goes in the labelled metals bin." },
+      { q: "Where do used batteries go?", options: ["The marked battery box", "The metals bin", "General waste", "Any bin"], answer: 0, explain: "Batteries go to the marked battery box, never the bins." }
+    ] },
+
+  { id: "rd-deliv", level: 3,
+    title: "Receiving a delivery",
+    passage: "When a delivery arrives, the storeperson counts it against the docket before signing. Damaged cartons are photographed and noted on the docket. Anything not on the docket is set aside and the supplier is phoned, not put into stock.",
+    questions: [
+      { q: "What is done before signing for a delivery?", options: ["It is counted against the docket", "It is put straight into stock", "It is photographed in full", "Nothing"], answer: 0, explain: "The storeperson counts it against the docket before signing." },
+      { q: "What happens to an item not listed on the docket?", options: ["It is set aside and the supplier phoned", "It is added to stock anyway", "It is thrown out", "It is signed for"], answer: 0, explain: "Unlisted items are set aside and the supplier is called, not stocked." }
+    ] },
+
+  { id: "rd-signoff", level: 4,
+    title: "Job sign-off",
+    passage: "A job is signed off only after it is tested and the area is left clean. The apprentice records the test results; the supervisor checks them and signs. If a result is outside the allowed range, the job is not signed off and is booked for rework.",
+    questions: [
+      { q: "Who signs off the job?", options: ["The supervisor, after checking the results", "The apprentice alone", "The client", "Whoever is free"], answer: 0, explain: "The apprentice records results; the supervisor checks and signs." },
+      { q: "What happens if a test result is out of range?", options: ["The job is booked for rework, not signed off", "It is signed off anyway", "The result is ignored", "The area is cleaned and closed"], answer: 0, explain: "Out-of-range results mean no sign-off and rework." }
     ] }
 
 ];
@@ -195,6 +235,54 @@ var APT_VERBAL = [
       { s: "Outdoor electrical work continues during heavy rain.", answer: 1, explain: "Outdoor electrical work is paused in heavy rain." },
       { s: "Indoor work can continue when it is raining.", answer: 0, explain: "Indoor work continues in wet weather." },
       { s: "Work at height stops in a light drizzle.", answer: 2, explain: "Height work stops on wind gusts over the limit; drizzle alone isn't addressed." }
+    ] },
+
+  { id: "vb-stock", level: 2, title: "Stocktake",
+    passage: "The store is counted on the last Friday of each month. Items below their minimum level are reordered the same day. Slow-moving items are reviewed but not automatically removed.",
+    statements: [
+      { s: "The store is counted every month.", answer: 0, explain: "It is counted on the last Friday of each month." },
+      { s: "Items below minimum are reordered the next month.", answer: 1, explain: "They are reordered the same day, not the next month." },
+      { s: "Slow-moving items are thrown out automatically.", answer: 1, explain: "They are reviewed, not automatically removed." }
+    ] },
+
+  { id: "vb-labels", level: 3, title: "Switchboard labels",
+    passage: "Every circuit on the board must have a label. Labels are printed, not handwritten. A circuit without a label is tagged out until one is fitted.",
+    statements: [
+      { s: "Handwritten labels are acceptable.", answer: 1, explain: "Labels must be printed, not handwritten." },
+      { s: "An unlabelled circuit is tagged out until labelled.", answer: 0, explain: "Stated directly." },
+      { s: "The board has exactly twelve circuits.", answer: 2, explain: "The number of circuits is not given." }
+    ] },
+
+  { id: "vb-toolbox", level: 2, title: "Toolbox talk",
+    passage: "A toolbox talk is held each morning before work starts. Attendance is recorded. Anyone arriving after it has finished must read the notes and sign before going on the tools.",
+    statements: [
+      { s: "The toolbox talk happens before work starts.", answer: 0, explain: "It is held each morning before work." },
+      { s: "Latecomers can skip the talk entirely.", answer: 1, explain: "They must read the notes and sign first." },
+      { s: "The talk always lasts ten minutes.", answer: 2, explain: "The duration is not stated." }
+    ] },
+
+  { id: "vb-vehicle", level: 3, title: "Vehicle checks",
+    passage: "Work vehicles are checked at the start of each shift: lights, tyres and fluid levels. A fault that affects safety takes the vehicle off the road until fixed. Minor faults are logged and booked in.",
+    statements: [
+      { s: "Vehicles are checked once a week.", answer: 1, explain: "They are checked at the start of each shift." },
+      { s: "A safety fault stops the vehicle being used.", answer: 0, explain: "It is taken off the road until fixed." },
+      { s: "The check includes the radio.", answer: 2, explain: "Only lights, tyres and fluids are listed." }
+    ] },
+
+  { id: "vb-permit", level: 4, title: "Permit board",
+    passage: "An open permit hangs on the permit board with the worker's name. The board shows at a glance which areas are under a permit. A permit is removed only when the work is finished and the area handed back.",
+    statements: [
+      { s: "You can tell from the board which areas are under a permit.", answer: 0, explain: "The board shows this at a glance." },
+      { s: "A permit may be removed before the work is finished.", answer: 1, explain: "It is removed only once work is finished and handed back." },
+      { s: "There are three permits open right now.", answer: 2, explain: "The current count is not given." }
+    ] },
+
+  { id: "vb-training", level: 3, title: "Training records",
+    passage: "Tickets and competencies are kept in each worker's training record. A ticket within three months of expiry is flagged for renewal. Work needing a current ticket is not allocated to anyone whose ticket has lapsed.",
+    statements: [
+      { s: "An expired ticket can still be used for ticketed work.", answer: 1, explain: "Lapsed-ticket holders aren't allocated that work." },
+      { s: "Tickets near expiry are flagged for renewal.", answer: 0, explain: "Flagged within three months of expiry." },
+      { s: "First aid tickets last three years.", answer: 2, explain: "No ticket duration is stated." }
     ] }
 
 ];

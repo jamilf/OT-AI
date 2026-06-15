@@ -359,18 +359,36 @@
     return { 0: "up", 45: "up and right", 90: "right", 135: "down and right", 180: "down", 225: "down and left", 270: "left", 315: "up and left" }[d] || (d + "°");
   }
   var POSNAME = ["top-left", "top-right", "bottom-right", "bottom-left"];
+  function squareShadeCell(level, max) {
+    var op = (level / max).toFixed(2);
+    return svgWrap('<rect x="14" y="14" width="32" height="32" fill="currentColor" fill-opacity="' + op + '" stroke="currentColor" stroke-width="1.5"/>');
+  }
   function rowFigure(cellSvgs) {
     return '<div class="apt-figrow">' + cellSvgs.join("") + '<div class="apt-cell apt-cell-q">?</div></div>';
   }
   function genAbstract(level) {
-    var t = pick(["count", "sides", "size", "rotate", "fillcount", "position", "bars"]);
+    var t = pick(["count", "sides", "size", "rotate", "fillcount", "position", "bars", "shade", "altshape"]);
     var cfg, norm = function (x) { return ((x % 360) + 360) % 360; };
     if (t === "count") {
-      var step = pick([1, 2]); var start = step === 2 ? 1 : rint(1, 5);
-      cfg = { vals: [start, start + step, start + 2 * step, start + 3 * step], correct: start + 4 * step,
-        cands: [start + 4 * step - 1, start + 4 * step - 2, start + 4 * step + 1, start + 4 * step + 2, start + 4 * step - 3],
+      var cup = Math.random() < 0.5, cstep = pick([1, 2]) * (cup ? 1 : -1);
+      var cstart = cup ? (cstep === 2 ? 1 : rint(1, 5)) : (cstep === -2 ? 9 : rint(5, 9));
+      var cc = cstart + 4 * cstep;
+      cfg = { vals: [cstart, cstart + cstep, cstart + 2 * cstep, cstart + 3 * cstep], correct: cc,
+        cands: [cc - 1, cc + 1, cc - 2, cc + 2, cc - 3, cc + 3, cc - 4, cc + 4],
         bound: function (v) { return v >= 1 && v <= 9; }, cell: dotsCell, alt: function (v) { return v + " dots"; }, key: function (v) { return "n" + v; },
-        explain: "Each box has " + step + " more dot" + (step === 1 ? "" : "s") + " than the one before." };
+        explain: "Each box has " + Math.abs(cstep) + (cup ? " more" : " fewer") + " dot" + (Math.abs(cstep) === 1 ? "" : "s") + " than the one before." };
+    } else if (t === "shade") {
+      var hup = Math.random() < 0.5;
+      cfg = { vals: hup ? [1, 2, 3, 4] : [5, 4, 3, 2], correct: hup ? 5 : 1, cands: [1, 2, 3, 4, 5],
+        bound: function (v) { return v >= 1 && v <= 5; }, cell: function (v) { return squareShadeCell(v, 5); },
+        alt: function (v) { return "shade " + v + " of 5"; }, key: function (v) { return "h" + v; },
+        explain: "The square gets one shade " + (hup ? "darker" : "lighter") + " each step." };
+    } else if (t === "altshape") {
+      var aA = pick([3, 4, 5, 6]); var aB = pick([3, 4, 5, 6, 7]); var gg = 0;
+      while (aB === aA && gg < 20) { aB = pick([3, 4, 5, 6, 7]); gg++; }
+      cfg = { vals: [aA, aB, aA, aB], correct: aA, cands: [aB, aA + 1, aA + 2, aA + 3, aB + 1, aB + 2, aA - 1],
+        bound: function (v) { return v >= 3 && v <= 8; }, cell: polyCell, alt: function (v) { return polyName(v) + " (" + v + " sides)"; }, key: function (v) { return "s" + v; },
+        explain: "The shapes alternate, so the next is a " + polyName(aA) + "." };
     } else if (t === "sides") {
       var s0 = pick([3, 4]); var sc = s0 + 4;
       cfg = { vals: [s0, s0 + 1, s0 + 2, s0 + 3], correct: sc, cands: [sc - 1, sc + 1, sc - 2, sc + 2],
@@ -423,13 +441,16 @@
     if (shape === "flag") { return '<line x1="22" y1="12" x2="22" y2="48" stroke="currentColor" stroke-width="3"/><path d="M22 14 L42 20 L22 28 Z" fill="currentColor"/><circle cx="22" cy="48" r="3.5" fill="currentColor"/>'; }
     if (shape === "L") { return '<path d="M20 12 L20 46 L42 46" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="12" r="3.5" fill="currentColor"/>'; }
     if (shape === "boot") { return '<path d="M24 12 L24 40 L42 40 L42 48 L20 48 L20 12 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>'; }
+    if (shape === "P") { return '<path d="M22 48 L22 14 L34 14 Q42 14 42 22 Q42 30 34 30 L22 30" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>'; }
+    if (shape === "zig") { return '<path d="M16 16 L32 16 L20 32 L36 32 L24 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>'; }
+    if (shape === "hook") { return '<path d="M26 14 L26 38 Q26 46 36 46 L42 46" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="14" r="3.5" fill="currentColor"/>'; }
     return '<path d="M16 16 L44 16 L28 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>';
   }
   function glyphCell(shape, rot, mirror) {
     return svgWrap('<g transform="rotate(' + rot + ' 30 30)' + (mirror ? ' translate(60 0) scale(-1 1)' : '') + '">' + glyphPath(shape) + '</g>');
   }
   function genSpatial(level) {
-    var shape = pick(["flag", "L", "boot", "seven"]);
+    var shape = pick(["flag", "L", "boot", "seven", "P", "zig", "hook"]);
     var type = pick(["rot", "mirror", "odd"]);
     var rots = shuffle([60, 120, 180, 240, 300]);
     var optAlt = "visual figure option";
