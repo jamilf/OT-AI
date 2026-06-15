@@ -110,6 +110,10 @@
           <span class="filter-label">Focus:</span>
           <div class="eli5-chips" id="cat-chips"></div>
         </div>
+        <div class="study-filter">
+          <span class="filter-label">New / day:</span>
+          <div class="eli5-chips" id="newperday-chips"></div>
+        </div>
         <div class="study-backup">
           <button id="export-btn" class="btn btn-ghost btn-sm" type="button">Export progress</button>
           <label class="btn btn-ghost btn-sm" for="import-input">Import progress</label>
@@ -159,6 +163,7 @@
           <h3 class="browse-title">The deck: every card, with its source</h3>
           <button id="browse-back" class="btn btn-ghost btn-sm" type="button">Back to dashboard</button>
         </div>
+        <input id="browse-search" class="eli5-search" type="search" placeholder="Search the deck…" aria-label="Search cards">
         <div id="browse-list"></div>
       </div>
       </div><!-- /#sr-root -->
@@ -172,9 +177,11 @@
             <div class="stat-tile"><span class="stat-num" id="apt-answered">0</span><span class="stat-label">Questions done</span></div>
             <div class="stat-tile"><span class="stat-num" id="apt-acc">—</span><span class="stat-label">Accuracy</span></div>
           </div>
+          <div class="apt-diag" id="apt-diag"></div>
           <div class="apt-cat-levels" id="apt-cat-levels"></div>
           <div class="study-controls">
             <button id="apt-start-drills" class="btn btn-primary" type="button">Start drills</button>
+            <button id="apt-start-speed" class="btn btn-ghost" type="button">Beat the clock (3 min)</button>
             <button id="apt-start-mock" class="btn btn-ghost" type="button">Timed mock — 20 Q / 15 min</button>
           </div>
           <div class="study-filter">
@@ -268,6 +275,7 @@
 
 <script src="app.js" defer></script>
 <script src="study-data.js" defer></script>
+<script src="knowledge-gen.js" defer></script>
 <script src="study.js" defer></script>
 <script src="aptitude-data.js" defer></script>
 <script src="aptitude.js" defer></script>

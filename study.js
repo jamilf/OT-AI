@@ -147,6 +147,7 @@
     var nothing = (c.due + c.newAvail) === 0;
     start.disabled = nothing;
     start.textContent = nothing ? "All caught up for today" : "Start review";
+    renderNewPerDayChips();
     show("study-dash");
   }
 
@@ -250,27 +251,80 @@
     show("study-summary");
   }
 
-  /* ---- browse ---- */
-  function renderBrowse() {
+  /* ---- new-cards-per-day control ---- */
+  function renderNewPerDayChips() {
+    var wrap = $("newperday-chips");
+    if (!wrap) { return; }
+    wrap.innerHTML = "";
+    [5, 10, 20, 40].forEach(function (n) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "eli5-chip" + (data.settings.newPerDay === n ? " active" : "");
+      b.textContent = n;
+      b.addEventListener("click", function () {
+        data.settings.newPerDay = n;
+        save();
+        renderNewPerDayChips();
+        renderDash();
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+  /* ---- browse (lazy + searchable, scales to 1000+ cards) ---- */
+  function renderCardsInto(container, list) {
+    var frag = document.createDocumentFragment();
+    list.forEach(function (c) {
+      var item = document.createElement("div");
+      item.className = "browse-item";
+      var q = document.createElement("p"); q.className = "bi-q"; q.textContent = c.front;
+      var a = document.createElement("p"); a.className = "bi-a"; a.textContent = c.back;
+      var s = document.createElement("p"); s.className = "bi-src"; s.textContent = "Source: " + c.source;
+      item.appendChild(q); item.appendChild(a); item.appendChild(s);
+      frag.appendChild(item);
+    });
+    container.appendChild(frag);
+  }
+  function buildBrowseAccordions() {
     var list = $("browse-list");
     list.innerHTML = "";
     categories().forEach(function (cat) {
-      var group = document.createElement("div");
-      group.className = "browse-cat";
-      var h = document.createElement("h4");
-      h.textContent = cat;
-      group.appendChild(h);
-      STUDY_CARDS.filter(function (c) { return c.category === cat; }).forEach(function (c) {
-        var item = document.createElement("div");
-        item.className = "browse-item";
-        var q = document.createElement("p"); q.className = "bi-q"; q.textContent = c.front;
-        var a = document.createElement("p"); a.className = "bi-a"; a.textContent = c.back;
-        var s = document.createElement("p"); s.className = "bi-src"; s.textContent = "Source: " + c.source;
-        item.appendChild(q); item.appendChild(a); item.appendChild(s);
-        group.appendChild(item);
+      var items = STUDY_CARDS.filter(function (c) { return c.category === cat; });
+      var d = document.createElement("details");
+      d.className = "browse-cat-acc";
+      var sum = document.createElement("summary");
+      sum.textContent = cat + " (" + items.length + ")";
+      d.appendChild(sum);
+      var body = document.createElement("div");
+      body.className = "browse-cat-body";
+      d.appendChild(body);
+      var done = false;
+      d.addEventListener("toggle", function () {
+        if (d.open && !done) { done = true; renderCardsInto(body, items); }
       });
-      list.appendChild(group);
+      list.appendChild(d);
     });
+  }
+  function onBrowseSearch() {
+    var input = $("browse-search");
+    var qv = (input && input.value || "").trim().toLowerCase();
+    if (!qv) { buildBrowseAccordions(); return; }
+    var list = $("browse-list");
+    list.innerHTML = "";
+    var matches = STUDY_CARDS.filter(function (c) {
+      return (c.front + " " + c.back + " " + c.category).toLowerCase().indexOf(qv) !== -1;
+    });
+    var note = document.createElement("p");
+    note.className = "browse-note";
+    note.textContent = matches.length + " match" + (matches.length === 1 ? "" : "es") +
+      (matches.length > 200 ? " (showing first 200)" : "");
+    list.appendChild(note);
+    renderCardsInto(list, matches.slice(0, 200));
+  }
+  function renderBrowse() {
+    var input = $("browse-search");
+    if (input) { input.value = ""; }
+    buildBrowseAccordions();
     show("study-browse");
   }
 
@@ -323,6 +377,7 @@
   $("start-review").addEventListener("click", startSession);
   $("browse-toggle").addEventListener("click", renderBrowse);
   $("browse-back").addEventListener("click", renderDash);
+  if ($("browse-search")) { $("browse-search").addEventListener("input", onBrowseSearch); }
   $("back-dash").addEventListener("click", renderDash);
   $("end-session").addEventListener("click", showSummary);
   $("reveal-btn").addEventListener("click", reveal);
