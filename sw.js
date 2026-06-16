@@ -1,6 +1,6 @@
-/* Service worker for the OT-AI study site.
+/* Service worker for the Apprenticeship site.
    App-shell cache-first; runtime cache for Google Fonts. Offline-capable. */
-var CACHE = "ot-ai-v1";
+var CACHE = "apprenticeship-v1";
 var SHELL = [
   "./",
   "index.html", "study.html", "feeder-monitor.html", "project.html",

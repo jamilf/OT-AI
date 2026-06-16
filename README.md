@@ -53,7 +53,7 @@ python3 -m http.server 8000
 …or just open `index.html` directly in a browser. It also works as-is on
 GitHub Pages.
 
-Live site: https://jamilf.github.io/OT-AI/ (deployed from `main` by the
+Live site: https://jamilf.github.io/Apprenticeship/ (deployed from `main` by the
 GitHub Pages workflow in `.github/workflows/pages.yml`).
 
 ## Author
