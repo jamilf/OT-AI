@@ -6,11 +6,11 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; object-src 'none'">
 <meta name="robots" content="index,follow">
 <title>Distribution Feeder Monitor — a trade build by Jamil Flores</title>
-<meta name="description" content="An extra-low-voltage (battery/USB) feeder-monitoring build by Jamil Flores: senses voltage, current and temperature on a simulated feeder and raises a SCADA-style alarm — documented to AS/NZS standards with a single-line diagram, safe-isolation procedure and risk assessment. No mains wiring.">
+<meta name="description" content="An extra-low-voltage (battery/USB) bench model by Jamil Flores of how the grid is watched, from a transmission substation RTU (Transgrid) down to a distribution feeder (Ausgrid and the other distributors). Senses voltage, current and temperature and raises a SCADA-style alarm. Documented to AS/NZS standards with a single-line diagram, safe-isolation procedure and risk assessment. No mains wiring.">
 <meta name="author" content="Jamil Flores">
 <meta name="theme-color" content="#14161b">
 <meta property="og:title" content="Distribution Feeder Monitor — a trade build by Jamil Flores">
-<meta property="og:description" content="A hands-on extra-low-voltage build, documented to AS/NZS standards: build circuits, measure, work safely, read single-line diagrams. Battery/USB powered — no mains wiring.">
+<meta property="og:description" content="A hands-on extra-low-voltage bench model of how the grid is watched, transmission to distribution. Documented to AS/NZS standards: build circuits, measure, work safely, read single-line diagrams. Battery/USB powered, no mains wiring.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 7v9c0 7.5-5 12.5-12 14C9 28.5 4 23.5 4 16V7Z' fill='%2314161b' stroke='%2333a35a' stroke-width='2'/%3E%3Cpath d='M10 16.5l4 4 8-9' fill='none' stroke='%232ECC71' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,11 +80,12 @@
     <p class="section-kicker" data-animate>01 · What I'm building</p>
     <h2 class="section-title" id="what-title" data-animate style="--d:.08s">A bench model of how a feeder is watched.</h2>
     <p class="section-sub" data-animate style="--d:.16s">
-      Out on the network, a remote terminal unit (RTU) in a substation watches a feeder and flags an
-      over-current or over-temperature. I'm building a small, safe version of that on the bench: a
-      microcontroller reads an extra-low-voltage test circuit and trips an alarm past a threshold. It's
-      the trade in miniature: a circuit to build, readings to take, protection logic, a diagram to
-      draw, and a safe way to work on it.
+      The same idea runs the length of the grid. A remote terminal unit (RTU) in a transmission
+      substation (Transgrid's end) or a distribution feeder (Ausgrid and the other distributors)
+      watches voltage, current and temperature and flags a fault. I'm building a small, safe version of
+      that on the bench: a microcontroller reads an extra-low-voltage test circuit and trips an alarm
+      past a threshold. It's the trade in miniature: a circuit to build, readings to take, protection
+      logic, a diagram to draw, and a safe way to work on it. It's a model, not real HV work.
     </p>
   </div>
 </section>
@@ -222,7 +223,7 @@
           </marker>
         </defs>
       </svg>
-      <figcaption>Transmission → zone substation → distribution substation → feeder → the bench model.</figcaption>
+      <figcaption>Transmission (Transgrid) → zone substation → distribution substation (Ausgrid and the other distributors) → feeder → the bench model.</figcaption>
     </figure>
   </div>
 </section>
@@ -391,8 +392,8 @@
       <div class="about-body">
         <p class="about-kicker">Electrical apprentice · Sydney</p>
         <h3>Jamil Flores</h3>
-        <p>I'm after an electrical apprenticeship with one of the NSW networks or a group training
-        organisation that places into them. I've done my pre-apprenticeship, I've got my tickets, I'm
+        <p>I'm after an electrical apprenticeship with one of the NSW networks, especially Ausgrid or
+        Transgrid, or a group training organisation that places into them. I've done my pre-apprenticeship, I've got my tickets, I'm
         available now and happy to relocate regionally. I'd like to talk.</p>
         <div class="about-actions">
           <a class="btn btn-linkedin" href="https://www.linkedin.com/in/jamilflores" target="_blank" rel="noopener">Connect on LinkedIn</a>
